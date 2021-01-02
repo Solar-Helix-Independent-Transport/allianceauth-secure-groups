@@ -1,0 +1,80 @@
+{% extends "allianceauth/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Available Groups" %}{% endblock page_title %}
+{% block extra_css %}{% endblock extra_css %}
+{% block content %}
+    <div class="col-lg-12">
+        <h1 class="page-header text-center">{% trans "Available Groups" %}</h1>
+        {% if groups %}
+            <table class="table table-aa">
+                <thead>
+                    <tr>
+                        <th class="text-center">{% trans "Name" %}</th>
+                        <th class="text-center">{% trans "Description" %}</th>
+                        <th class="text-center">{% trans "Action" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in groups %}
+                        <tr>
+                            <td class="text-center">{{ g.smart_group.group.name }}</td>
+                            <td class="text-center">{{ g.smart_group.group.authgroup.description|urlize }}<br>{{ g.smart_group.description|urlize }}</td>
+                            <td class="text-center">
+                                {% if g.smart_group.group in user.groups.all %}
+                                    {% if not g.request %}
+                                        <a href="{% url 'securegroups:request_leave' g.smart_group.group.id %}" class="btn btn-danger">
+                                            {% trans "Leave" %}
+                                        </a>
+                                    {% else %}
+                                        <button type="button" class="btn btn-primary" disabled>
+                                            {{ g.request.status }}
+                                        </button>
+                                    {% endif %}
+                                {% elif not g.request %}
+                                    <a id="{{ g.smart_group.group.id }}" class="btn btn-primary check-user-button">
+                                        {% trans "Request" %}
+                                    </a>
+                                {% else %}
+                                    <button type="button" class="btn btn-primary" disabled>
+                                        {{ g.request.status }}
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-warning text-center">
+                {% trans "No groups available." %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="modal fade" id="modal-main" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="main-modal-title">Account Checks</h5>
+                </div>
+                <div id="main-modal-body" class="modal-body"  style="overflow-y:auto;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_script %}
+$(".check-user-button").on("click", function() {
+    var url = "{% url 'securegroups:request_check' 123456 %}";
+    var id = this.id;
+    url = url.replace('123456', id);
+    $.get(url, function(data) {
+        console.log(data);
+        modal_body = $("#main-modal-body")[0];
+        modal_body.innerHTML = data;
+        $("#modal-main").modal();
+    });
+});
+{% endblock %}

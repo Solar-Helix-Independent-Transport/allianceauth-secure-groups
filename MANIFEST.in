@@ -1,0 +1,3 @@
+include README.md
+recursive-include securegroups *.py
+recursive-include securegroups/templates *
