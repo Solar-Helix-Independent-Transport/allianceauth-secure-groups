@@ -33,6 +33,9 @@ admin.site.register(GracePeriodRecord, GraceAdmin)
 
 
 class SmartfilterAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request, obj=None):
+        return False
+
     list_display = ["__str__", "grace_period"]
 
 

@@ -31,6 +31,9 @@ class GroupUpdateWebhook(models.Model):
 
 
 class SmartFilter(models.Model):
+    class Meta:
+        verbose_name = "Smart Filter Catalog"
+        verbose_name_plural = verbose_name
 
     content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, editable=False
@@ -62,6 +65,10 @@ class FilterBase(models.Model):
 
 
 class AltCorpFilter(FilterBase):
+    class Meta:
+        verbose_name = "Smart Filter: Alt in Corporation"
+        verbose_name_plural = verbose_name
+
     alt_corp = models.ForeignKey(EveCorporationInfo, on_delete=models.CASCADE)
 
     def process_filter(self, user: User):
@@ -71,6 +78,10 @@ class AltCorpFilter(FilterBase):
 
 
 class AltAllianceFilter(FilterBase):
+    class Meta:
+        verbose_name = "Smart Filter: Alt in Alliance"
+        verbose_name_plural = verbose_name
+
     alt_alli = models.ForeignKey(EveAllianceInfo, on_delete=models.CASCADE)
 
     def process_filter(self, user: User):
