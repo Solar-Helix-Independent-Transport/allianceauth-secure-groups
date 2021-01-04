@@ -25,6 +25,10 @@ Not in any particular order:
  - Blacklist module ( link )
    - users has no flags or has or has never had blacklisted char
 
+## Soon(tm) Wishlist
+ - Filter for PAP's per Time Period
+ - Please request any "filters" you feel are worthwhile.
+
 ## Installation
 
 ### Install
@@ -62,25 +66,28 @@ there are 4 steps to creating a smart group
 
 ## Screenshots
 
-TODO: MAKE NEW SCREENSHOTS!
+### Admin Setup of Smart Groups
 
-![https://cdn.discordapp.com/attachments/752362812176728147/794876785480171550/unknown.png](https://cdn.discordapp.com/attachments/752362812176728147/794876785480171550/unknown.png)
+![img](https://i.imgur.com/WzaI7bN.png)
 
-users display demo
+### User Group Selection
 
-![https://cdn.discordapp.com/attachments/656624103523876895/794835225904939008/unknown.png](https://cdn.discordapp.com/attachments/656624103523876895/794835225904939008/unknown.png)
+![img](https://i.imgur.com/i4lMpLe.png)
 
-discord message example
+### User Failed Checks
+
+![img](https://i.imgur.com/04ewh1U.png)
+
+### User Passed Checks
+
+![img](https://i.imgur.com/3OloLdZ.png)
+
+### Discord Message Example
 
 ![https://cdn.discordapp.com/attachments/752362812176728147/794880515798466590/unknown.png](https://cdn.discordapp.com/attachments/752362812176728147/794880515798466590/unknown.png)
 
-admin demo
-
-![https://cdn.discordapp.com/attachments/656624103523876895/794835209249882122/unknown.png](https://cdn.discordapp.com/attachments/656624103523876895/794835209249882122/unknown.png)
-
-
 ## Issues
-Please remember to report any Group Bot related issues using the issues on **this** repository.
+Please remember to report any Secure Groups related issues using the issues on **this** repository.
 
 ## Contributing
 Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at https://developers.eveonline.com before submitting any pull requests. **All bug fixes or features must not include extra superfluous formatting changes.**
