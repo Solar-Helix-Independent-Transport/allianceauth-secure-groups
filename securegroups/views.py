@@ -1,29 +1,18 @@
 from .models import SmartGroup
 from allianceauth.groupmanagement.models import GroupRequest
 from allianceauth.groupmanagement.managers import GroupManager
-from allianceauth.notifications import notify
 from django.utils.translation import ugettext_lazy as _
-from django.http import Http404, HttpResponse
-from django.db.models import Count
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.contrib.auth.decorators import user_passes_test
-from allianceauth.authentication.models import State
+from django.http import HttpResponse
 import logging
 
-from allianceauth.eveonline.models import EveCharacter
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.db.models import Q
 from django.conf import settings
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 
 from django.template.loader import render_to_string
-
-import json
-
-logger = logging.getLogger(__name__)
-
 
 logger = logging.getLogger(__name__)
 

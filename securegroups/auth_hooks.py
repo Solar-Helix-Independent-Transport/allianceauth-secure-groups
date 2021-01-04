@@ -1,7 +1,6 @@
 from . import urls
 from allianceauth import hooks
 from allianceauth.services.hooks import MenuItemHook, UrlHook
-from allianceauth.authentication.models import UserProfile, State
 from .models import AltCorpFilter, AltAllianceFilter
 
 

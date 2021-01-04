@@ -1,6 +1,5 @@
 from django.db import models
 from allianceauth.eveonline.models import (
-    EveCharacter,
     EveCorporationInfo,
     EveAllianceInfo,
 )
@@ -10,8 +9,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 from django.utils import timezone
-
-import json
 
 from . import app_settings, filter as smart_filters
 

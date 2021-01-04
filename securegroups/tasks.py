@@ -1,21 +1,19 @@
 import logging
 
 from celery import shared_task, chain
-from .filter import check_alt_corp_on_account, check_alt_alli_on_account
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
-from allianceauth.authentication.models import UserProfile, State
 from allianceauth.notifications import notify
 from .models import GroupUpdateWebhook, SmartGroup, GracePeriodRecord
 from . import app_settings
 import requests
 import json
 
-logger = logging.getLogger(__name__)
-
 if app_settings.discord_bot_active():
-    import aadiscordbot.tasks
+    import aadiscordbot
+
+logger = logging.getLogger(__name__)
 
 
 def send_discord_dm(user, message):
@@ -90,7 +88,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     # print(all_graced_members)
     for u in users:
         try:
-            char_id = u.profile.main_character.character_id
+            assert u.profile.main_character is not None
         except:  # no main character kickeroo
             removed += 1
             if not fake_run:

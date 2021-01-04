@@ -1,4 +1,3 @@
-from unittest import mock
 from django.test import TestCase, RequestFactory
 from django.urls import reverse
 from allianceauth.tests.auth_utils import AuthUtils
@@ -10,9 +9,7 @@ from datetime import timedelta
 from .. import filter as gb_filters
 from .. import models as gb_models
 from .. import tasks as gb_tasks
-from ..views import smart_group_run_check
-from django.contrib.auth.models import User, Group
-from django.core.cache import cache
+from django.contrib.auth.models import Group
 
 
 class TestGroupBotFilters(TestCase):

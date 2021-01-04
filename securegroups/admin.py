@@ -58,3 +58,5 @@ class AltAlliAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AltAllianceFilter, AltAlliAdmin)
+
+admin.site.register(GroupUpdateWebhook)
