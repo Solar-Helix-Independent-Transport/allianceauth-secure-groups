@@ -43,7 +43,7 @@ class BaseFilter(models.Model):
 Now you create your filter! EG. A filter for checking if a users has a alt in a specific corp could look a little like this; [View the Real Code Here](https://github.com/pvyParts/allianceauth-secure-groups/blob/main/securegroups/models.py#L64)
 
 ```python
-class ExampleAltCorpFilter(FilterBase):
+class ExampleAltCorpFilter(BaseFilter):
     alt_corp = models.ForeignKey(EveCorporationInfo, on_delete=models.CASCADE)
 
     def process_filter(self, user: User):
