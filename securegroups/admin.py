@@ -44,6 +44,8 @@ admin.site.register(SmartFilter, SmartfilterAdmin)
 
 class SmartGroupAdmin(admin.ModelAdmin):
     filter_horizontal = ["filters"]
+    list_display = ["__str__", "enabled", "auto_group",
+                    "include_in_updates", "can_grace"]
 
 
 admin.site.register(SmartGroup, SmartGroupAdmin)
