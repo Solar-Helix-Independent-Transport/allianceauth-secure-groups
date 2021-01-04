@@ -19,6 +19,7 @@ setup(
     description='Alliance Auth Plugin',
     install_requires=install_requires,
     long_description=README,
+    long_description_content_type='text/markdown',
     url='https://github.com/pvyParts/allianceauth-secure-groups',
     author='ak',
     author_email='ak@ak.auth',
