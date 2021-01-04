@@ -16,8 +16,8 @@ jobs:
       - run:
           name: Run Tests
           command: |
-            python3 -m venv venv
             . venv/bin/activate
+            pip install -U pip
             pip install tox && tox
       - store_artifacts:
           path: htmlcov/

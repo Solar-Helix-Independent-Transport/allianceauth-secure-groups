@@ -14,14 +14,6 @@ import json
 
 logger = logging.getLogger(__name__)
 
-try:
-    from toolbox.models import EveNote
-
-    _TOOLBOX = True
-except:
-    logger.error("Cannot Load Toolbox module. Is it installed?")
-    _TOOLBOX = False
-
 if app_settings.discord_bot_active():
     import aadiscordbot.tasks
 
