@@ -14,7 +14,7 @@ On its own this app does very little! However it leverages any module that is ca
    - Alt in Corp on account
 
 ## Apps that provide a filter
-Information for Third Party Developers can be found [Here](https://github.com/pvyParts/allianceauth-secure-groups/blob/main/THIRD_PARTY.md)
+Information for Third Party Developers can be found [Here](https://github.com/pvyParts/allianceauth-secure-groups/blob/main/THRID_PARTY.md)
 Not in any particular order:
  - Corptools ( link here )
    - Assets on account
@@ -28,7 +28,7 @@ Not in any particular order:
 ## Installation
 
 ### Install
-1. `pip install allianceauth-secure-groups`
+1. `pip install allianceauth-securegroups`
 2. edit your local.py amd add `'securegroups',` to `INSTALLED_APPS`
 3. run migrations `python myauth/manage.py migrate securegroups`
 4. restart auth `supervisorctrl restart all`
