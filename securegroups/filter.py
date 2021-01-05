@@ -1,9 +1,10 @@
 import logging
+from django.contrib.auth.models import User, Group
 
 logger = logging.getLogger(__name__)
 
 
-def check_alt_alli_on_account(user, alt_alli_id):
+def check_alt_alli_on_account(user: User, alt_alli_id):
     try:
         character_list = user.character_ownerships.all().select_related("character")
         character_count = character_list.filter(
@@ -17,7 +18,7 @@ def check_alt_alli_on_account(user, alt_alli_id):
         return False
 
 
-def check_alt_corp_on_account(user, alt_corp_id, exempt_alliances=False):
+def check_alt_corp_on_account(user: User, alt_corp_id, exempt_alliances=False):
     # logger.debug("Checking {0} for alt in corp {1}".format(character_id, alt_corp_id))
     try:
         character_list = user.character_ownerships.all().select_related("character")
@@ -33,6 +34,16 @@ def check_alt_corp_on_account(user, alt_corp_id, exempt_alliances=False):
             character__corporation_id=alt_corp_id
         ).count()
         if character_count > 0:
+            return True
+        else:
+            return False
+    except:
+        return False
+
+
+def check_group_on_account(user: User, group: Group):
+    try:
+        if group in user.groups.all():
             return True
         else:
             return False

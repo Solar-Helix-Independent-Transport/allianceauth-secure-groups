@@ -32,8 +32,8 @@ class GroupUpdateWebhook(models.Model):
 
 class SmartFilter(models.Model):
     class Meta:
-        verbose_name = "Smart Filter Catalog"
-        verbose_name_plural = verbose_name
+        verbose_name = "Smart Filter Binding"
+        verbose_name_plural = "Smart Filter Catalog"
 
     content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, editable=False
@@ -86,6 +86,17 @@ class AltAllianceFilter(FilterBase):
 
     def process_filter(self, user: User):
         return smart_filters.check_alt_alli_on_account(user, self.alt_alli.alliance_id)
+
+
+class UserInGroupFilter(FilterBase):
+    class Meta:
+        verbose_name = "Smart Filter: User Has Group"
+        verbose_name_plural = verbose_name
+
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+
+    def process_filter(self, user: User):
+        return smart_filters.check_group_on_account(user, self.group)
 
 
 class SmartGroup(models.Model):
