@@ -31,8 +31,6 @@ jobs:
       - image: circleci/python:3.7
     steps:
       - checkout
-      - restore_cache:
-          key: v1-dependency-cache-{{ checksum "securegroups/__init__.py" }}-{{ checksum "Makefile" }}
       - run:
           name: install python dependencies
           command: |
@@ -44,16 +42,11 @@ jobs:
           command: |
             echo -e "[pypi]" >> ~/.pypirc
             echo -e "username = __token__" >> ~/.pypirc
-            echo -e "password = $pypi-api-token" >> ~/.pypirc
+            echo -e "password = ${pypi-api-token}" >> ~/.pypirc
       - run:
           name: create packages
           command: |
             make package
-      - save_cache:
-          key: v1-dependency-cache-{{ checksum "securegroups/__init__.py" }}-{{ checksum "Makefile" }}
-          paths:
-            - "venv"
-            - ".tox"
       - run:
           name: upload to pypi
           command: |
