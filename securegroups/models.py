@@ -66,7 +66,7 @@ class FilterBase(models.Model):
 
 class AltCorpFilter(FilterBase):
     class Meta:
-        verbose_name = "Smart Filter: Alt in Corporation"
+        verbose_name = "Smart Filter: Character in Corporation"
         verbose_name_plural = verbose_name
 
     alt_corp = models.ForeignKey(EveCorporationInfo, on_delete=models.CASCADE)
@@ -79,7 +79,7 @@ class AltCorpFilter(FilterBase):
 
 class AltAllianceFilter(FilterBase):
     class Meta:
-        verbose_name = "Smart Filter: Alt in Alliance"
+        verbose_name = "Smart Filter: Character in Alliance"
         verbose_name_plural = verbose_name
 
     alt_alli = models.ForeignKey(EveAllianceInfo, on_delete=models.CASCADE)
@@ -116,7 +116,7 @@ class SmartGroup(models.Model):
             ("access_sec_group", "Can access sec group requests screen."),)
 
     def __str__(self):
-        return "Smart Group :%s" % self.group.name
+        return "Smart Group: %s" % self.group.name
 
     def run_checks(self, user: User):
         output = []
