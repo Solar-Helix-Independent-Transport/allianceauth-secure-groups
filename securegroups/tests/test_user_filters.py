@@ -134,6 +134,30 @@ class TestGroupBotFilters(TestCase):
         self.assertTrue(tests[9])
         self.assertTrue(tests[10])
 
+    def test_user_group_filter(self):
+        User.objects.get(id=1).groups.add(self.test_group)
+        User.objects.get(id=7).groups.add(self.test_group)
+
+        users = {}
+        for user in User.objects.all():
+            users[user.pk] = None
+
+        tests = {}
+        for k, u in users.items():
+            tests[k] = gb_filters.check_group_on_account(
+                User.objects.get(pk=k), self.test_group)
+
+        self.assertTrue(tests[1])
+        self.assertFalse(tests[2])
+        self.assertFalse(tests[3])
+        self.assertFalse(tests[4])
+        self.assertFalse(tests[5])
+        self.assertFalse(tests[6])
+        self.assertTrue(tests[7])
+        self.assertFalse(tests[8])
+        self.assertFalse(tests[9])
+        self.assertFalse(tests[10])
+
     def test_generic_smart_group_task(self):
         reset_time = timezone.now() - timedelta(days=5)
         User.objects.get(id=1).groups.add(self.test_group)
