@@ -36,8 +36,8 @@ Not in any particular order:
 2. edit your local.py amd add `'securegroups',` to `INSTALLED_APPS`
 3. run migrations `python myauth/manage.py migrate securegroups`
 4. restart auth `supervisorctrl restart all`
-5. create the update task by running `python myauth/manage.py create_securegroup_task`
-    * this will create a daily task to run all your smart group checks. you cam edit this schedule as you desire from withing the admin site. `Admin > Periodic Tasks > Secure Groups Runner Task`
+5. create the update task by running `python myauth/manage.py setup_securegroup_task`
+    * this will create a daily task to run all your smart group checks. you cam edit this schedule as you desire from withing the admin site. `Admin > Periodic Tasks > Secure Group Updater`
 
 ### Configuration
 there are 4 steps to creating a smart group
