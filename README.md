@@ -42,7 +42,8 @@ Not in any particular order:
 ### Configuration
 there are 4 steps to creating a smart group
 1. Create an Auth Group. `Admin > Group Management > Group > Add Group.`
-    * Group Type Settings arr not important. the Smart Group will over ride these.
+    * Group Type Settings arr not important. the Smart Group will over ride the important ones.
+      * We will reset the Group to Hidden, Non-Internal, Non-Public Rest of the settings are observed.
 2. Create your Smart Filters
     * These will be in admin but can be under many apps that may provide a 3rd party filter
     * Create the filter and add your options as needed.
