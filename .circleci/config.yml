@@ -64,10 +64,8 @@ workflows:
   version: 2
   SecureGroups:
     jobs:
-      - BuildAndTest:
+      - BuildAndTest
       - Deploy:
-          requires:
-            - BuildAndTest
           filters:
             tags:
               only: /.*/
