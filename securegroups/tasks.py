@@ -73,14 +73,18 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
         all_graced_members[gm.user.username][gm.grace_filter] = gm
 
     if smart_group.auto_group:
-        users = User.objects.filter(
-            profile__state__name__in=app_settings.MEMBER_STATES)
+        states = group.authgroup.states.all()
+        if states.count() > 0:
+            users = User.objects.filter(
+                profile__state__in=states)
+        else:
+            users = User.objects.filter(
+                profile__main_character__isnull=False)
     else:
         users = group.user_set.all()
 
     users = users.select_related(
         "profile", "profile__main_character").distinct()
-
     count = 0
     added = 0
     removed = 0

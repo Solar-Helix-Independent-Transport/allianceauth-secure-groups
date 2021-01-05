@@ -8,6 +8,7 @@ from .models import (
     SmartFilter,
     AltCorpFilter,
     AltAllianceFilter,
+    UserInGroupFilter
 )
 
 
@@ -56,6 +57,14 @@ class AltCorpAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AltCorpFilter, AltCorpAdmin)
+
+
+class UserInGroupFilterAdmin(admin.ModelAdmin):
+    list_select_related = True
+    list_display = ["__str__", "group"]
+
+
+admin.site.register(UserInGroupFilter, UserInGroupFilterAdmin)
 
 
 class AltAlliAdmin(admin.ModelAdmin):

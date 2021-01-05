@@ -1,5 +1,5 @@
 from django.db.models.signals import post_save, pre_delete
-from django.dispatch import receiver
+from django.dispatch import receiver, Signal
 
 from . import models
 
@@ -26,26 +26,22 @@ class hook_cache:
 filters = hook_cache()
 
 
-@receiver(post_save)
 def new_filter(sender, instance, created, **kwargs):
     try:
-        if instance.__class__ in filters.get_hooks():
-            if created:
-                models.SmartFilter.objects.create(filter_object=instance)
-            else:
-                # this is an updated model we dont at this stage care about this.
-                pass
+        if created:
+            models.SmartFilter.objects.create(filter_object=instance)
+        else:
+            # this is an updated model we dont at this stage care about this.
+            pass
     except:
         print("Bah Humbug")  # we failed! do something here
 
 
-@receiver(pre_delete)
 def rem_filter(sender, instance, **kwargs):
     try:
-        if instance.__class__ in filters.get_hooks():
-            models.SmartFilter.objects.get(
-                object_id=instance.pk, content_type__model=instance.__class__.__name__
-            ).delete()
+        models.SmartFilter.objects.get(
+            object_id=instance.pk, content_type__model=instance.__class__.__name__
+        ).delete()
     except:
         print("Bah Humbug")  # we failed! do something here
 
@@ -59,3 +55,8 @@ def new_group_filter(sender, instance: models.SmartGroup, created, **kwargs):
         instance.group.save()
     except:
         print("Bah Humbug")  # we failed! do something here
+
+
+for _filter in filters.get_hooks():
+    post_save.connect(new_filter, sender=_filter)
+    pre_delete.connect(rem_filter, sender=_filter)

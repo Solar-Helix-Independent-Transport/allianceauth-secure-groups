@@ -40,14 +40,22 @@ Not in any particular order:
 1. `pip install allianceauth-securegroups`
 2. edit your `local.py` amd add `'securegroups',` to `INSTALLED_APPS`
 3. run migrations `python myauth/manage.py migrate securegroups`
-4. restart auth `supervisorctl restart all`
-5. create the update task by running `python myauth/manage.py create_securegroup_task`
-    - This will create a daily task to run all your smart group checks. you can edit this schedule as you desire from withing the admin site. `Admin > Periodic Tasks > Secure Groups Runner Task`
+4. restart auth `supervisorctrl restart all`
+5. create the update task by running `python myauth/manage.py setup_securegroup_task`
+    - this will create a daily task to run all your smart group checks. you cam edit this schedule as you desire from withing the admin site. `Admin > Periodic Tasks > Secure Group Updater`
 
 ### Configuration
 
 1. Create an Auth Group. `Admin > Group Management > Group > Add Group.`
-    - Group Type Settings are not important. the Smart Group will override these.
+    - WARNING: There is a bug in auth that will wipe andy "AuthGroup" Settings on first save, to get around this, Set your groups name then click save and continue, then edit the rest of the settings.
+    - Group Settings:
+      - The Smart Group will override the important ones.
+        - Hidden On, Internal Off, Public Off
+      - The rest of the settings are observed as per Alliance Auth's normal group behavior
+        - Open: Setting this will let anyone that passes the checks to join without a manager approval.
+      - States:
+        - Set states here to limit auto groups to specific states
+        - Having no states will make an autogroup run against the entire user base. ( this is not recommended )
 2. Create your Smart Filters
     - These will be in admin but can be under many apps that may provide a 3rd party filter
     - Create the filter and add your options as needed.
@@ -59,10 +67,10 @@ Not in any particular order:
     - Group: pick group from step one
     - Description *Optional*: to add to the group description in list
     - Filters: pick your Smart Filters from Step 2
-    - Enabled: Turning this off, Smart Groups don't show im the groups screen or run in any tasks
-    - Can Grace: Turning this off, overrides all grace periods for Instant Kick during updates.
+    - Enabled: Turning this off Smart Groups don't show im the groups screen or run in any tasks
+    - Can Grace: Turning this off overrides all grace periods for Instant Kick during updates.
     - Auto Group: Hides the group from the Secure Groups list, and will run every user in "member" States and constantly keep it in sync.
-    - Include In Updates: Setting this on will alow you to have a check om join and never again style group.
+    - Include In Updates: Setting this off will alow you to have a check om join and never again style group.
 
 ### Notifications
 

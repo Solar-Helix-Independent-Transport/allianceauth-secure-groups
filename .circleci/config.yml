@@ -40,12 +40,6 @@ jobs:
             . venv/bin/activate
             make dev
       - run:
-          name: init .pypirc
-          command: |
-            echo -e "[pypi]" >> ~/.pypirc
-            echo -e "username = __token__" >> ~/.pypirc
-            echo -e "password = $pypi-api-token" >> ~/.pypirc
-      - run:
           name: create packages
           command: |
             make package
@@ -59,16 +53,17 @@ jobs:
           command: |
             . venv/bin/activate
             twine upload dist/*
+
 workflows:
   version: 2
   SecureGroups:
     jobs:
       - BuildAndTest
       - Deploy:
-          requires:
-            - BuildAndTest
+          context:
+            - pypi
           filters:
             tags:
-              only: /^v.*/
+              only: /.*/
             branches:
               ignore: /.*/
