@@ -42,8 +42,17 @@ Not in any particular order:
 ### Configuration
 there are 4 steps to creating a smart group
 1. Create an Auth Group. `Admin > Group Management > Group > Add Group.`
-    * Group Type Settings arr not important. the Smart Group will over ride the important ones.
-      * We will reset the Group to Hidden, Non-Internal, Non-Public Rest of the settings are observed.
+    * WARNING: There is a bug in auth that will wipe andy "AuthGroup" Settings on first save, to get around this, Set your groups name then click save and continue, then edit the rest of the settings.
+    * Group Settings:
+      * The Smart Group will override the important ones.
+        * Hidden On
+        * Internal Off
+        * Public Off
+      * The rest of the settings are observed as per Alliance Auth's normal group behavior
+        * Open: Setting this will let anyone that passes the checks to join without a manager approval.
+        * States:
+          * Set states here to limit auto groups to specific states
+          * Having no states will make an autogroup run against the entire user base. ( this is not recommended )
 2. Create your Smart Filters
     * These will be in admin but can be under many apps that may provide a 3rd party filter
     * Create the filter and add your options as needed.
@@ -58,7 +67,7 @@ there are 4 steps to creating a smart group
     * Enabled: Turning this off Smart Groups dont show im the groups screen or run in any tasks
     * Can Grace: Turning this off overrides all grace periods for Instant Kick during updates.
     * Auto Group: Hides the group from the Secure Groups list, and will run every user in "member" States and constantly keep it in sync.
-    * Include In Updates: Setting this on will alow you to have a check om join and never again style group.
+    * Include In Updates: Setting this off will alow you to have a check om join and never again style group.
 
 ### Notifications
   * You cam send a simple update log to a discord webhook
