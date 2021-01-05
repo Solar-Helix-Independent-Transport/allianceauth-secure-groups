@@ -74,7 +74,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
 
     if smart_group.auto_group:
         users = User.objects.filter(
-            profile__state__name__in=app_settings.MEMBER_STATES)
+            profile__state__in=group.authgroup.states)
     else:
         users = group.user_set.all()
 
