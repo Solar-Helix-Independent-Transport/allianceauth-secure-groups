@@ -59,16 +59,17 @@ jobs:
           command: |
             . venv/bin/activate
             twine upload dist/*
+
 workflows:
   version: 2
   SecureGroups:
     jobs:
       - BuildAndTest
+      - Hold: # <<< A job that will require manual approval in the CircleCI web application.
+          type: approval # <<< This key-value pair will set your workflow to a status of "On Hold"
+          requires: # We only run the "hold" job when test2 has succeeded
+           - BuildAndTest
       - Deploy:
           requires:
             - BuildAndTest
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
+            - Hold
