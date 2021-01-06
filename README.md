@@ -27,6 +27,13 @@ Not in any particular order:
   - Kills in time period
 - Blacklist module ( link )
   - users has no flags or has or has never had blacklisted char
+- [Member Audit](https://gitlab.com/ErikKalkoken/aa-memberaudit) via its [integration](https://gitlab.com/eclipse-expeditions/aa-memberaudit-securegroups).
+  - Activity Filter
+  - Asset Filter
+  - Character Age Filter
+  - Member Audit Compliance Filter
+  - Skill Set Filter
+  - Skill Point Filter
 
 ## Soon(tm) Wishlist
 
