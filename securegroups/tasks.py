@@ -108,6 +108,10 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
             continue
 
         checks = smart_group.run_checks(u)
+
+        if len(checks) == 0:
+            break
+
         count += 1
         out = True
         reasons = []

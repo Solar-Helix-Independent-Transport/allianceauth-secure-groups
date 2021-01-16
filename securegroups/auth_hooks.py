@@ -6,7 +6,7 @@ from .models import AltCorpFilter, AltAllianceFilter, UserInGroupFilter
 
 @hooks.register("url_hook")
 def register_url():
-    return UrlHook(urls, "securegroups", r"^smartgroups/")
+    return UrlHook(urls, "securegroups", r"^securegroups/")
 
 
 class GroupMenu(MenuItemHook):
