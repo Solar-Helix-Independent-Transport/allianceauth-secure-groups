@@ -1,5 +1,6 @@
 import logging
 from django.contrib.auth.models import User, Group
+from allianceauth.authentication.models import State
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ def check_alt_alli_on_account(user: User, alt_alli_id):
             return True
         else:
             return False
-    except:
+    except Exception:
         return False
 
 
@@ -37,7 +38,7 @@ def check_alt_corp_on_account(user: User, alt_corp_id, exempt_alliances=False):
             return True
         else:
             return False
-    except:
+    except Exception:
         return False
 
 
@@ -47,5 +48,12 @@ def check_group_on_account(user: User, group: Group):
             return True
         else:
             return False
-    except:
+    except Exception:
+        return False
+
+
+def check_state_on_account(user: User, state: State):
+    try:
+        return user.profile.state == state
+    except Exception:
         return False
