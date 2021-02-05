@@ -9,7 +9,8 @@ from .models import (
     SmartFilter,
     AltCorpFilter,
     AltAllianceFilter,
-    UserInGroupFilter
+    UserInGroupFilter,
+    UserInStateFilter
 )
 
 
@@ -66,6 +67,14 @@ class UserInGroupFilterAdmin(admin.ModelAdmin):
 
 
 admin.site.register(UserInGroupFilter, UserInGroupFilterAdmin)
+
+
+class UserInStateFilterAdmin(admin.ModelAdmin):
+    list_select_related = True
+    list_display = ["__str__", "state"]
+
+
+admin.site.register(UserInStateFilter, UserInStateFilterAdmin)
 
 
 class AltAlliAdmin(admin.ModelAdmin):

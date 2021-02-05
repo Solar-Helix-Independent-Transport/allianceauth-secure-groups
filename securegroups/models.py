@@ -1,4 +1,5 @@
 from django.db import models
+from allianceauth.authentication.models import State
 from allianceauth.eveonline.models import (
     EveCorporationInfo,
     EveAllianceInfo,
@@ -90,13 +91,24 @@ class AltAllianceFilter(FilterBase):
 
 class UserInGroupFilter(FilterBase):
     class Meta:
-        verbose_name = "Smart Filter: User Has Group"
+        verbose_name = "Smart Filter: User In Group"
         verbose_name_plural = verbose_name
 
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     def process_filter(self, user: User):
         return smart_filters.check_group_on_account(user, self.group)
+
+
+class UserInStateFilter(FilterBase):
+    class Meta:
+        verbose_name = "Smart Filter: User In State"
+        verbose_name_plural = verbose_name
+
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+
+    def process_filter(self, user: User):
+        return smart_filters.check_state_on_account(user, self.state)
 
 
 class SmartGroup(models.Model):
