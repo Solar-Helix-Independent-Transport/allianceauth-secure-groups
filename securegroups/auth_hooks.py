@@ -1,7 +1,7 @@
 from . import urls
 from allianceauth import hooks
 from allianceauth.services.hooks import MenuItemHook, UrlHook
-from .models import AltCorpFilter, AltAllianceFilter, UserInGroupFilter, UserInStateFilter
+from .models import AltCorpFilter, AltAllianceFilter, UserInGroupFilter
 
 
 @hooks.register("url_hook")
@@ -34,4 +34,4 @@ def register_menu():
 
 @hooks.register("secure_group_filters")
 def filters():
-    return [AltAllianceFilter, AltCorpFilter, UserInGroupFilter, UserInStateFilter]
+    return [AltAllianceFilter, AltCorpFilter, UserInGroupFilter]
