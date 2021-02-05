@@ -11,20 +11,22 @@ On its own this app does very little! However it leverages any module that is ca
 - A Grace on failure feature when already in the group with notifications to users to alow time to rectify
 - Pings to users on discord and in auth when they are due for and removed
 - Smart Group Filters included with this app:
-  - Alt in Alliance on account
-  - Alt in Corp on account
+  - Character in Alliance on account
+  - Character in Corp on account
+  - User has group
 
 ## Apps that provide a filter
 
 Information for Third Party Developers can be found [Here](https://github.com/pvyParts/allianceauth-secure-groups/blob/main/THRID_PARTY.md)
 Not in any particular order:
 
-- [CorpTools](https://github.com/pvyParts/allianceauth-corp-tools/) ## WIP, Filters not published
-  - Assets on account
-  - Skills on account
-  - some others i forget ATM
-- [Statistics](https://github.com/pvyParts/allianceauth-analitics) ## WIP, Filters not published
-  - Kills in time period
+- [CorpTools](https://github.com/pvyParts/allianceauth-corp-tools/)
+  - Assets in Locations
+  - Skill List checks
+  - Main's Time in Corp
+  - All characters loaded in corp-tools
+- [Statistics](https://github.com/pvyParts/allianceauth-analitics)
+  - zKill - x Kills in x Months
 - Blacklist module ( link )
   - users has no flags or has or has never had blacklisted char
 - [Member Audit](https://gitlab.com/ErikKalkoken/aa-memberaudit) via its [integration](https://gitlab.com/eclipse-expeditions/aa-memberaudit-securegroups).
