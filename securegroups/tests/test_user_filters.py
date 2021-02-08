@@ -165,7 +165,14 @@ class TestGroupBotFilters(TestCase):
         User.objects.get(id=9).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
 
+        self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
+        self.assertTrue(
+            self.test_group in User.objects.get(id=10).groups.all())
+        self.assertTrue(self.test_group in User.objects.get(id=9).groups.all())
+        self.assertTrue(self.test_group in User.objects.get(id=7).groups.all())
+
         gb_tasks.run_smart_group_update(self.test_s_group.id)
+
         self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
         self.assertTrue(
             self.test_group in User.objects.get(id=10).groups.all())
@@ -176,6 +183,7 @@ class TestGroupBotFilters(TestCase):
         gb_models.GracePeriodRecord.objects.all().update(expires=reset_time)
 
         gb_tasks.run_smart_group_update(self.test_s_group.id)
+
         self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
         self.assertFalse(
             self.test_group in User.objects.get(id=10).groups.all())
@@ -183,6 +191,7 @@ class TestGroupBotFilters(TestCase):
             self.test_group in User.objects.get(id=9).groups.all())
         self.assertFalse(
             self.test_group in User.objects.get(id=7).groups.all())
+
         self.assertEquals(gb_models.GracePeriodRecord.objects.all().count(), 0)
 
     def test_fail_view(self):
