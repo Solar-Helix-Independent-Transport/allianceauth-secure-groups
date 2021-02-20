@@ -1,8 +1,8 @@
-from .models import SmartGroup
+from .models import SmartGroup, SmartFilter
 from allianceauth.groupmanagement.models import GroupRequest
 from allianceauth.groupmanagement.managers import GroupManager
 from django.utils.translation import ugettext_lazy as _
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import logging
 
 from django.contrib.auth.decorators import permission_required
@@ -11,6 +11,9 @@ from django.contrib.auth.models import Group
 from django.db.models import Q
 from django.conf import settings
 from django.shortcuts import render, redirect
+from collections import defaultdict
+from django.http import Http404
+from django.db.models import Count
 
 from django.template.loader import render_to_string
 
@@ -43,6 +46,73 @@ def groups_view(request):
 
     context = {"groups": groups}
     return render(request, "smartgroups/groups.html", context=context)
+
+
+@permission_required("securegroups.access_sec_group")
+def groups_manager_checks(request, sg_id=None, filter_id=None):
+    logger.debug("groups_manager_checks called by user %s" % request.user)
+    if request.method == "POST":
+        sg = SmartGroup.objects.get(id=sg_id)
+        fltr = SmartFilter.objects.get(id=filter_id)
+        users = sg.group.user_set.all()
+        out = []
+        try:
+            _o = fltr.filter_object.filter_audit(users)
+        except Exception as e:
+            print(e)
+            _o = defaultdict(lambda: None)
+
+        for u in users:
+            out.append({"uid": u.id,
+                        "fid": filter_id,
+                        "result": _o[u.id]["check"],
+                        "message": _o[u.id]["message"]})
+
+        return JsonResponse(out, safe=False)
+    raise Http404("Does not exist")
+
+
+@permission_required("securegroups.access_sec_group")
+def groups_manager_view(request, sg_id=None):
+    logger.debug("groups_manager_view called by user %s" % request.user)
+
+    sg = SmartGroup.objects.get(id=sg_id)
+    users = sg.group.user_set.all()
+    filters = []
+    out = {}
+    for u in users:
+        out[u.id] = u.profile.main_character
+    for fltr in sg.filters.all():
+        filters.append(fltr)
+
+    context = {"sg": sg,
+               "filters": filters,
+               "characters": out}
+
+    return render(request, "smartgroups/audit.html", context=context)
+
+
+@permission_required("securegroups.access_sec_group")
+def groups_manager_list(request):
+    logger.debug("groups_manager_list called by user %s" % request.user)
+
+    # Get all open and closed groups
+    if GroupManager.has_management_permission(request.user):
+        # Full access
+        groups = GroupManager.get_all_non_internal_groups()
+    else:
+        # Group leader specific
+        groups = GroupManager.get_group_leaders_groups(request.user)
+
+    groups_qs = groups.exclude(authgroup__internal=True)
+
+    smart_groups_qs = SmartGroup.objects.filter(
+        group__in=groups_qs, enabled=True
+    ).select_related("group", "group__authgroup").annotate(num_members=Count('group__user')).order_by('group__name')
+
+    context = {"sgs": smart_groups_qs}
+
+    return render(request, "smartgroups/audit_list.html", context=context)
 
 
 @permission_required("securegroups.access_sec_group")

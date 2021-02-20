@@ -1,0 +1,155 @@
+{% extends "allianceauth/base.html" %}
+{% load static %}
+{% load i18n %}
+{% load sg_audit %}
+
+{% block page_title %}{% trans "Group Audit" %}{% endblock page_title %}
+{% block extra_css %}
+<style>
+.form-control {
+    margin: 2px;
+}
+</style>
+<style>
+.lds-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: 30px;
+  height: 10px;
+}
+.lds-ellipsis div {
+  position: absolute;
+  top: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #aaa;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.lds-ellipsis div:nth-child(1) {
+  left: 0px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(2) {
+  left: 0px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(3) {
+  left: 10px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(4) {
+  left: 20px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(10px, 0);
+  }
+}
+
+table.dataTable tbody td {
+  vertical-align: middle;
+}
+</style>
+{% endblock extra_css %}
+{% block content %}
+    {% csrf_token %}
+
+    <div class="col-lg-12">
+        <h1 class="page-header text-center">{% trans "Smart Group Audit" %}</h1>
+        <h4 class="text-center">{{sg.group.name}}</h3>
+        <p class="text-center">{{sg.description}}</p>
+        <table class="table table-aa">
+            <thead>
+                <tr>
+                    <th class="">{% trans "User" %}</th>
+                    {% for fl in filters %}<th class="text-center">{{fl.filter_object.description}}</th>{% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for u, vals in characters.items %}
+                    <tr>
+                        <td class="">{{ vals }}</td>
+                        {% for fv in filters %}
+                            <td class="text-center" id="{{ u }}_{{ fv.id }}">
+                                <div class="text-center"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}
+
+{% block extra_script %}
+
+$(document).ready(function() {
+    var failure_check = '<a class="label label-danger" type="button"><i class="fas fa-times-circle"></i></a>';
+    var pass_check = '<a class="label label-success" type="button" data-toggle="tooltip" rel="tooltip" data-placement="top" title="" data-original-title=""><i class="fas fa-check-circle"></i></a>';
+
+
+    function load_filter(filter_id){
+        var url = "{% url 'securegroups:audit_check' sg.id 1234567890 %}";
+        url = url.replace('1234567890', filter_id);
+        var token = document.getElementsByName('csrfmiddlewaretoken')
+        token = token[1].value
+        $.ajax({
+            headers: {'X-CSRFToken': token},
+            method:"POST",
+            url:url,
+            data:{},
+            success:filter_post});
+    };
+
+
+    function update_cell(data) {
+        console.log(data);
+        uid = data.uid;
+        fid = data.fid;
+        result = data.result;
+        message = data.message;
+        tag = "#" + uid + "_" + fid;
+        cell_body = $(tag)[0];
+        var pass = false;
+        message = pass_check.replace('data-original-title=""', 'data-original-title="' + message + '"');
+        if (result) {
+            cell_body.innerHTML = message;
+        } else {
+            cell_body.innerHTML = failure_check;
+        }
+        $("[rel='tooltip']").tooltip();
+
+    };
+
+
+    function filter_post(data) {
+        console.log(data);
+        data.forEach(update_cell)
+    };
+
+    {% for fltr in filters %}
+    load_filter({{fltr.id}});
+    {% endfor %}
+});
+{% endblock %}

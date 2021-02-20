@@ -6,6 +6,10 @@ app_name = 'securegroups'
 
 urlpatterns = [
     url(r'^$', views.groups_view, name='groups'),
+    url(r'^audit/$', views.groups_manager_list, name='audit_list'),
+    url(r'^audit/(?P<sg_id>(\d)*)/$', views.groups_manager_view, name='audit'),
+    url(r'^audit/(?P<sg_id>(\d)*)/(?P<filter_id>(\d)*)/$',
+        views.groups_manager_checks, name='audit_check'),
     url(r'^group/', include([
         url(r'^request_check/(?P<group_id>(\d)*)/$', views.smart_group_run_check,
             name='request_check'),

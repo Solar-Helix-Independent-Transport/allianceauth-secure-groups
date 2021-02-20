@@ -30,10 +30,10 @@ class TestGroupBotFilters(TestCase):
             corporation_ticker="TST2",
             member_count=100,
         )
-        gb_models.AltCorpFilter.objects.create(
+        cls.corp_filter = gb_models.AltCorpFilter.objects.create(
             name="Test Corp 2 Alt", description="Have Alt in TST2", alt_corp_id=tst2.pk
         )
-        _sf = gb_models.SmartFilter.objects.all().first()
+        _sf = gb_models.SmartFilter.objects.all().last()
         cls.test_s_group = gb_models.SmartGroup.objects.create(
             group=cls.test_group,
             can_grace=True,

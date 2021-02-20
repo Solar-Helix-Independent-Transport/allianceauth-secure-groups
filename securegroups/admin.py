@@ -54,22 +54,29 @@ admin.site.register(SmartGroup, SmartGroupAdmin)
 
 
 class AltCorpAdmin(admin.ModelAdmin):
+    list_select_related = ["alt_corp"]
+    list_display = ["__str__", "alt_corp"]
     raw_id_fields = ["alt_corp"]
+    filter_horizontal = ["exempt_alliances", "exempt_corporations"]
 
 
 admin.site.register(AltCorpFilter, AltCorpAdmin)
 
 
 class UserInGroupFilterAdmin(admin.ModelAdmin):
-    list_select_related = True
+    list_select_related = ["group"]
     list_display = ["__str__", "group"]
+    filter_horizontal = ["exempt_alliances", "exempt_corporations"]
 
 
 admin.site.register(UserInGroupFilter, UserInGroupFilterAdmin)
 
 
 class AltAlliAdmin(admin.ModelAdmin):
+    list_select_related = ["alt_alli"]
+    list_display = ["__str__", "alt_alli"]
     raw_id_fields = ["alt_alli"]
+    filter_horizontal = ["exempt_alliances", "exempt_corporations"]
 
 
 admin.site.register(AltAllianceFilter, AltAlliAdmin)
