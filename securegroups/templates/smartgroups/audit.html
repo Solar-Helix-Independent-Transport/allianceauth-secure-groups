@@ -76,29 +76,37 @@ table.dataTable tbody td {
     {% csrf_token %}
 
     <div class="col-lg-12">
-        <h1 class="page-header text-center">{% trans "Smart Group Audit" %}</h1>
-        <h4 class="text-center">{{sg.group.name}}</h3>
-        <p class="text-center">{{sg.description}}</p>
-        <table class="table table-aa">
-            <thead>
-                <tr>
-                    <th class="">{% trans "User" %}</th>
-                    {% for fl in filters %}<th class="text-center">{{fl.filter_object.description}}</th>{% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for u, vals in characters.items %}
-                    <tr>
-                        <td class="">{{ vals }}</td>
-                        {% for fv in filters %}
-                            <td class="text-center" id="{{ u }}_{{ fv.id }}">
-                                <div class="text-center"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
-                            </td>
+        <br>
+        {% include 'smartgroups/menu.html' %}
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {{sg.group.name}}
+            </div>
+
+            <div class="panel-body">
+                <table class="table table-aa">
+                    <thead>
+                        <tr>
+                            <th class="">{% trans "User" %}</th>
+                            {% for fl in filters %}<th class="text-center">{{fl.filter_object.description}}</th>{% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u, vals in characters.items %}
+                            <tr>
+                                <td class="">{{ vals }}</td>
+                                {% for fv in filters %}
+                                    <td class="text-center" id="{{ u }}_{{ fv.id }}">
+                                        <div class="text-center"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
                         {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock content %}
 
