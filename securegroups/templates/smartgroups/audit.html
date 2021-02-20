@@ -105,8 +105,8 @@ table.dataTable tbody td {
 {% block extra_script %}
 
 $(document).ready(function() {
-    var failure_check = '<a class="label label-danger" type="button"><i class="fas fa-times-circle"></i></a>';
-    var pass_check = '<a class="label label-success" type="button" data-toggle="tooltip" rel="tooltip" data-placement="top" title="" data-original-title=""><i class="fas fa-check-circle"></i></a>';
+    var failure_check = '<a class="label label-danger" type="button" data-toggle="tooltip" rel="tooltip" data-placement="top" title="" data-original-title="" data-html="true"><i class="fas fa-times-circle"></i></a>';
+    var pass_check = '<a class="label label-success" type="button" data-toggle="tooltip" rel="tooltip" data-placement="top" title="" data-original-title="" data-html="true"><i class="fas fa-check-circle"></i></a>';
 
 
     function load_filter(filter_id){
@@ -131,12 +131,10 @@ $(document).ready(function() {
         message = data.message;
         tag = "#" + uid + "_" + fid;
         cell_body = $(tag)[0];
-        var pass = false;
-        message = pass_check.replace('data-original-title=""', 'data-original-title="' + message + '"');
         if (result) {
-            cell_body.innerHTML = message;
+            cell_body.innerHTML = pass_check.replace('data-original-title=""', 'data-original-title="' + message + '"');
         } else {
-            cell_body.innerHTML = failure_check;
+            cell_body.innerHTML = failure_check.replace('data-original-title=""', 'data-original-title="' + message + '"');
         }
         $("[rel='tooltip']").tooltip();
 
