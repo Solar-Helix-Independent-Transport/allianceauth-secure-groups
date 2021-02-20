@@ -88,7 +88,7 @@ class AltCorpFilter(FilterBase):
             exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
         )
 
-    def filter_audit(self, users):
+    def audit_filter(self, users):
         co = CharacterOwnership.objects.filter(user__in=users, character__corporation_id=self.alt_corp.corporation_id).values(
             'user__id', 'character__character_name')
 
@@ -121,7 +121,7 @@ class AltAllianceFilter(FilterBase):
                                                        exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
                                                        )
 
-    def filter_audit(self, users):
+    def audit_filter(self, users):
         co = CharacterOwnership.objects.filter(user__in=users, character__alliance_id=self.alt_alli.alliance_id).values(
             'user__id', 'character__character_name')
         chars = defaultdict(list)
@@ -153,7 +153,7 @@ class UserInGroupFilter(FilterBase):
                                                     exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
                                                     )
 
-    def filter_audit(self, users):
+    def audit_filter(self, users):
         cl = users.filter(groups__in=[self.group])
         chars = defaultdict(lambda: {"message": "", "check": False})
         for c in cl:

@@ -33,10 +33,10 @@
                                 {% for sg in sgs %}
                                     <tr>
                                         <td>
-                                            <a href="{% url 'securegroups:audit' sg.id %}">{{ sg.group.name }}</a>
+                                            {{ sg.group.name }}
                                         </td>
 
-                                        <td>{{ sg.description|linebreaks|urlize }}</td>
+                                        <td>{{ sg.group.authgroup.description|linebreaks|urlize }}{{ sg.description|linebreaks|urlize }}</td>
 
                                         <td class="text-center">
                                             {% if sg.group.authgroup.open %}
@@ -50,7 +50,7 @@
                                             {{ sg.num_members }}
                                         </td>
                                         <td class="text-right">
-                                            <a href="{% url 'groupmanagement:membership' sg.group.id %}" class="btn btn-primary" title="{% trans "View Members" %}">
+                                            <a href="{% url 'securegroups:audit' sg.id %}" class="btn btn-primary" title="{% trans "Audit Members" %}">
                                                 <i class="glyphicon glyphicon-eye-open"></i>
                                             </a>
                                             <a href="{% url 'groupmanagement:membership' sg.id %}" class="btn btn-primary" title="{% trans "Request Update" %}">

@@ -57,16 +57,23 @@ def groups_manager_checks(request, sg_id=None, filter_id=None):
         users = sg.group.user_set.all()
         out = []
         try:
-            _o = fltr.filter_object.filter_audit(users)
+            _o = fltr.filter_object.audit_filter(users)
         except Exception as e:
             print(e)
             _o = defaultdict(lambda: None)
 
         for u in users:
+            check = None
+            msg = ""
+            try:
+                check = _o[u.id]["check"]
+                msg = _o[u.id]["message"]
+            except Exception:
+                pass
             out.append({"uid": u.id,
                         "fid": filter_id,
-                        "result": _o[u.id]["check"],
-                        "message": _o[u.id]["message"]})
+                        "result": check,
+                        "message": msg})
 
         return JsonResponse(out, safe=False)
     raise Http404("Does not exist")
