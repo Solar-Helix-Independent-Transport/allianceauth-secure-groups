@@ -30,7 +30,7 @@ The "Key Model Assumptions" are as follows;
       - `User.ID` as key
       - internal Dict with 2 fields
           - `check` Boolean, True they Pass, False they Fail.
-          - `message` String, an optional messaage for either pass or fails. ( use `<br>` for linebreaks)
+          - `message` String, an optional messaage for either pass or fails. ( use `<br>` for linebreaks )
 
         ``` 
         {
