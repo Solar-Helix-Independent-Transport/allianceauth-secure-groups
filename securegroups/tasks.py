@@ -62,7 +62,6 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
 
     group = smart_group.group
     all_users = group.user_set.all().values_list("username", flat=True)
-
     all_graced_members = {}
     _all_graced_members = GracePeriodRecord.objects.filter(
         group=smart_group, user__username__in=all_users
@@ -85,6 +84,15 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
 
     users = users.select_related(
         "profile", "profile__main_character").distinct()
+
+    bulk_checks = {}
+    filters = smart_group.filters.all()
+    for f in filters:
+        try:
+            bulk_checks[f.id]=f.filter_object.audit_filter(users)
+        except Exception as e:
+            pass
+    
     count = 0
     added = 0
     removed = 0
@@ -106,9 +114,24 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     u, f'Auto Group Removal "{group.name}"', message, "warning")
                 logger.info(message)
             continue
-
-        checks = smart_group.run_checks(u)
-
+        
+        checks = []
+        for f in filters:
+            _c = {
+                    "name": f.filter_object.description,
+                    "filter": f
+                }
+            try:
+                _c["check"] = bulk_checks[f.id][u.id]['check']
+                _c["message"] = bulk_checks[f.id][u.id]['message']
+            except Exception as e:
+                try:
+                    _c["check"] = f.filter_object.process_filter(u)
+                    _c["message"] = ""
+                except Exception  as e:
+                    _c["check"] = False
+                    _c["message"] = "Filter Failed"
+            checks.append(_c)
         if len(checks) == 0:
             break
 
@@ -116,9 +139,9 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
         out = True
         reasons = []
         for c in checks:
-            if not c.get("output", False):
+            if not c.get("check", False):
                 out = False
-                reasons.append(c.get("message", ""))
+                reasons.append(c.get("name", ""))
 
         if out:
             if u.username in all_graced_members:
@@ -154,7 +177,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                                 continue
                             else:
                                 was_graced = True
-                        elif not c.get("output", False):
+                        elif not c.get("check", False):
                             if can_grace and grace_days > 0:
                                 grace = True
                                 if not fake_run:
@@ -167,7 +190,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                             else:
                                 remove = True
                                 continue
-                    elif not c.get("output", False):
+                    elif not c.get("check", False):
                         if can_grace and grace_days > 0:
                             grace = True
                             if not fake_run:

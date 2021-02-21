@@ -105,8 +105,8 @@ def m2m_changed_user_groups(sender, instance: User, action, *args, **kwargs):
                     groups_to_remove.append(g)
                     logger.warning(
                         "Removing {} from {}, due to invalid join".format(instance, g))
-        # if len(groups_to_remove) > 0:
-            # instance.groups.remove(*groups_to_remove)
+        if len(groups_to_remove) > 0:
+            instance.groups.remove(*groups_to_remove)
         signal_cache.clear_user(instance)
 
     if instance.pk and (action == "post_add"):

@@ -3,7 +3,17 @@
 {% load i18n %}
 
 {% block page_title %}{% trans "Available Groups" %}{% endblock page_title %}
-{% block extra_css %}{% endblock extra_css %}
+{% block extra_css %}
+<style>
+    @media (min-width: 768px)
+    {
+        .modal-dialog {
+            width: 800px;
+            margin: 30px auto;
+        }
+    }
+</style>
+{% endblock extra_css %}
 {% block content %}
     <div class="col-lg-12">
         <h1 class="page-header text-center">{% trans "Available Groups" %}</h1>

@@ -17,6 +17,7 @@ The "Key Model Assumptions" are as follows;
    - `name` field
    - `description` field
    - `process_filter` function
+   - `audit_filter` function
  - "Single User check"
    - `process_filter` will check the account of the `user` passed in relative to your apps data.
    - `process_filter` will always return a boolean, and NEVER throw exception.
@@ -25,7 +26,7 @@ The "Key Model Assumptions" are as follows;
    - `audit_filter` will check all users from the queryset passed in in a "bulk" way
    - `audit_filter` must return a pass or fail for all users, messages optional.
    - `users` will be an Auth User Model Queryset
-   - return format is a dict or dict like object (`defaultdict` works great) with structure as follows:
+   - return format is a dict or dict-like object (`defaultdict` works great) with structure as follows:
       - `User.ID` as key
       - internal Dict with 2 fields
           - `check` Boolean, True they Pass, False they Fail.

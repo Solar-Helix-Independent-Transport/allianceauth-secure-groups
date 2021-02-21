@@ -126,7 +126,7 @@ def groups_manager_list(request):
 def smart_group_run_check(request, group_id):
     try:
         smart_group = SmartGroup.objects.get(group__id=group_id)
-        filters = smart_group.run_checks(request.user)
+        filters = smart_group.run_check_on_user(request.user)
         pass_checks = smart_group.process_checks(filters)
         ctx = {"filters": filters,
                "pass_checks": pass_checks, "group_id": group_id}

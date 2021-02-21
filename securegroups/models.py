@@ -195,9 +195,33 @@ class SmartGroup(models.Model):
                 test_pass = False
                 logger.error("TEST FAILED")  # TODO Make pretty
             _check = {
-                "message": check.filter_object.description,
+                "name": check.filter_object.description,
             }
-            _check["output"] = test_pass
+            _check["check"] = test_pass
+            _check["filter"] = check
+            output.append(_check)
+        return output
+
+    def run_check_on_user(self, user: User):
+        output = []
+        for check in self.filters.all():
+            _filter = check.filter_object
+            if _filter is None:
+                logger.warning(f"Failed to run filter for {check}")
+                continue  # Skip as this is broken...
+            try:
+                test_pass = _filter.audit_filter(User.objects.filter(pk=user.pk))
+            except Exception:
+                try:
+                    test_pass = {user.id:{"message": "", "check":_filter.process_filter(user)}}
+                except Exception:
+                    test_pass = {user.id:{"message": "Filter Failed", "check": False}}
+                    logger.error("TEST FAILED")  # TODO Make pretty
+            _check = {
+                "name": check.filter_object.description,
+            }
+            _check["check"] = test_pass[user.id]['check']
+            _check["message"] = test_pass[user.id]['message']
             _check["filter"] = check
             output.append(_check)
         return output
@@ -205,7 +229,7 @@ class SmartGroup(models.Model):
     def process_checks(self, checks):
         out = True
         for c in checks:
-            out = out & c.get("output", False)
+            out = out & c.get("check", False)
         return out
 
     def check_user(self, user: User):
