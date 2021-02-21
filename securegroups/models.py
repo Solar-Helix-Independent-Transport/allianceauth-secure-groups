@@ -67,6 +67,8 @@ class FilterBase(models.Model):
     def process_filter(self, user: User):
         raise NotImplementedError("Please Create a filter!")
 
+    def audit_filter(self, users):
+        raise NotImplementedError("Please Create an audit function!")
 
 class AltCorpFilter(FilterBase):
     class Meta:
