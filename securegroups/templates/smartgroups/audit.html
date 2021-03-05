@@ -2,6 +2,7 @@
 {% load static %}
 {% load i18n %}
 {% load sg_audit %}
+{% load evelinks %}
 
 {% block page_title %}{% trans "Group Audit" %}{% endblock page_title %}
 {% block extra_css %}
@@ -91,6 +92,7 @@ table.dataTable tbody td {
                     <thead>
                         <tr>
                             <th class="">{% trans "User" %}</th>
+                            <th>{% trans "Organization" %}</th>
                             {% for fl in filters %}<th class="text-center">{{fl.filter_object.description}}</th>{% endfor %}
                         </tr>
                     </thead>
@@ -98,6 +100,17 @@ table.dataTable tbody td {
                         {% for u, vals in characters.items %}
                             <tr>
                                 <td class="">{{ vals }}</td>
+                                <td>
+                                  {% if vals %}
+                                      <a href="{{ member.main_char|dotlan_corporation_url }}" target="_blank">
+                                          {{ vals.corporation_name }}
+                                      </a><br>
+                                      {{ vals.alliance_name|default_if_none:"" }}
+                                  {% else %}
+                                      {% trans "(unknown)" %}
+                                  {% endif %}
+                              </td>
+
                                 {% for fv in filters %}
                                     <td class="text-center" id="{{ u }}_{{ fv.id }}">
                                         <div class="text-center"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
@@ -175,7 +188,7 @@ $(document).ready(function() {
       "order": [
           [0, "asc"]
       ],
-      "pageLength": 25,
+      "paging": false,
       "responsive" : true
   });
 });
