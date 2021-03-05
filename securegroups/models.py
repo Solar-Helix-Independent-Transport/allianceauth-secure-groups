@@ -156,7 +156,7 @@ class UserInGroupFilter(FilterBase):
                                                     )
 
     def audit_filter(self, users):
-        cl = users.filter(groups__in=[self.group])
+        cl = users.prefetch_related('groups').filter(groups__id__in=[self.group.id,])
         chars = defaultdict(lambda: {"message": "", "check": False})
         for c in cl:
             chars[c.id] = {"message": "", "check": True}
