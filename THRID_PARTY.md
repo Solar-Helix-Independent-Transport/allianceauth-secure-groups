@@ -11,6 +11,7 @@ Please keep a few key design factors in mind. Consider these Loose Rules:
  - Include both the single and bulk functions. 
    - The Audit pages only use bulk checks
    - The Smart Group update task will fallback to single user checks if the bulk checks fail for what ever reason.
+ - Hide filters in admin from people who do not have this app installed.
 
 The "Key Model Assumptions" are as follows;
  - Your model **Must Have**:

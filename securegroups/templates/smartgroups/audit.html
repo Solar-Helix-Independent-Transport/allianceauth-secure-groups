@@ -156,7 +156,11 @@ $(document).ready(function() {
         tag = "#" + uid + "_" + fid;
         cell_body = $(tag)[0];
         if (result == null){
-          cell_body.innerHTML = `<a class="label label-default" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="Error in Filter"><i class="fas fa-question"></i></a>`;
+          msg = "Error in Filter"
+          if (message!=""){
+            msg=message
+          }
+          cell_body.innerHTML = `<a class="label label-default" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}"><i class="fas fa-question"></i></a>`;
         }else if (result == true) {
             cell_body.innerHTML = `<a class="label label-success" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}" data-html="true"><i class="fas fa-check-circle"></i></a>`;
         } else {
