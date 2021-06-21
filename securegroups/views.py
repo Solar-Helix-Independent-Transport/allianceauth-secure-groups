@@ -14,6 +14,7 @@ from django.shortcuts import render, redirect
 from collections import defaultdict
 from django.http import Http404
 from django.db.models import Count
+from django.contrib.auth.decorators import user_passes_test
 
 from django.template.loader import render_to_string
 
@@ -48,7 +49,8 @@ def groups_view(request):
     return render(request, "smartgroups/groups.html", context=context)
 
 
-@permission_required("securegroups.access_sec_group")
+@permission_required("securegroups.audit_sec_group")
+@user_passes_test(GroupManager.can_manage_groups)
 def groups_manager_checks(request, sg_id=None, filter_id=None):
     logger.debug("groups_manager_checks called by user %s" % request.user)
     if request.method == "POST":
@@ -79,7 +81,8 @@ def groups_manager_checks(request, sg_id=None, filter_id=None):
     raise Http404("Does not exist")
 
 
-@permission_required("securegroups.access_sec_group")
+@permission_required("securegroups.audit_sec_group")
+@user_passes_test(GroupManager.can_manage_groups)
 def groups_manager_view(request, sg_id=None):
     logger.debug("groups_manager_view called by user %s" % request.user)
 
@@ -99,7 +102,8 @@ def groups_manager_view(request, sg_id=None):
     return render(request, "smartgroups/audit.html", context=context)
 
 
-@permission_required("securegroups.access_sec_group")
+@permission_required("securegroups.audit_sec_group")
+@user_passes_test(GroupManager.can_manage_groups)
 def groups_manager_list(request):
     logger.debug("groups_manager_list called by user %s" % request.user)
 

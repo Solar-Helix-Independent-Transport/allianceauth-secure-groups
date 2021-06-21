@@ -52,9 +52,6 @@ class GroupManagementMenuItem(MenuItemHook):
 
     def render(self, request):
         if GroupManager.can_manage_groups(request.user):
-            app_count = GroupManager.pending_requests_count_for_user(
-                request.user)
-            self.count = app_count if app_count and app_count > 0 else None
             return MenuItemHook.render(self, request)
         return ""
 

@@ -70,6 +70,7 @@ class FilterBase(models.Model):
     def audit_filter(self, users):
         raise NotImplementedError("Please Create an audit function!")
 
+
 class AltCorpFilter(FilterBase):
     class Meta:
         verbose_name = "Smart Filter: Character in Corporation"
@@ -156,7 +157,8 @@ class UserInGroupFilter(FilterBase):
                                                     )
 
     def audit_filter(self, users):
-        cl = users.prefetch_related('groups').filter(groups__id__in=[self.group.id,])
+        cl = users.prefetch_related('groups').filter(
+            groups__id__in=[self.group.id, ])
         chars = defaultdict(lambda: {"message": "", "check": False})
         for c in cl:
             chars[c.id] = {"message": "", "check": True}
@@ -177,7 +179,8 @@ class SmartGroup(models.Model):
 
     class Meta:
         permissions = (
-            ("access_sec_group", "Can access sec group requests screen."),)
+            ("access_sec_group", "Can access sec group requests screen."),
+            ("audit_sec_group", "Can audit sec groups members."),)
 
     def __str__(self):
         return "Smart Group: %s" % self.group.name
@@ -210,12 +213,15 @@ class SmartGroup(models.Model):
                 logger.warning(f"Failed to run filter for {check}")
                 continue  # Skip as this is broken...
             try:
-                test_pass = _filter.audit_filter(User.objects.filter(pk=user.pk))
+                test_pass = _filter.audit_filter(
+                    User.objects.filter(pk=user.pk))
             except Exception:
                 try:
-                    test_pass = {user.id:{"message": "", "check":_filter.process_filter(user)}}
+                    test_pass = {user.id: {"message": "",
+                                           "check": _filter.process_filter(user)}}
                 except Exception:
-                    test_pass = {user.id:{"message": "Filter Failed", "check": False}}
+                    test_pass = {
+                        user.id: {"message": "Filter Failed", "check": False}}
                     logger.error("TEST FAILED")  # TODO Make pretty
             _check = {
                 "name": check.filter_object.description,
