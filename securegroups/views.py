@@ -1,4 +1,5 @@
-from .models import SmartGroup, SmartFilter
+from django.db.models.fields import GenericIPAddressField
+from .models import GracePeriodRecord, SmartGroup, SmartFilter
 from allianceauth.groupmanagement.models import GroupRequest
 from allianceauth.groupmanagement.managers import GroupManager
 from django.utils.translation import ugettext_lazy as _
@@ -24,7 +25,7 @@ logger = logging.getLogger(__name__)
 @permission_required("securegroups.access_sec_group")
 def groups_view(request):
     logger.debug("groups_view called by user %s" % request.user)
-
+    usr_groups = request.user.groups.all()
     groups_qs = Group.objects.filter(
         Q(authgroup__states=request.user.profile.state) | Q(authgroup__states=None)
     )
@@ -32,16 +33,26 @@ def groups_view(request):
     smart_groups_qs = SmartGroup.objects.filter(
         group__in=groups_qs, auto_group=False, enabled=True
     ).select_related("group", "group__authgroup")
-
+    graces_qs = GracePeriodRecord.objects.filter(user=request.user)
+    graces = {}
+    for g in graces_qs:
+        if g.group.group.name not in graces:
+            graces[g.group.group.name] = []
+        graces[g.group.group.name].append(
+            g.grace_filter.filter_object.description)
     groups = []
     for smart_group in smart_groups_qs:
         group_request = GroupRequest.objects.filter(user=request.user).filter(
             group=smart_group.group
         )
+        grace_msg = None
+        if smart_group.group.name in graces and smart_group.group in usr_groups:
+            grace_msg = "\n".join(graces[smart_group.group.name])
         groups.append(
             {
                 "smart_group": smart_group,
                 "request": group_request[0] if group_request else None,
+                "grace_msg": grace_msg
             }
         )
 
@@ -119,7 +130,8 @@ def groups_manager_list(request):
 
     smart_groups_qs = SmartGroup.objects.filter(
         group__in=groups_qs, enabled=True
-    ).select_related("group", "group__authgroup").annotate(num_members=Count('group__user')).order_by('group__name')
+    ).select_related("group", "group__authgroup").annotate(num_members=Count('group__user'),
+                                                           pending_rem=Count('graceperiodrecord__user', distinct=True)).order_by('group__name')
 
     context = {"sgs": smart_groups_qs}
 

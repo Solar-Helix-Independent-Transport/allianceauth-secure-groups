@@ -1,0 +1,15 @@
+{% load i18n %}
+<table class="table table-aa">
+    <thead>
+        <th>Requirements</th>
+        <th class="text-center">Note</th>
+        <th class="text-right">Result</th>
+    </thead>
+{% for filter in filters %}
+    <tr>
+        <td>{{ filter.name }}</td>
+        <td class="text-center">{{ filter.message|safe }}</td>
+        <td>{% if filter.check %}<a class="pull-right btn btn-success" type="button" ><i class="fas fa-check-circle"></i></a>{% else %}<a class="pull-right btn btn-danger" type="button" ><i class="fas fa-times-circle"></i></a>{% endif %}</td>
+    </tr>
+{% endfor %}
+</table>
