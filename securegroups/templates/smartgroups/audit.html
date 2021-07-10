@@ -94,18 +94,21 @@ table.dataTable tbody td {
                             <th class="">{% trans "User" %}</th>
                             <th>{% trans "Organization" %}</th>
                             {% for fl in filters %}<th class="text-center">{{fl.filter_object.description}}</th>{% endfor %}
+                            <th>{% trans "Actions" %}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for u, vals in characters.items %}
-                            <tr>
+                            <tr id="uid_{{u}}">
                                 <td class="">{{ vals }}</td>
                                 <td>
                                   {% if vals %}
-                                      <a href="{{ member.main_char|dotlan_corporation_url }}" target="_blank">
+                                      <a href="{{ vals|dotlan_corporation_url }}" target="_blank">
                                           {{ vals.corporation_name }}
                                       </a><br>
-                                      {{ vals.alliance_name|default_if_none:"" }}
+                                      <a href="{{ vals|dotlan_alliance_url }}" target="_blank">
+                                          {{ vals.alliance_name|default_if_none:"" }}
+                                      </a
                                   {% else %}
                                       {% trans "(unknown)" %}
                                   {% endif %}
@@ -116,6 +119,12 @@ table.dataTable tbody td {
                                         <div class="label label-default text-center"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
                                     </td>
                                 {% endfor %}
+                                <td class="text-center">
+                                    <a href="#" id="{{ u }}" class="btn btn-warning rem-user-button" title="{% trans "Kick Member" %}">
+                                        <i class="glyphicon glyphicon-remove"></i>
+                                    </a>
+                                </td>
+
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -146,7 +155,6 @@ $(document).ready(function() {
             data:{},
             success:filter_post});
     };
-
 
     function update_cell(data) {
         uid = data.uid;
@@ -182,18 +190,35 @@ $(document).ready(function() {
     {% endfor %}
 
     $('#audit-table').DataTable({
-      "filterDropDown": {
+        "filterDropDown": {
         columns: [],
-          },
-      "columnDefs": [
-          { "searchable": true, "targets": [0] },
-          { "sortable": true, "targets": [0] }
-      ],
-      "order": [
-          [0, "asc"]
-      ],
-      "paging": false,
-      "responsive" : true
-  });
+            },
+        "columnDefs": [
+            { "searchable": true, "targets": [0] },
+            { "sortable": true, "targets": [0] }
+        ],
+        "order": [
+            [0, "asc"]
+        ],
+        "paging": false,
+        "responsive" : true
+    });
+
+    $(".rem-user-button").on("click", function() {
+        var url = "{% url 'securegroups:rem_user' sg.group.id 123456 %}";
+        var id = this.id;
+        url = url.replace('123456', id);
+        var token =  document.getElementsByName('csrfmiddlewaretoken')[1].value
+        $.get(url, function(data, status) {
+            if(status=="success"){
+                console.log(data)
+                $("#uid_"+data.user_id).remove()
+            } else {
+
+            }
+
+        });
+    });
+
 });
 {% endblock %}
