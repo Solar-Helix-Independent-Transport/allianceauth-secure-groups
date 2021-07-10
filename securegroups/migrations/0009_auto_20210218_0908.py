@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eveonline', '0014_auto_20210105_1413'),
+        ('eveonline', '0012_index_additions'),
         ('securegroups', '0008_auto_20210117_0219'),
     ]
 
