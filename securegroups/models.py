@@ -215,7 +215,7 @@ class SmartGroup(models.Model):
             try:
                 test_pass = _filter.audit_filter(
                     User.objects.filter(pk=user.pk))
-            except Exception:
+            except Exception as e:
                 try:
                     test_pass = {user.id: {"message": "",
                                            "check": _filter.process_filter(user)}}
