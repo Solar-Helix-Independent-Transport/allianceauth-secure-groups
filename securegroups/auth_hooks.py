@@ -4,6 +4,7 @@ from allianceauth.services.hooks import MenuItemHook, UrlHook
 from .models import AltCorpFilter, AltAllianceFilter, UserInGroupFilter
 from allianceauth.groupmanagement.managers import GroupManager
 from django.utils.translation import ugettext_lazy as _
+from .models import GracePeriodRecord
 
 
 @hooks.register("url_hook")
@@ -24,6 +25,8 @@ class GroupMenu(MenuItemHook):
 
     def render(self, request):
         if request.user.has_perm("securegroups.access_sec_group"):
+            self.count = GracePeriodRecord.objects.filter(
+                user=request.user).values('group_id').distinct().count()
             return MenuItemHook.render(self, request)
         else:
             return ""

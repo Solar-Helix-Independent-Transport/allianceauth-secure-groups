@@ -100,7 +100,11 @@ table.dataTable tbody td {
                     <tbody>
                         {% for u, vals in characters.items %}
                             <tr id="uid_{{u}}">
-                                <td class="">{{ vals }}</td>
+                                <td class="">{{ vals }}
+                                {% if u in graces %}
+                                    <span class="label label-warning text-center"><i class="fas fa-clock"></i></span>
+                                {% endif %}
+                                </td>
                                 <td>
                                   {% if vals %}
                                       <a href="{{ vals|dotlan_corporation_url }}" target="_blank">

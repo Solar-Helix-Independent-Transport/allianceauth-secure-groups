@@ -47,7 +47,7 @@ def groups_view(request):
         )
         grace_msg = None
         if smart_group.group.name in graces and smart_group.group in usr_groups:
-            grace_msg = "\n".join(graces[smart_group.group.name])
+            grace_msg = "<br>".join(graces[smart_group.group.name])
         groups.append(
             {
                 "smart_group": smart_group,
