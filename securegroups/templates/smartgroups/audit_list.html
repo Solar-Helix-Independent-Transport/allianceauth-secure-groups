@@ -40,7 +40,9 @@
                                         <td>{{ sg.group.authgroup.description|linebreaks|urlize }}{{ sg.description|linebreaks|urlize }}</td>
 
                                         <td class="text-center">
-                                            {% if sg.group.authgroup.open %}
+                                            {% if sg.auto_group %}
+                                                <span class="label label-default">{% trans "Auto Group" %}</span>
+                                            {% elif sg.group.authgroup.open %}
                                                 <span class="label label-success">{% trans "Open" %}</span>
                                             {% else %}
                                                 <span class="label label-default">{% trans "Requestable" %}</span>
