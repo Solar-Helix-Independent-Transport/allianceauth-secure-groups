@@ -16,7 +16,7 @@ class GroupMenu(MenuItemHook):
     def __init__(self):
         MenuItemHook.__init__(
             self,
-            "Secure Groups *BETA*",
+            "Secure Groups",
             "fas fa-user-lock fa-fw",
             "securegroups:groups",
             45,
@@ -44,7 +44,7 @@ class GroupManagementMenuItem(MenuItemHook):
         # setup menu entry for sidebar
         MenuItemHook.__init__(
             self,
-            text=_("Secure Group Audit *BETA*"),
+            text=_("Secure Group Audit"),
             classes="fas fa-user-check fa-fw",
             url_name="securegroups:audit_list",
             order=55,

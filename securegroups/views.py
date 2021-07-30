@@ -19,6 +19,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 
 from django.template.loader import render_to_string
 
+from .tasks import run_smart_group_update
 logger = logging.getLogger(__name__)
 
 
@@ -159,6 +160,17 @@ def smart_group_run_check(request, group_id):
         }
 
     return HttpResponse(render_to_string("smartgroups/user_check.html", ctx, request=request))
+
+
+@permission_required("securegroups.audit_sec_group")
+@user_passes_test(GroupManager.can_manage_groups)
+def group_manual_refresh(request, sg_id=None):
+    logger.debug("group_manual_refresh called by user %s" % request.user)
+    run_smart_group_update.apply_async(args=[sg_id], priority=4)
+    sg = SmartGroup.objects.get(id=sg_id)
+
+    messages.info(request, f"Added Priority job for '{sg.group.name}'")
+    return redirect("securegroups:audit_list")
 
 
 @permission_required("securegroups.access_sec_group")
