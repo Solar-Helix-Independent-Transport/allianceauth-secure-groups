@@ -93,6 +93,7 @@ table.dataTable tbody td {
                         <tr>
                             <th class="">{% trans "User" %}</th>
                             <th>{% trans "Organization" %}</th>
+                            <th>Pending Removal</th>
                             {% for fl in filters %}<th class="text-center">{{fl.filter_object.description}}</th>{% endfor %}
                             <th>{% trans "Actions" %}</th>
                         </tr>
@@ -116,8 +117,14 @@ table.dataTable tbody td {
                                   {% else %}
                                       {% trans "(unknown)" %}
                                   {% endif %}
-                              </td>
-
+                                </td>
+                                <td>
+                                {% if u in graces %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+                                </td>
                                 {% for fv in filters %}
                                     <td class="text-center" id="{{ u }}_{{ fv.id }}">
                                         <div class="label label-default text-center"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
@@ -128,7 +135,6 @@ table.dataTable tbody td {
                                         <i class="glyphicon glyphicon-remove"></i>
                                     </a>
                                 </td>
-
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -195,10 +201,13 @@ $(document).ready(function() {
 
     $('#audit-table').DataTable({
         "filterDropDown": {
-        columns: [],
+        columns: [
+            {"idx":2}
+        ],
             },
         "columnDefs": [
             { "searchable": true, "targets": [0] },
+            { "visible": false, "targets": [2] },
             { "sortable": true, "targets": [0] }
         ],
         "order": [
