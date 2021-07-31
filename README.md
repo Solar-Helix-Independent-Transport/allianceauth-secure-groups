@@ -99,15 +99,21 @@ Not in any particular order:
 
 ### User Failed Checks
 
-![img](https://i.imgur.com/04ewh1U.png)
+![img](https://i.imgur.com/vpeF3JP.png)
 
 ### User Passed Checks
 
-![img](https://i.imgur.com/3OloLdZ.png)
+![img](https://i.imgur.com/BiB6SdN.png)
+
+### Audit Secure Groups
+
+![img](https://i.imgur.com/mS11rwA.png)
+![img](https://i.imgur.com/mzg7UcM.png)
+![img](https://i.imgur.com/fjYut7x.png)
 
 ### Discord Message Example
 
-![https://cdn.discordapp.com/attachments/752362812176728147/794880515798466590/unknown.png](https://cdn.discordapp.com/attachments/752362812176728147/794880515798466590/unknown.png)
+![img](https://i.imgur.com/fxnacZj.png)
 
 ## Issues
 

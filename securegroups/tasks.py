@@ -209,10 +209,10 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     if not fake_run:
                         u.groups.remove(group)
                         # remove user
-                        message = '{} - Removed from "{}" due to failing:\n```{}```'.format(
+                        message = '{} - Removed from "{}" due to failing:\n```{}\n```'.format(
                             u.profile.main_character.character_name,
                             group.name,
-                            "``` ```".join(reasons),
+                            "\n```\n```".join(reasons),
                         )
                         send_discord_dm(u, message)
                         notify(
@@ -223,10 +223,10 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     pending_removals += 1
                     if not fake_run:
                         message = (
-                            '{} - Pending Removal from "{}" due to failing:\n```{}```'.format(
+                            '{} - Pending Removal from "{}" due to failing:\n```{}\n```'.format(
                                 u.profile.main_character.character_name,
                                 group.name,
-                                "``` ```".join(reasons),
+                                "\n```\n```".join(reasons),
                             )
                         )
                         send_discord_dm(u, message)
