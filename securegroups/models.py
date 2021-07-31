@@ -3,12 +3,16 @@ from allianceauth.eveonline.models import (
     EveCorporationInfo,
     EveAllianceInfo,
 )
+from allianceauth.authentication.models import CharacterOwnership
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 from django.utils import timezone
+from collections import defaultdict
+
+from itertools import groupby
 
 from . import app_settings, filter as smart_filters
 
@@ -63,6 +67,9 @@ class FilterBase(models.Model):
     def process_filter(self, user: User):
         raise NotImplementedError("Please Create a filter!")
 
+    def audit_filter(self, users):
+        raise NotImplementedError("Please Create an audit function!")
+
 
 class AltCorpFilter(FilterBase):
     class Meta:
@@ -71,10 +78,31 @@ class AltCorpFilter(FilterBase):
 
     alt_corp = models.ForeignKey(EveCorporationInfo, on_delete=models.CASCADE)
 
+    # sometimes there are double standards.
+    exempt_alliances = models.ManyToManyField(
+        EveAllianceInfo, related_name="corp_exempt_alliances", blank=True)
+    exempt_corporations = models.ManyToManyField(
+        EveCorporationInfo, related_name="corp_exempt_corporations", blank=True)
+
     def process_filter(self, user: User):
         return smart_filters.check_alt_corp_on_account(
-            user, self.alt_corp.corporation_id
+            user, self.alt_corp.corporation_id,
+            exempt_allis=self.exempt_alliances.all().values_list("alliance_id", flat=True),
+            exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
         )
+
+    def audit_filter(self, users):
+        co = CharacterOwnership.objects.filter(user__in=users, character__corporation_id=self.alt_corp.corporation_id).values(
+            'user__id', 'character__character_name')
+
+        chars = defaultdict(list)
+        for c in co:
+            chars[c['user__id']].append(c['character__character_name'])
+
+        output = defaultdict(lambda: {"message": "", "check": False})
+        for c, char_list in chars.items():
+            output[c] = {"message": ", ".join(char_list), "check": True}
+        return output
 
 
 class AltAllianceFilter(FilterBase):
@@ -84,8 +112,29 @@ class AltAllianceFilter(FilterBase):
 
     alt_alli = models.ForeignKey(EveAllianceInfo, on_delete=models.CASCADE)
 
+    # sometimes there are double standards.
+    exempt_alliances = models.ManyToManyField(
+        EveAllianceInfo, related_name="alli_exempt_alliances", blank=True)
+    exempt_corporations = models.ManyToManyField(
+        EveCorporationInfo, related_name="alli_exempt_corporations", blank=True)
+
     def process_filter(self, user: User):
-        return smart_filters.check_alt_alli_on_account(user, self.alt_alli.alliance_id)
+        return smart_filters.check_alt_alli_on_account(user, self.alt_alli.alliance_id,
+                                                       exempt_allis=self.exempt_alliances.all().values_list("alliance_id", flat=True),
+                                                       exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
+                                                       )
+
+    def audit_filter(self, users):
+        co = CharacterOwnership.objects.filter(user__in=users, character__alliance_id=self.alt_alli.alliance_id).values(
+            'user__id', 'character__character_name')
+        chars = defaultdict(list)
+        for c in co:
+            chars[c['user__id']].append(c['character__character_name'])
+
+        output = defaultdict(lambda: {"message": "", "check": False})
+        for c, char_list in chars.items():
+            output[c] = {"message": ", ".join(char_list), "check": True}
+        return output
 
 
 class UserInGroupFilter(FilterBase):
@@ -95,8 +144,25 @@ class UserInGroupFilter(FilterBase):
 
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
+    # sometimes there are double standards.
+    exempt_alliances = models.ManyToManyField(
+        EveAllianceInfo, related_name="group_exempt_alliances", blank=True)
+    exempt_corporations = models.ManyToManyField(
+        EveCorporationInfo, related_name="group_exempt_corporations", blank=True)
+
     def process_filter(self, user: User):
-        return smart_filters.check_group_on_account(user, self.group)
+        return smart_filters.check_group_on_account(user, self.group,
+                                                    exempt_allis=self.exempt_alliances.all().values_list("alliance_id", flat=True),
+                                                    exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
+                                                    )
+
+    def audit_filter(self, users):
+        cl = users.prefetch_related('groups').filter(
+            groups__id__in=[self.group.id, ])
+        chars = defaultdict(lambda: {"message": "", "check": False})
+        for c in cl:
+            chars[c.id] = {"message": "", "check": True}
+        return chars
 
 
 class SmartGroup(models.Model):
@@ -113,7 +179,8 @@ class SmartGroup(models.Model):
 
     class Meta:
         permissions = (
-            ("access_sec_group", "Can access sec group requests screen."),)
+            ("access_sec_group", "Can access sec group requests screen."),
+            ("audit_sec_group", "Can audit sec groups members."),)
 
     def __str__(self):
         return "Smart Group: %s" % self.group.name
@@ -131,9 +198,36 @@ class SmartGroup(models.Model):
                 test_pass = False
                 logger.error("TEST FAILED")  # TODO Make pretty
             _check = {
-                "message": check.filter_object.description,
+                "name": check.filter_object.description,
             }
-            _check["output"] = test_pass
+            _check["check"] = test_pass
+            _check["filter"] = check
+            output.append(_check)
+        return output
+
+    def run_check_on_user(self, user: User):
+        output = []
+        for check in self.filters.all():
+            _filter = check.filter_object
+            if _filter is None:
+                logger.warning(f"Failed to run filter for {check}")
+                continue  # Skip as this is broken...
+            try:
+                test_pass = _filter.audit_filter(
+                    User.objects.filter(pk=user.pk))
+            except Exception as e:
+                try:
+                    test_pass = {user.id: {"message": "",
+                                           "check": _filter.process_filter(user)}}
+                except Exception:
+                    test_pass = {
+                        user.id: {"message": "Filter Failed", "check": False}}
+                    logger.error("TEST FAILED")  # TODO Make pretty
+            _check = {
+                "name": check.filter_object.description,
+            }
+            _check["check"] = test_pass[user.id]['check']
+            _check["message"] = test_pass[user.id]['message']
             _check["filter"] = check
             output.append(_check)
         return output
@@ -141,7 +235,7 @@ class SmartGroup(models.Model):
     def process_checks(self, checks):
         out = True
         for c in checks:
-            out = out & c.get("output", False)
+            out = out & c.get("check", False)
         return out
 
     def check_user(self, user: User):

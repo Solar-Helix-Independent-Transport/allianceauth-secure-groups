@@ -1,0 +1,17 @@
+{% load static %}
+{% load i18n %}
+{% load navactive %}
+
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">{% trans "Toggle navigation" %}</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{% url 'securegroups:audit_list' %}">{% trans "Secure Group Audit" %}</a>
+        </div>
+    </div>
+</nav>

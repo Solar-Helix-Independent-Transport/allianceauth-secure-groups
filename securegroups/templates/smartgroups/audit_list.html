@@ -1,0 +1,83 @@
+{% extends "allianceauth/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Smart Group Audit" %}{% endblock page_title %}
+{% block extra_css %}{% endblock extra_css %}
+
+{% block content %}
+    <div class="col-lg-12">
+        <br>
+        {% include 'smartgroups/menu.html' %}
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% trans "Secure Groups" %}
+            </div>
+
+            <div class="panel-body">
+                {% if sgs %}
+                    <div class="table-responsive">
+                        <table class="table table-aa">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Name" %}</th>
+                                    <th>{% trans "Description" %}</th>
+                                    <th class="text-center">{% trans "Status" %}</th>
+                                    <th class="text-center">{% trans "Member Count" %}</th>
+                                    <th class="text-center">{% trans "Pending Removal" %}</th>
+                                    <th style="white-space: nowrap;"></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for sg in sgs %}
+                                    <tr>
+                                        <td>
+                                            {{ sg.group.name }}
+                                        </td>
+
+                                        <td>{{ sg.group.authgroup.description|linebreaks|urlize }}{{ sg.description|linebreaks|urlize }}</td>
+
+                                        <td class="text-center">
+                                            {% if sg.auto_group %}
+                                                <span class="label label-default">{% trans "Auto Group" %}</span>
+                                            {% elif sg.group.authgroup.open %}
+                                                <span class="label label-success">{% trans "Open" %}</span>
+                                            {% else %}
+                                                <span class="label label-default">{% trans "Requestable" %}</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-center">
+                                            {{ sg.num_members }}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ sg.pending_rem }}
+                                        </td>
+                                        <td class="text-right">
+                                            <a href="{% url 'securegroups:audit' sg.id %}" class="btn btn-primary" title="{% trans "Audit Members" %}">
+                                                <i class="glyphicon glyphicon-eye-open"></i>
+                                            </a>
+                                            <a href="{% url 'securegroups:update_group' sg.id %}" class="btn btn-primary" title="{% trans "Request Update" %}">
+                                                <i class="glyphicon glyphicon-refresh"></i>
+                                            </a>
+                                        </td>
+
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning text-center">
+                        {% trans "No groups to list." %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_javascript %}
+{% endblock %}

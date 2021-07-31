@@ -1,7 +1,4 @@
 {% load i18n %}
-{% if message %}
-<p class="alert text-center alert-warning">Group Error: {{message}} </p>
-{% endif %}
 <table class="table table-aa">
     <thead>
         <th>Requirements</th>
@@ -16,7 +13,3 @@
     </tr>
 {% endfor %}
 </table>
-
-<div class="col-sm-12">
-    <a class="btn btn-primary col-md-12" {% if pass_checks %}href="{% url 'securegroups:request_add' group_id %}">Join Group{% else %} disabled>Ineligible{% endif %}</a>
-</div>
