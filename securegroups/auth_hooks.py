@@ -26,7 +26,8 @@ class GroupMenu(MenuItemHook):
     def render(self, request):
         if request.user.has_perm("securegroups.access_sec_group"):
             _cnt = GracePeriodRecord.objects.filter(
-                user=request.user).values('group_id').distinct().count()
+                user=request.user,
+                group__auto_group=False).values('group_id').distinct().count()
             if _cnt > 0:
                 self.count = _cnt
             return MenuItemHook.render(self, request)

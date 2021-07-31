@@ -16,7 +16,8 @@ from .models import (
 class GraceAdmin(admin.ModelAdmin):
     list_select_related = True
     list_display = ["group", "user", "grace_filter", "expires"]
-    search_fields = ["group__group__name", "user__username", "grace_filter"]
+    search_fields = ["group__group__name", "user__username"]
+    list_filter = ["grace_filter"]
 
     def user_name(self, obj):
         return obj.user.username
