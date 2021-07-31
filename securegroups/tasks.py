@@ -66,10 +66,11 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     _all_graced_members = GracePeriodRecord.objects.filter(
         group=smart_group, user__username__in=all_users
     )
-    for gm in _all_graced_members:
-        if gm.user.username not in all_graced_members:
-            all_graced_members[gm.user.username] = {}
-        all_graced_members[gm.user.username][gm.grace_filter] = gm
+    if smart_group.can_grace:
+        for gm in _all_graced_members:
+            if gm.user.username not in all_graced_members:
+                all_graced_members[gm.user.username] = {}
+            all_graced_members[gm.user.username][gm.grace_filter] = gm
 
     if smart_group.auto_group:
         states = group.authgroup.states.all()
@@ -89,10 +90,10 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     filters = smart_group.filters.all()
     for f in filters:
         try:
-            bulk_checks[f.id]=f.filter_object.audit_filter(users)
+            bulk_checks[f.id] = f.filter_object.audit_filter(users)
         except Exception as e:
             pass
-    
+
     count = 0
     added = 0
     removed = 0
@@ -114,13 +115,13 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     u, f'Auto Group Removal "{group.name}"', message, "warning")
                 logger.info(message)
             continue
-        
+
         checks = []
         for f in filters:
             _c = {
-                    "name": f.filter_object.description,
-                    "filter": f
-                }
+                "name": f.filter_object.description,
+                "filter": f
+            }
             try:
                 _c["check"] = bulk_checks[f.id][u.id]['check']
                 _c["message"] = bulk_checks[f.id][u.id]['message']
@@ -128,7 +129,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                 try:
                     _c["check"] = f.filter_object.process_filter(u)
                     _c["message"] = ""
-                except Exception  as e:
+                except Exception as e:
                     _c["check"] = False
                     _c["message"] = "Filter Failed"
             checks.append(_c)
@@ -141,7 +142,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
         for c in checks:
             if not c.get("check", False):
                 out = False
-                reasons.append(c.get("name", ""))
+                reasons.append(f'{c.get("name", "")}  {c.get("message", "")}')
 
         if out:
             if u.username in all_graced_members:
@@ -208,10 +209,10 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     if not fake_run:
                         u.groups.remove(group)
                         # remove user
-                        message = '{} - Removed from "{}" due to failing: {}'.format(
+                        message = '{} - Removed from "{}" due to failing:\n```{}```'.format(
                             u.profile.main_character.character_name,
                             group.name,
-                            ", ".join(reasons),
+                            "``` ```".join(reasons),
                         )
                         send_discord_dm(u, message)
                         notify(
@@ -222,10 +223,10 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     pending_removals += 1
                     if not fake_run:
                         message = (
-                            '{} - Pending Removal from "{}" due to failing: {}'.format(
+                            '{} - Pending Removal from "{}" due to failing:\n```{}```'.format(
                                 u.profile.main_character.character_name,
                                 group.name,
-                                ", ".join(reasons),
+                                "``` ```".join(reasons),
                             )
                         )
                         send_discord_dm(u, message)
@@ -253,6 +254,13 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     logger.info(message)
 
     send_update_to_webhook(group, message)
+
+    # cleanup graces
+    GracePeriodRecord.objects.filter(
+        group=smart_group
+    ).exclude(
+        user__in=group.user_set.all()
+    ).delete()
 
     return message
 
