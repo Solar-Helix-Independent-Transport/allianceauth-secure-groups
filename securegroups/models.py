@@ -239,7 +239,7 @@ class SmartGroup(models.Model):
         return out
 
     def check_user(self, user: User):
-        checks = self.run_checks(user)
+        checks = self.run_check_on_user(user)
         out = self.process_checks(checks)
         return out
 
