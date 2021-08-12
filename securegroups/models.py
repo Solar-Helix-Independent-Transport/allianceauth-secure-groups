@@ -12,8 +12,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from collections import defaultdict
 
-from itertools import groupby
-
 from . import app_settings, filter as smart_filters
 
 if app_settings.discord_bot_active():
@@ -217,6 +215,7 @@ class SmartGroup(models.Model):
                     User.objects.filter(pk=user.pk))
             except Exception as e:
                 try:
+                    print(e)
                     test_pass = {user.id: {"message": "",
                                            "check": _filter.process_filter(user)}}
                 except Exception:
