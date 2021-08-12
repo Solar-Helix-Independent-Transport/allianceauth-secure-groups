@@ -52,8 +52,9 @@ class GroupCheck(commands.Cog):
                 embed.colour = Color.blue()
 
                 for c in checks:
-                    msg = c.get("message") if c.get(
-                        "message") is not None else " - "
+                    msg = c.get("message")
+                    if not msg:
+                        msg = "Pass: {}".format(c.get("check"))
 
                     embed.add_field(
                         name="{} (Pass: {})".format(c.get("filter").filter_object.description, c.get("check")), value=msg, inline=False
