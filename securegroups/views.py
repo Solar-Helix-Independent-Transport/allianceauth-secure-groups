@@ -1,7 +1,7 @@
 from .models import GracePeriodRecord, SmartGroup, SmartFilter
 from allianceauth.groupmanagement.models import GroupRequest, RequestLog
 from allianceauth.groupmanagement.managers import GroupManager
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponse, JsonResponse
 import logging
 
@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 @permission_required("securegroups.access_sec_group")
 def groups_view(request):
     logger.debug("groups_view called by user %s" % request.user)
+    from allianceauth.notifications import notify
+    notify(request.user, title="Test notification",
+           message="This isa test messaage")
     usr_groups = request.user.groups.all()
     groups_qs = Group.objects.filter(
         Q(authgroup__states=request.user.profile.state) | Q(authgroup__states=None)

@@ -3,7 +3,7 @@ from allianceauth import hooks
 from allianceauth.services.hooks import MenuItemHook, UrlHook
 from .models import AltCorpFilter, AltAllianceFilter, UserInGroupFilter
 from allianceauth.groupmanagement.managers import GroupManager
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from .models import GracePeriodRecord
 from . import app_settings
 
