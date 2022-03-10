@@ -1,5 +1,6 @@
 from django.test import TestCase, RequestFactory
 from django.urls import reverse
+from django.core.cache import cache
 from allianceauth.tests.auth_utils import AuthUtils
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo, EveAllianceInfo
 from allianceauth.authentication.models import CharacterOwnership
@@ -101,7 +102,6 @@ class TestGroupBotFilters(TestCase):
             name="Test Group", description="Test Group", group=cls.test_group
         )
 
-
     def test_user_alt_corp(self):
         users = {}
         for user in User.objects.all():
@@ -124,14 +124,14 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[9])
         self.assertFalse(tests[10])
 
-
     def test_user_alt_corp_audit(self):
         users = []
         for user in User.objects.all():
             print
             users.append(user.pk)
 
-        tests = self.corp_filter.audit_filter(User.objects.filter(id__in=users))
+        tests = self.corp_filter.audit_filter(
+            User.objects.filter(id__in=users))
 
         self.assertTrue(tests[1]['check'])
         self.assertTrue(tests[2]['check'])
@@ -143,7 +143,6 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[8]['check'])
         self.assertFalse(tests[9]['check'])
         self.assertFalse(tests[10]['check'])
-
 
     def test_user_alt_alli(self):
         users = {}
@@ -166,13 +165,13 @@ class TestGroupBotFilters(TestCase):
         self.assertTrue(tests[9])
         self.assertTrue(tests[10])
 
-
     def test_user_alt_alli_audit(self):
         users = []
         for user in User.objects.all():
             users.append(user.pk)
 
-        tests = self.alli_filter.audit_filter(User.objects.filter(id__in=users))
+        tests = self.alli_filter.audit_filter(
+            User.objects.filter(id__in=users))
 
         self.assertFalse(tests[1]['check'])
         self.assertFalse(tests[2]['check'])
@@ -184,7 +183,6 @@ class TestGroupBotFilters(TestCase):
         self.assertTrue(tests[8]['check'])
         self.assertTrue(tests[9]['check'])
         self.assertTrue(tests[10]['check'])
-
 
     def test_user_group_filter(self):
         User.objects.get(id=1).groups.add(self.test_group)
@@ -210,7 +208,6 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[9])
         self.assertFalse(tests[10])
 
-
     def test_user_group_filter_audit(self):
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
@@ -220,7 +217,7 @@ class TestGroupBotFilters(TestCase):
             users.append(user.pk)
 
         tests = self.grp_filter.audit_filter(
-                User.objects.filter(pk__in=users))
+            User.objects.filter(pk__in=users))
 
         self.assertTrue(tests[1]['check'])
         self.assertFalse(tests[2]['check'])
@@ -233,20 +230,21 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[9]['check'])
         self.assertFalse(tests[10]['check'])
 
-
     def test_generic_smart_group_task(self):
+        cache.clear()
         reset_time = timezone.now() - timedelta(days=5)
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=10).groups.add(self.test_group)
         User.objects.get(id=9).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
-
+        # users all good
         self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
         self.assertTrue(
             self.test_group in User.objects.get(id=10).groups.all())
         self.assertTrue(self.test_group in User.objects.get(id=9).groups.all())
         self.assertTrue(self.test_group in User.objects.get(id=7).groups.all())
 
+        # first pass test hit the pre notify
         gb_tasks.run_smart_group_update(self.test_s_group.id)
 
         self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
@@ -254,12 +252,26 @@ class TestGroupBotFilters(TestCase):
             self.test_group in User.objects.get(id=10).groups.all())
         self.assertTrue(self.test_group in User.objects.get(id=9).groups.all())
         self.assertTrue(self.test_group in User.objects.get(id=7).groups.all())
-        self.assertEquals(gb_models.GracePeriodRecord.objects.all().count(), 3)
+        self.assertEquals(
+            gb_models.GracePeriodRecord.objects.all().count(), 0)  # not notified
 
-        gb_models.GracePeriodRecord.objects.all().update(expires=reset_time)
+        # the data should have been updated by now so try again
+        gb_tasks.run_smart_group_update(self.test_s_group.id)
+
+        self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
+        self.assertTrue(
+            self.test_group in User.objects.get(id=10).groups.all())
+        self.assertTrue(self.test_group in User.objects.get(id=9).groups.all())
+        self.assertTrue(self.test_group in User.objects.get(id=7).groups.all())
+        self.assertEquals(
+            gb_models.GracePeriodRecord.objects.all().count(), 3)  # now notified
+
+        gb_models.GracePeriodRecord.objects.all().update(
+            expires=reset_time)  # reset he grace to remove
 
         gb_tasks.run_smart_group_update(self.test_s_group.id)
 
+        # purge the users
         self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
         self.assertFalse(
             self.test_group in User.objects.get(id=10).groups.all())
@@ -269,7 +281,6 @@ class TestGroupBotFilters(TestCase):
             self.test_group in User.objects.get(id=7).groups.all())
 
         self.assertEquals(gb_models.GracePeriodRecord.objects.all().count(), 0)
-
 
     def test_fail_view(self):
         user = User.objects.get(id=7)
@@ -288,7 +299,6 @@ class TestGroupBotFilters(TestCase):
         self.assertContains(response, "Ineligible")
         self.assertNotContains(response, "Running Group Check Failed")
 
-
     def test_pass_view(self):
         user = User.objects.get(id=1)
         permission = AuthUtils.get_permission_by_name(
@@ -305,7 +315,6 @@ class TestGroupBotFilters(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Join Group")
         self.assertNotContains(response, "Running Group Check Failed")
-
 
     def test_no_perm_view(self):
         user = User.objects.get(id=5)

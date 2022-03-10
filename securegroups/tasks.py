@@ -70,7 +70,7 @@ def get_failure(sg_id, user_id) -> bool:
     return cache.get(get_failure_key(sg_id, user_id), False)
 
 
-def clear_falure(sg_id, user_id):
+def clear_failure(sg_id, user_id):
     cache.delete(get_failure_key(sg_id, user_id))
 
 
@@ -233,23 +233,19 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                 if remove:
                     removed += 1
                     if not fake_run:
-                        if get_failure(sg_id, u.id):
-                            u.groups.remove(group)
-                            # remove user
-                            message = '{} - Removed from "{}" due to failing:\n```{}\n```'.format(
-                                u.profile.main_character.character_name,
-                                group.name,
-                                "\n``` ```".join(reasons),
-                            )
-                            send_discord_dm(
-                                u, "Removed From Group", message, color=Color.red())
-                            notify(
-                                u, f'Auto Group Removal "{group.name}"', message, "warning"
-                            )
-                            logger.info(message)
-                            clear_falure(sg_id, u.id)
-                        else:
-                            set_failure(sg_id, u.id)
+                        u.groups.remove(group)
+                        # remove user
+                        message = '{} - Removed from "{}" due to failing:\n```{}\n```'.format(
+                            u.profile.main_character.character_name,
+                            group.name,
+                            "\n``` ```".join(reasons),
+                        )
+                        send_discord_dm(
+                            u, "Removed From Group", message, color=0xe74c3c)
+                        notify(
+                            u, f'Auto Group Removal "{group.name}"', message, "warning"
+                        )
+                        logger.info(message)
                 elif grace:
                     pending_removals += 1
                     if not fake_run:
@@ -262,7 +258,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                                 )
                             )
                             send_discord_dm(
-                                u, "Group Removal Pending", message, color=Color.orange())
+                                u, "Group Removal Pending", message, color=0xe67e22)
                             notify(
                                 u,
                                 f'Auto Group Removal Pending "{group.name}"',
@@ -270,7 +266,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                                 "warning",
                             )
                             logger.info(message)
-                            clear_falure(sg_id, u.id)
+                            clear_failure(sg_id, u.id)
                         else:
                             set_failure(sg_id, u.id)
                 elif was_graced:
