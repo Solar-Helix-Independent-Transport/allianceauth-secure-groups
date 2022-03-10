@@ -26,9 +26,6 @@ logger = logging.getLogger(__name__)
 @permission_required("securegroups.access_sec_group")
 def groups_view(request):
     logger.debug("groups_view called by user %s" % request.user)
-    from allianceauth.notifications import notify
-    notify(request.user, title="Test notification",
-           message="This isa test messaage")
     usr_groups = request.user.groups.all()
     groups_qs = Group.objects.filter(
         Q(authgroup__states=request.user.profile.state) | Q(authgroup__states=None)
