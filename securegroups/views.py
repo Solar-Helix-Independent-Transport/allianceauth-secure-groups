@@ -1,7 +1,7 @@
 from .models import GracePeriodRecord, SmartGroup, SmartFilter
 from allianceauth.groupmanagement.models import GroupRequest, RequestLog
 from allianceauth.groupmanagement.managers import GroupManager
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponse, JsonResponse
 import logging
 

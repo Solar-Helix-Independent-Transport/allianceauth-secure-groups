@@ -3,8 +3,9 @@ from allianceauth import hooks
 from allianceauth.services.hooks import MenuItemHook, UrlHook
 from .models import AltCorpFilter, AltAllianceFilter, UserInGroupFilter
 from allianceauth.groupmanagement.managers import GroupManager
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from .models import GracePeriodRecord
+from . import app_settings
 
 
 @hooks.register("url_hook")
@@ -70,3 +71,8 @@ def register_audit():
 @hooks.register("secure_group_filters")
 def filters():
     return [AltAllianceFilter, AltCorpFilter, UserInGroupFilter]
+
+
+@hooks.register('discord_cogs_hook')
+def register_cogs():
+    return app_settings.DISCORD_BOT_COGS

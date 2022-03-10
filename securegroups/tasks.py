@@ -2,6 +2,8 @@ import logging
 
 from celery import shared_task, chain
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.db.models.expressions import Col
 from django.utils import timezone
 from datetime import timedelta
 from allianceauth.notifications import notify
@@ -12,15 +14,20 @@ import json
 
 if app_settings.discord_bot_active():
     import aadiscordbot
+    from discord import Embed, Color
 
 logger = logging.getLogger(__name__)
 
 
-def send_discord_dm(user, message):
+def send_discord_dm(user, title, message, color):
     if app_settings.discord_bot_active():
         try:
-            aadiscordbot.tasks.send_direct_message.delay(
-                user.discord.uid, message)
+            e = Embed(title=title,
+                      description=message,
+                      color=color)
+            aadiscordbot.tasks.send_message(
+                user_id=user.discord.uid,
+                embed=e)
             logger.debug("sent discord ping to {}".format(user))
         except Exception as e:
             logger.error(e, exc_info=1)
@@ -46,6 +53,25 @@ def send_update_to_webhook(group, update):
                 r.raise_for_status()
             except Exception as e:
                 logger.error(e, exc_info=1)
+
+
+CACHE_TIMEOUT = 60*60*4
+
+
+def get_failure_key(sg_id, user_id) -> str:
+    return f"SG-CHECK-{sg_id}-{user_id}-FAILURE"
+
+
+def set_failure(sg_id, user_id):
+    cache.set(get_failure_key(sg_id, user_id), True, CACHE_TIMEOUT)
+
+
+def get_failure(sg_id, user_id) -> bool:
+    return cache.get(get_failure_key(sg_id, user_id), False)
+
+
+def clear_failure(sg_id, user_id):
+    cache.delete(get_failure_key(sg_id, user_id))
 
 
 @shared_task
@@ -110,7 +136,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                 message = '{} - Removed from "{}" No Main'.format(
                     u.username, group.name
                 )
-                send_discord_dm(u, message)
+                send_discord_dm(u, "Removed From Group", message, Color.red())
                 notify(
                     u, f'Auto Group Removal "{group.name}"', message, "warning")
                 logger.info(message)
@@ -181,7 +207,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                         elif not c.get("check", False):
                             if can_grace and grace_days > 0:
                                 grace = True
-                                if not fake_run:
+                                if not fake_run and get_failure(sg_id, u.id):
                                     GracePeriodRecord.objects.create(
                                         user=u,
                                         group=smart_group,
@@ -194,7 +220,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     elif not c.get("check", False):
                         if can_grace and grace_days > 0:
                             grace = True
-                            if not fake_run:
+                            if not fake_run and get_failure(sg_id, u.id):
                                 GracePeriodRecord.objects.create(
                                     user=u,
                                     group=smart_group,
@@ -212,9 +238,10 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                         message = '{} - Removed from "{}" due to failing:\n```{}\n```'.format(
                             u.profile.main_character.character_name,
                             group.name,
-                            "\n```\n```".join(reasons),
+                            "\n``` ```".join(reasons),
                         )
-                        send_discord_dm(u, message)
+                        send_discord_dm(
+                            u, "Removed From Group", message, color=0xe74c3c)
                         notify(
                             u, f'Auto Group Removal "{group.name}"', message, "warning"
                         )
@@ -222,21 +249,26 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                 elif grace:
                     pending_removals += 1
                     if not fake_run:
-                        message = (
-                            '{} - Pending Removal from "{}" due to failing:\n```{}\n```'.format(
-                                u.profile.main_character.character_name,
-                                group.name,
-                                "\n```\n```".join(reasons),
+                        if get_failure(sg_id, u.id):
+                            message = (
+                                '{} - Pending Removal from "{}" due to failing:\n```{}\n```'.format(
+                                    u.profile.main_character.character_name,
+                                    group.name,
+                                    "\n``` ```".join(reasons),
+                                )
                             )
-                        )
-                        send_discord_dm(u, message)
-                        notify(
-                            u,
-                            f'Auto Group Removal Pending "{group.name}"',
-                            message,
-                            "warning",
-                        )
-                        logger.info(message)
+                            send_discord_dm(
+                                u, "Group Removal Pending", message, color=0xe67e22)
+                            notify(
+                                u,
+                                f'Auto Group Removal Pending "{group.name}"',
+                                message,
+                                "warning",
+                            )
+                            logger.info(message)
+                            clear_failure(sg_id, u.id)
+                        else:
+                            set_failure(sg_id, u.id)
                 elif was_graced:
                     pending_removals += 1
 
