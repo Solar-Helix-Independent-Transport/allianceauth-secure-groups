@@ -23,7 +23,7 @@ deploy:
 	pip install twine
 	echo "[pypi]" > ~/.pypirc
 	echo "username=__token__" >> ~/.pypirc
-	echo "password=${pypi-api-token}" >> ~/.pypirc
+	echo "password=${pypi_api_token}" >> ~/.pypirc
 	cut -c-20 ~/.pypirc
 
 package:
