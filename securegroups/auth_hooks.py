@@ -58,7 +58,9 @@ class GroupManagementMenuItem(MenuItemHook):
         )
 
     def render(self, request):
-        if GroupManager.can_manage_groups(request.user) and request.user.has_perms("securegroups.audit_sec_group"):
+        mgr = GroupManager.can_manage_groups(request.user)
+        adt = request.user.has_perm("securegroups.audit_sec_group")
+        if mgr and adt:
             return MenuItemHook.render(self, request)
         return ""
 
