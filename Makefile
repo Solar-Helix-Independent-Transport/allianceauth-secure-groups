@@ -9,7 +9,6 @@ help:
 
 clean:
 	rm -rf dist/*
-	rm -rf
 
 dev:
 	pip install --upgrade pip

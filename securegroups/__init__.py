@@ -1,2 +1,2 @@
 default_app_config = "securegroups.apps.SecureGroupsConfig"
-__version__ = "0.2.0"
+__version__ = "0.2.1"
