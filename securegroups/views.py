@@ -192,6 +192,10 @@ def group_request_add(request, group_id):
         logger.info("%s joining %s as is an open group" %
                     (request.user, group))
         request.user.groups.add(group)
+        request_info = request.user.username + ":" + group.name
+        log = RequestLog(request_type=False, group=group,
+                         request_info=request_info, action=1, request_actor=request.user)
+        log.save()
         return redirect("securegroups:groups")
     req = GroupRequest.objects.filter(user=request.user, group=group).count()
     if req > 0:
@@ -260,6 +264,10 @@ def group_request_leave(request, group_id):
             "%s leaving joinable group %s due to auto_leave" % (
                 request.user, group)
         )
+        request_info = request.user.username + ":" + group.name
+        log = RequestLog(request_type=True, group=group,
+                         request_info=request_info, action=1, request_actor=request.user)
+        log.save()
         request.user.groups.remove(group)
         return redirect("securegroups:groups")
     grouprequest = GroupRequest()
