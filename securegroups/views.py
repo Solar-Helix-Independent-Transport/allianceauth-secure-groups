@@ -255,7 +255,7 @@ def group_request_leave(request, group_id):
                 "You already have a pending leave request for that group.")
         )
         return redirect("securegroups:groups")
-    if getattr(settings, "AUTO_LEAVE", False):
+    if getattr(settings, "GROUPMANAGEMENT_AUTO_LEAVE", False) or getattr(settings, "AUTO_LEAVE", False):
         logger.info(
             "%s leaving joinable group %s due to auto_leave" % (
                 request.user, group)
