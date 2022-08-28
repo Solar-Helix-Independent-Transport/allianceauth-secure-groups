@@ -213,6 +213,7 @@ def group_request_add(request, group_id):
     grouprequest.user = request.user
     grouprequest.leave_request = False
     grouprequest.save()
+    grouprequest.notify_leaders()
     logger.info(
         "Created group request for user %s to group %s"
         % (request.user, Group.objects.get(id=group_id))
@@ -276,6 +277,7 @@ def group_request_leave(request, group_id):
     grouprequest.user = request.user
     grouprequest.leave_request = True
     grouprequest.save()
+    grouprequest.notify_leaders()
     logger.info(
         "Created group leave request for user %s to group %s"
         % (request.user, Group.objects.get(id=group_id))
