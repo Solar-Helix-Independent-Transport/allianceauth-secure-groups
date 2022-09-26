@@ -76,7 +76,8 @@ def m2m_changed_user_groups(sender, instance: User, action, pk_set, *args, **kwa
     def trigger_group_checks():
         logger.debug("Checking user is valid for SmartGroups! %s" % instance)
         # find the groups!
-        users_groups = instance.groups.filter(smartgroup__isnull=False)
+        users_groups = instance.groups.filter(
+            pk__in=pk_set, smartgroup__isnull=False)
         groups_to_remove = []
         for g in users_groups:
             logger.debug(
