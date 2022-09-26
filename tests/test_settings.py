@@ -4,6 +4,7 @@ Alliance Auth Test Suite Django settings.
 
 from allianceauth.project_template.project_name.settings.base import *
 
+SITE_URL = ""
 
 # Celery configuration
 CELERY_ALWAYS_EAGER = True  # Forces celery to run locally for testing
@@ -39,15 +40,17 @@ ESI_SSO_CALLBACK_URL = "123"
 
 CACHES = {
     "default": {
-        "BACKEND": "redis_cache.RedisCache",
-        "LOCATION": "localhost:6379",
-        "OPTIONS": {
-            "DB": 1,
-        }
-        # "BACKEND": "django_redis.cache.RedisCache",
-        # "LOCATION": "redis://localhost:6379/1",
+        # AA 2.x
+        # "BACKEND": "redis_cache.RedisCache",
+        # "LOCATION": "localhost:6379",
         # "OPTIONS": {
-        #    "COMPRESSOR": "django_redis.compressors.lzma.LzmaCompressor",
+        #    "DB": 1,
         # }
+        # AA 3.x
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://localhost:6379/1",
+        "OPTIONS": {
+            "COMPRESSOR": "django_redis.compressors.lzma.LzmaCompressor",
+        }
     }
 }
