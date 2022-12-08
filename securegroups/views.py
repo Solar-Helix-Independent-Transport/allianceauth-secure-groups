@@ -33,7 +33,7 @@ def groups_view(request):
 
     smart_groups_qs = SmartGroup.objects.filter(
         group__in=groups_qs, auto_group=False, enabled=True
-    ).select_related("group", "group__authgroup")
+    ).select_related("group", "group__authgroup").order_by('group__name')
     graces_qs = GracePeriodRecord.objects.filter(user=request.user)
     graces = {}
     for g in graces_qs:
