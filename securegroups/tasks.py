@@ -189,12 +189,13 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                         u.groups.add(group)
                         message = f"{u.profile.main_character.character_name} - Passed the requirements for {group.name}"
                         if smart_group.notify_on_add:
-                            send_discord_dm(
-                                u,
-                                f'Auto Group Added "{group.name}"',
-                                message,
-                                Color.blue()
-                            )
+                            if app_settings.discord_bot_active():
+                                send_discord_dm(
+                                    u,
+                                    f'Auto Group Added "{group.name}"',
+                                    message,
+                                    Color.blue()
+                                )
                             notify(
                                 u, f'Auto Group Added "{group.name}"', message, "info")
                         logger.info(message)
@@ -343,12 +344,13 @@ def notify_grace():
             message,
             "warning"
         )
-        send_discord_dm(
-            u,
-            "Pending Removal",
-            message,
-            Color.orange()
-        )
+        if app_settings.discord_bot_active():
+            send_discord_dm(
+                u,
+                "Pending Removal",
+                message,
+                Color.orange()
+            )
     mdls.update(notified=True)
 
 
@@ -374,12 +376,13 @@ def notify_removal():
             message,
             "warning"
         )
-        send_discord_dm(
-            u,
-            "Group Removal",
-            message,
-            Color.red()
-        )
+        if app_settings.discord_bot_active():
+            send_discord_dm(
+                u,
+                "Group Removal",
+                message,
+                Color.red()
+            )
     mdls.update(notified=True)
 
 
