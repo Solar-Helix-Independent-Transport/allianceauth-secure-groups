@@ -100,7 +100,6 @@ class GroupCheck(commands.Cog):
             has_any_perm(ctx.author.id, [
                          'corputils.view_alliance_corpstats', 'corpstats.view_alliance_corpstats'])
             await ctx.defer()
-
             char = EveCharacter.objects.get(character_name=character)
             group = Group.objects.get(name=group.name)
 
@@ -116,8 +115,17 @@ class GroupCheck(commands.Cog):
                         msg = "Pass: {}".format(c.get("check"))
 
                     embed.add_field(
-                        name="{} (Pass: {})".format(c.get("filter").filter_object.description, c.get("check")), value=msg, inline=False
+                        name="{} {} (Pass: {})".format(
+                            ':green_circle:' if c.get(
+                                'check') else ':red_circle:',
+                            c.get("filter").filter_object.description,
+                            c.get("check")
+                        ),
+                        value=msg,
+                        inline=False
                     )
+                    if not c.get("check"):
+                        embed.color = Color.red()
 
                 return await ctx.respond(embed=embed)
             except ObjectDoesNotExist as e:
