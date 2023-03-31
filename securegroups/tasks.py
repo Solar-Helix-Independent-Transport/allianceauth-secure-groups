@@ -331,10 +331,10 @@ def notify_grace():
             messages.add(f"{m.filter.filter_object.description}: {m.message}")
 
         message = (
-            '{} - Pending Removal from these Groups:\n```\n  - {}\n```\nDue to failing:\n```\n  - {}\n```'.format(
+            '{} - Pending Removal from these Groups:\n```\n- {}\n```\nDue to failing:\n```\n- {}\n```'.format(
                 u.profile.main_character.character_name,
-                "\n  - ".join(list(groups)),
-                "\n  - ".join(list(messages)),
+                "\n- ".join(list(groups)),
+                "\n- ".join(list(messages)),
             )
         )
         notify(
@@ -362,10 +362,10 @@ def notify_removal():
             messages.add(f"{m.filter.filter_object.description}: {m.message}")
 
         message = (
-            '{} - Removed from these Groups:\n```\n  - {}\n```\nDue to failing:\n```\n  - {}\n```'.format(
+            '{} - Removed from these Groups:\n```\n- {}\n```\nDue to failing:\n```\n- {}\n```'.format(
                 u.profile.main_character.character_name,
-                "\n  - ".join(list(groups)),
-                "\n  - ".join(list(messages)),
+                "\n- ".join(list(groups)),
+                "\n- ".join(list(messages)),
             )
         )
         notify(
