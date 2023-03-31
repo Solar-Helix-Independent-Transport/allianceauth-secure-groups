@@ -167,6 +167,7 @@ def smart_group_run_check(request, group_id):
 def group_manual_refresh(request, sg_id=None):
     logger.debug("group_manual_refresh called by user %s" % request.user)
     run_smart_group_update.apply_async(args=[sg_id], priority=4)
+    # think about doing notifications here
     sg = SmartGroup.objects.get(id=sg_id)
 
     messages.info(request, f"Added Priority job for '{sg.group.name}'")
