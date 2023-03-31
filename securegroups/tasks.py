@@ -7,7 +7,7 @@ from django.db.models.expressions import Col
 from django.utils import timezone
 from datetime import timedelta
 from allianceauth.notifications import notify
-from .models import GroupUpdateWebhook, SmartGroup, GracePeriodRecord
+from .models import GroupUpdateWebhook, PendingNotification, SmartGroup, GracePeriodRecord
 from . import app_settings
 import requests
 import json
@@ -17,6 +17,13 @@ if app_settings.discord_bot_active():
     from discord import Embed, Color
 
 logger = logging.getLogger(__name__)
+
+
+def create_pending_notification(user, message, group, filter, remove=False):
+    logger.debug(
+        "Adding {} to pending notifications for {}".format(user, group))
+    PendingNotification.objects.create(
+        user=user, filter=filter, group=group, message=message, removal=remove)
 
 
 def send_discord_dm(user, title, message, color):
@@ -124,21 +131,20 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     added = 0
     removed = 0
     pending_removals = 0
-    # print(all_graced_members)
     for u in users:
         try:
             assert u.profile.main_character is not None
-        except:  # no main character kickeroo
+        except:  # no main character kickeroo!
             removed += 1
             if not fake_run:
                 u.groups.remove(group)
                 # remove user
-                message = '{} - Removed from "{}" No Main'.format(
-                    u.username, group.name
-                )
-                send_discord_dm(u, "Removed From Group", message, Color.red())
-                notify(
-                    u, f'Auto Group Removal "{group.name}"', message, "warning")
+                if smart_group.notify_on_remove:
+                    message = '{} - Removed from "{}" No Main'.format(
+                        u.username, group.name
+                    )
+                    notify(
+                        u, f'Auto Group Removal "{group.name}"', message, "warning")
                 logger.info(message)
             continue
 
@@ -182,8 +188,15 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     if not fake_run:
                         u.groups.add(group)
                         message = f"{u.profile.main_character.character_name} - Passed the requirements for {group.name}"
-                        notify(
-                            u, f'Auto Group Added "{group.name}"', message, "info")
+                        if smart_group.notify_on_add:
+                            send_discord_dm(
+                                u,
+                                f'Auto Group Added "{group.name}"',
+                                message,
+                                Color.blue()
+                            )
+                            notify(
+                                u, f'Auto Group Added "{group.name}"', message, "info")
                         logger.info(message)
 
         else:
@@ -198,6 +211,14 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     if u.username in all_graced_members:
                         if filter_name in all_graced_members.get(u.username, {}):
                             if all_graced_members[u.username][filter_name].is_expired():
+                                if smart_group.notify_on_remove:
+                                    create_pending_notification(
+                                        u,
+                                        c.get("message", ""),
+                                        smart_group,
+                                        c.get("filter"),
+                                        remove=True
+                                    )
                                 all_graced_members[u.username][filter_name].delete(
                                 )
                                 remove = True
@@ -214,6 +235,13 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                                         grace_filter=filter_name,
                                         expires=expires,
                                     )
+                                    if smart_group.notify_on_grace:
+                                        create_pending_notification(
+                                            u,
+                                            c.get("message", ""),
+                                            smart_group,
+                                            c.get("filter")
+                                        )
                             else:
                                 remove = True
                                 continue
@@ -227,6 +255,13 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                                     grace_filter=filter_name,
                                     expires=expires,
                                 )
+                                if smart_group.notify_on_grace:
+                                    create_pending_notification(
+                                        u,
+                                        c.get("message", ""),
+                                        smart_group,
+                                        c.get("filter")
+                                    )
                         else:
                             remove = True
                             continue
@@ -234,38 +269,10 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                     removed += 1
                     if not fake_run:
                         u.groups.remove(group)
-                        # remove user
-                        message = '{} - Removed from "{}" due to failing:\n```{}\n```'.format(
-                            u.profile.main_character.character_name,
-                            group.name,
-                            "\n``` ```".join(reasons),
-                        )
-                        send_discord_dm(
-                            u, "Removed From Group", message, color=0xe74c3c)
-                        notify(
-                            u, f'Auto Group Removal "{group.name}"', message, "warning"
-                        )
-                        logger.info(message)
                 elif grace:
                     pending_removals += 1
                     if not fake_run:
                         if get_failure(sg_id, u.id):
-                            message = (
-                                '{} - Pending Removal from "{}" due to failing:\n```{}\n```'.format(
-                                    u.profile.main_character.character_name,
-                                    group.name,
-                                    "\n``` ```".join(reasons),
-                                )
-                            )
-                            send_discord_dm(
-                                u, "Group Removal Pending", message, color=0xe67e22)
-                            notify(
-                                u,
-                                f'Auto Group Removal Pending "{group.name}"',
-                                message,
-                                "warning",
-                            )
-                            logger.info(message)
                             clear_failure(sg_id, u.id)
                         else:
                             set_failure(sg_id, u.id)
@@ -309,4 +316,77 @@ def run_smart_groups(only_hidden=False):
     for g in groups:
         sig_list.append(run_smart_group_update.si(g.id))
 
+    sig_list.append(notify_users.si())
+
     chain(sig_list).apply_async(priority=5)
+
+
+def notify_grace():
+    users, mdls = PendingNotification.get_grace_notifications()
+    for u, msgs in users.items():
+        groups = set()
+        messages = set()
+        for m in msgs:
+            groups.add(m.group.group.name)
+            messages.add(f"{m.filter.filter_object.description}: {m.message}")
+
+        message = (
+            '{} - Pending Removal from these Groups:\n```\n  - {}\n```\nDue to failing:\n```\n  - {}\n```'.format(
+                u.profile.main_character.character_name,
+                "\n  - ".join(list(groups)),
+                "\n  - ".join(list(messages)),
+            )
+        )
+        notify(
+            u,
+            "Pending Removal",
+            message,
+            "warning"
+        )
+        send_discord_dm(
+            u,
+            "Pending Removal",
+            message,
+            Color.orange()
+        )
+    mdls.update(notified=True)
+
+
+def notify_removal():
+    users, mdls = PendingNotification.get_kick_notifications()
+    for u, msgs in users.items():
+        groups = set()
+        messages = set()
+        for m in msgs:
+            groups.add(m.group.group.name)
+            messages.add(f"{m.filter.filter_object.description}: {m.message}")
+
+        message = (
+            '{} - Removed from these Groups:\n```\n  - {}\n```\nDue to failing:\n```\n  - {}\n```'.format(
+                u.profile.main_character.character_name,
+                "\n  - ".join(list(groups)),
+                "\n  - ".join(list(messages)),
+            )
+        )
+        notify(
+            u,
+            "Group Removal",
+            message,
+            "warning"
+        )
+        send_discord_dm(
+            u,
+            "Group Removal",
+            message,
+            Color.red()
+        )
+    mdls.update(notified=True)
+
+
+@shared_task
+def notify_users():
+
+    notify_grace()
+    notify_removal()
+
+    PendingNotification.objects.filter(notified=True).delete()

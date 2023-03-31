@@ -175,6 +175,10 @@ class SmartGroup(models.Model):
 
     can_grace = models.BooleanField(default=False)
 
+    notify_on_remove = models.BooleanField(default=True)
+    notify_on_grace = models.BooleanField(default=True)
+    notify_on_add = models.BooleanField(default=False)
+
     class Meta:
         permissions = (
             ("access_sec_group", "Can access sec group requests screen."),
@@ -267,3 +271,33 @@ class GracePeriodRecord(models.Model):
                 pass
         else:
             pass
+
+
+class PendingNotification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    filter = models.ForeignKey(SmartFilter, on_delete=models.CASCADE)
+    group = models.ForeignKey(SmartGroup, on_delete=models.CASCADE)
+
+    message = models.TextField(blank=True, default=None, null=True)
+
+    removal = models.BooleanField(default=False)
+
+    notified = models.BooleanField(default=False)
+
+    @classmethod
+    def get_grace_notifications(cls):
+        notifications = cls.objects.filter(notified=False, removal=False)
+        out = defaultdict(list)
+        for n in notifications:
+            out[n.user].append(n)
+
+        return out, notifications
+
+    @classmethod
+    def get_kick_notifications(cls):
+        notifications = cls.objects.filter(notified=False, removal=True)
+        out = defaultdict(list)
+        for n in notifications:
+            out[n.user].append(n)
+
+        return out, notifications
