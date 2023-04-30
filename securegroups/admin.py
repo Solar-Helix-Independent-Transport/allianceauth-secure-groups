@@ -66,7 +66,7 @@ admin.site.register(AltCorpFilter, AltCorpAdmin)
 
 class UserInGroupFilterAdmin(admin.ModelAdmin):
     list_select_related = ["group"]
-    list_display = ["__str__", "group"]
+    list_display = ["__str__", "group", "reversed_logic"]
     filter_horizontal = ["exempt_alliances", "exempt_corporations"]
 
 
