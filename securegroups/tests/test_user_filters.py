@@ -233,7 +233,7 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[9]['check'])
         self.assertFalse(tests[10]['check'])
 
-    def test_user_group_filter_audit(self):
+    def test_user_group_filter_audit_inverted(self):
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
 
