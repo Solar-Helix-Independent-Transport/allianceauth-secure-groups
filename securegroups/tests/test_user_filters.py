@@ -101,6 +101,9 @@ class TestGroupBotFilters(TestCase):
         cls.grp_filter = gb_models.UserInGroupFilter.objects.create(
             name="Test Group", description="Test Group", group=cls.test_group
         )
+        cls.grp_filter_inverted = gb_models.UserInGroupFilter.objects.create(
+            name="Test Group", description="Test Group", group=cls.test_group, reversed_logic=True
+        )
 
     def test_user_alt_corp(self):
         users = {}
@@ -229,6 +232,28 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[8]['check'])
         self.assertFalse(tests[9]['check'])
         self.assertFalse(tests[10]['check'])
+
+    def test_user_group_filter_audit(self):
+        User.objects.get(id=1).groups.add(self.test_group)
+        User.objects.get(id=7).groups.add(self.test_group)
+
+        users = []
+        for user in User.objects.all():
+            users.append(user.pk)
+
+        tests = self.grp_filter_inverted.audit_filter(
+            User.objects.filter(pk__in=users))
+
+        self.assertFalse(tests[1]['check'])
+        self.assertTrue(tests[2]['check'])
+        self.assertTrue(tests[3]['check'])
+        self.assertTrue(tests[4]['check'])
+        self.assertTrue(tests[5]['check'])
+        self.assertTrue(tests[6]['check'])
+        self.assertFalse(tests[7]['check'])
+        self.assertTrue(tests[8]['check'])
+        self.assertTrue(tests[9]['check'])
+        self.assertTrue(tests[10]['check'])
 
     def test_generic_smart_group_task(self):
         cache.clear()

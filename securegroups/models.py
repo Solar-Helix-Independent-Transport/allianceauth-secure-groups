@@ -148,6 +148,8 @@ class UserInGroupFilter(FilterBase):
     exempt_corporations = models.ManyToManyField(
         EveCorporationInfo, related_name="group_exempt_corporations", blank=True)
 
+    reversed_logic = models.BooleanField(default=False)
+
     def process_filter(self, user: User):
         return smart_filters.check_group_on_account(user, self.group,
                                                     exempt_allis=self.exempt_alliances.all().values_list("alliance_id", flat=True),
@@ -157,9 +159,10 @@ class UserInGroupFilter(FilterBase):
     def audit_filter(self, users):
         cl = users.prefetch_related('groups').filter(
             groups__id__in=[self.group.id, ])
-        chars = defaultdict(lambda: {"message": "", "check": False})
+        chars = defaultdict(
+            lambda: {"message": "", "check": self.reversed_logic})
         for c in cl:
-            chars[c.id] = {"message": "", "check": True}
+            chars[c.id] = {"message": "", "check": not self.reversed_logic}
         return chars
 
 
