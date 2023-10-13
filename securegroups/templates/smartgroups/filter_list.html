@@ -1,9 +1,9 @@
 {% load i18n %}
 <table class="table table-aa">
     <thead>
-        <th>Requirements</th>
-        <th class="text-center">Note</th>
-        <th class="text-right">Result</th>
+        <th>{% translate 'Requirements' %}</th>
+        <th class="text-center">{% translate 'Note' %}</th>
+        <th class="text-right">{% translate 'Result' %}</th>
     </thead>
 {% for filter in filters %}
     <tr>

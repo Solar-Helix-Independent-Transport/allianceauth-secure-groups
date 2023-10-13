@@ -28,7 +28,7 @@
                 <tbody>
                     {% for g in groups %}
                         <tr>
-                            <td class="text-center">{{ g.smart_group.group.name }}{% if g.grace_msg %}<br><span rel="tooltip" class="label label-warning" data-toggle="tooltip" data-placement="top" data-html="true" title data-original-title="{{g.grace_msg}}">Pending Removal</span>{% endif %}</td></td>
+                            <td class="text-center">{{ g.smart_group.group.name }}{% if g.grace_msg %}<br><span rel="tooltip" class="label label-warning" data-toggle="tooltip" data-placement="top" data-html="true" title data-original-title="{{g.grace_msg}}">{% translate 'Pending Removal' %}</span>{% endif %}</td></td>
                             <td class="text-center">{{ g.smart_group.group.authgroup.description|urlize }}<br>{{ g.smart_group.description|urlize }}</td>
                             <td class="text-center">
                                 {% if g.smart_group.group in user.groups.all %}
@@ -65,7 +65,7 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="main-modal-title">Account Checks</h5>
+                    <h5 class="modal-title" id="main-modal-title">{% translate 'Account Checks'}</h5>
                 </div>
                 <div id="main-modal-body" class="modal-body"  style="overflow-y:auto;"></div>
                 </div>

@@ -156,7 +156,7 @@ def smart_group_run_check(request, group_id):
     except Exception as e:
         logger.error("Smart Group Failed to process!", exc_info=1)
         ctx = {
-            "message": "Running Group Check Failed, Please contact an Admin!\n{}".format(e)
+            "message": _("Running Group Check Failed, Please contact an Admin!") + "\n{}".format(e)
         }
 
     return HttpResponse(render_to_string("smartgroups/user_check.html", ctx, request=request))
@@ -314,7 +314,7 @@ def group_membership_remove(request, group_id, user_id):
                         (request.user, user, group))
             return JsonResponse({"user_id": user.pk})
         except ObjectDoesNotExist:
-            return Http404("Does not Exist")
+            return Http404(_("Does not Exist"))
 
     except ObjectDoesNotExist:
-        return Http404("Does not Exist")
+        return Http404(_("Does not Exist"))

@@ -4,7 +4,7 @@
 {% load sg_audit %}
 {% load evelinks %}
 
-{% block page_title %}{% trans "Group Audit" %}{% endblock page_title %}
+{% block page_title %}{% translate "Group Audit" %}{% endblock page_title %}
 {% block extra_css %}
 {% include 'bundles/datatables-css.html' %}
 
@@ -91,11 +91,11 @@ table.dataTable tbody td {
                 <table class="table table-aa datatables" id="audit-table">
                     <thead>
                         <tr>
-                            <th class="">{% trans "User" %}</th>
-                            <th>{% trans "Organization" %}</th>
-                            <th>Pending Removal</th>
+                            <th class="">{% translate "User" %}</th>
+                            <th>{% translate "Organization" %}</th>
+                            <th>{% translate "Pending Removal" %}</th>
                             {% for fl in filters %}<th class="text-center">{{fl.filter_object.description}}</th>{% endfor %}
-                            <th>{% trans "Actions" %}</th>
+                            <th>{% translate "Actions" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -120,9 +120,9 @@ table.dataTable tbody td {
                                 </td>
                                 <td>
                                 {% if u in graces %}
-                                    Yes
+                                  {% translate "Yes" %}
                                 {% else %}
-                                    No
+                                  {% translate "No" %}
                                 {% endif %}
                                 </td>
                                 {% for fv in filters %}
@@ -131,7 +131,7 @@ table.dataTable tbody td {
                                     </td>
                                 {% endfor %}
                                 <td class="text-center">
-                                    <a href="#" id="{{ u }}" class="btn btn-warning rem-user-button" title="{% trans "Kick Member" %}">
+                                    <a href="#" id="{{ u }}" class="btn btn-warning rem-user-button" title="{% translate "Kick Member" %}">
                                         <i class="glyphicon glyphicon-remove"></i>
                                     </a>
                                 </td>

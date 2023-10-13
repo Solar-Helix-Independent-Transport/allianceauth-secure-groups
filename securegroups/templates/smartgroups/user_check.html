@@ -1,12 +1,12 @@
 {% load i18n %}
 {% if message %}
-<p class="alert text-center alert-warning">Group Error: {{message}} </p>
+<p class="alert text-center alert-warning">{% blocktranslate %}Group Error: {{message}} {% endblocktranslate %}</p>
 {% endif %}
 <table class="table table-aa">
     <thead>
-        <th>Requirements</th>
-        <th class="text-center">Note</th>
-        <th class="text-right">Result</th>
+        <th>{% translate 'Requirements' %}</th>
+        <th class="text-center">{% translate 'Note' %}</th>
+        <th class="text-right">{% translate 'Result' %}</th>
     </thead>
 {% for filter in filters %}
     <tr>
@@ -18,5 +18,5 @@
 </table>
 
 <div class="col-xs-12">
-    <a class="btn btn-{% if pass_checks %}primary{% else %}warning{% endif %} col-xs-12" {% if pass_checks %}href="{% url 'securegroups:request_add' group_id %}">Join Group{% else %} disabled>Ineligible{% endif %}</a>
+    <a class="btn btn-{% if pass_checks %}primary{% else %}warning{% endif %} col-xs-12" {% if pass_checks %}href="{% url 'securegroups:request_add' group_id %}">{% translate 'Join Group' %}{% else %} disabled>{% translate 'Ineligible' %}{% endif %}</a>
 </div>
