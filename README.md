@@ -23,8 +23,13 @@ Not in any particular order:
 - [CorpTools](https://github.com/pvyParts/allianceauth-corp-tools/)
   - Assets in Locations
   - Skill List checks
-  - Main's Time in Corp
+    - Single of many or,
+    - Require many
+  - Main's time in Corp
   - All characters loaded in corp-tools
+  - Corporate Role checks
+  - Corporate Title check
+  - Highest SP on a Character check
 - [Statistics](https://github.com/pvyParts/allianceauth-analitics)
   - zKill - x Kills in x Months
 - Blacklist module ( link )
@@ -36,10 +41,12 @@ Not in any particular order:
   - Member Audit Compliance Filter
   - Skill Set Filter
   - Skill Point Filter
+- [Invoices](https://github.com/Solar-Helix-Independent-Transport/allianceauth-invoice-manager)
+  - No Overdue Invoices check
+  - Total isk paid in time period ( greater than or less than )
 
 ## Soon(tm) Wishlist
 
-- Filter for PAP's per Time Period
 - Please request any "filters" you feel are worthwhile.
 
 ## Installation
@@ -51,41 +58,48 @@ Not in any particular order:
 3. run migrations `python myauth/manage.py migrate securegroups`
 4. restart auth `supervisorctrl restart all`
 5. create the update task by running `python myauth/manage.py setup_securegroup_task`
-    - this will create a daily task to run all your smart group checks. you cam edit this schedule as you desire from withing the admin site. `Admin > Periodic Tasks > Secure Group Updater`
+   - this will create an hourly task to run all your smart group checks. you cam edit this schedule as you desire from withing the admin site. `Admin > Periodic Tasks > Secure Group Updater`
 
 ### Configuration
 
 1. Create an Auth Group. `Admin > Group Management > Group > Add Group.`
-    - WARNING: There is a bug in auth that will wipe andy "AuthGroup" Settings on first save, to get around this, Set your groups name then click save and continue, then edit the rest of the settings.
-    - Group Settings:
-      - The Smart Group will override the important ones.
-        - Hidden On, Internal Off, Public Off
-      - The rest of the settings are observed as per Alliance Auth's normal group behavior
-        - Open: Setting this will let anyone that passes the checks to join without a manager approval.
-      - States:
-        - Set states here to limit auto groups to specific states
-        - Having no states will make an autogroup run against the entire user base. ( this is not recommended )
+   - WARNING: There is a bug in auth that will wipe andy "AuthGroup" Settings on first save, to get around this, Set your groups name then click save and continue, then edit the rest of the settings.
+   - Group Settings:
+     - The Smart Group will override the important ones.
+       - Hidden On, Internal Off, Public Off
+     - The rest of the settings are observed as per Alliance Auth's normal group behavior
+       - Open: Setting this will let anyone that passes the checks to join without a manager approval.
+     - States:
+       - Set states here to limit auto groups to specific states
+       - Having no states will make an autogroup run against the entire user base. ( this is not recommended )
 2. Create your Smart Filters
-    - These will be in admin but can be under many apps that may provide a 3rd party filter
-    - Create the filter and add your options as needed.
+   - These will be in admin but can be under many apps that may provide a 3rd party filter
+   - Create the filter and add your options as needed.
 3. Set any Filters "Grace Periods", `Admin > Secure Groups > Smart Filters`
-    - the default is 5 Days.
-    - 0 is no grace.
-    - after the elapsed time the user will be removed.
+   - the default is 5 Days.
+   - 0 is no grace.
+   - after the elapsed time the user will be removed.
 4. Setup the Smart Group `Admin > Secure Groups > Smart Groups > Add Smart Group`
-    - Group: pick group from step one
-    - Description *Optional*: to add to the group description in list
-    - Filters: pick your Smart Filters from Step 2
-    - Enabled: Turning this off Smart Groups don't show im the groups screen or run in any tasks
-    - Can Grace: Turning this off overrides all grace periods for Instant Kick during updates.
-    - Auto Group: Hides the group from the Secure Groups list, and will run every user in "member" States and constantly keep it in sync.
-    - Include In Updates: Setting this off will alow you to have a check om join and never again style group.
+   - Group: pick group from step one
+   - Description _Optional_: to add to the group description in list
+   - Filters: pick your Smart Filters from Step 2
+   - Enabled: Turning this off Smart Groups don't show im the groups screen or run in any tasks
+   - Can Grace: Turning this off overrides all grace periods for Instant Kick during updates.
+   - Auto Group: Hides the group from the Secure Groups list, and will run every user in "member" States and constantly keep it in sync.
+   - Include In Updates: Setting this off will alow you to have a check om join and never again style group.
+
+### Permissions
+
+| Permision                                                         | Explanation                                                                            |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| securegroups - smart group - Can access sec group requests screen | Grants access to the secure group request screen.                                      |
+| securegroups - smart group - Can audit sec groups members         | Grants access to the secure group auditing screen, for groups the user is a leader of. |
 
 ### Notifications
 
 - You can send a simple update log to a discord webhook
   - set these up in `Admin > Secure Groups > Group Update Webhooks > Add Group Update Webhook`
-  - If you are using the AllianceAuth Discord Bot from [Here](link) users will be notified of pending removals and or removals from groups via DM's from the bot with an explanation. This requires no configuration.
+  - If you are using the AllianceAuth Discord Bot from [Here](https://github.com/Solar-Helix-Independent-Transport/allianceauth-discordbot) users will be notified of pending removals and or removals from groups via DM's from the bot with an explanation. This requires no configuration.
 
 ## Screenshots
 
@@ -121,4 +135,6 @@ Please remember to report any Secure Groups related issues using the issues on *
 
 ## Contributing
 
-Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at [EVE Developers](https://developers.eveonline.com) before submitting any pull requests. **All bug fixes or features must not include extra superfluous formatting changes.**
+Make sure you have signed the [License Agreement](https://developers.eveonline.com/resource/license-agreement) by logging in at [EVE Developers](https://developers.eveonline.com) before submitting any pull requests.
+
+**All bug fixes or features must not include extra superfluous formatting changes. If you want to reformat the repository do it in its own MR.**

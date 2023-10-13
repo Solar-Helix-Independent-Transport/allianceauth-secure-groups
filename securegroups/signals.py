@@ -58,7 +58,7 @@ def new_group_filter(sender, instance: models.SmartGroup, created, **kwargs):
         instance.group.authgroup.internal = False
         instance.group.authgroup.hidden = True
         instance.group.authgroup.public = False
-        instance.group.save()
+        instance.group.authgroup.save()
     except:
         logger.error("Bah Humbug")  # we failed! do something here
 
