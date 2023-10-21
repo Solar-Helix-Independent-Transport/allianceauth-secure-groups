@@ -66,7 +66,12 @@ def groups_view(request):
             }
         )
 
-    context = {"groups": groups}
+    count = 0
+    perms = GroupManager.can_manage_groups(request.user)
+    if perms:
+        count = GroupManager.pending_requests_count_for_user(request.user)
+
+    context = {"groups": groups, "req_count": count}
     try:
         return render(request, "smartgroups/groups_bs5.html", context=context)
     except TemplateDoesNotExist:

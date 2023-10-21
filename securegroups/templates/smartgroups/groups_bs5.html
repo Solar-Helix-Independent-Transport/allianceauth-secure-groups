@@ -8,6 +8,7 @@
 {% if manager_perms %}
 
 {% block header_nav_collapse_left %}
+{% if perms.groupmanagement.management %}
 <li class="nav-item">
     <a class="nav-link" href="{% url 'groupmanagement:management' %}">{% translate "Group Management" %}
         {% if req_count %}
@@ -15,13 +16,14 @@
         {% endif %}
     </a>
 </li>
+{% if perms.securegroups.audit_sec_group %}
 <li class="nav-item">
-    <a class="nav-link" href="{% url 'groupmanagement:management' %}">{% translate "Group Management" %}
-        {% if req_count %}
-            <span class="badge bg-secondary">{{ req_count }}</span>
-        {% endif %}
+    <a class="nav-link" href="{% url 'securegroups:audit_list' %}">{% translate "Secure Group Audit" %}
     </a>
 </li>
+{% endif %}
+{% endif %}
+
 {% endblock %}
 {% endif %}
 {% block content %}
