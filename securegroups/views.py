@@ -12,6 +12,8 @@ from django.db.models import Q
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from collections import defaultdict
+from django.template import TemplateDoesNotExist
+
 from django.http import Http404
 from django.db.models import Count
 from django.contrib.auth.decorators import user_passes_test
@@ -33,7 +35,14 @@ def groups_view(request):
 
     smart_groups_qs = SmartGroup.objects.filter(
         group__in=groups_qs, auto_group=False, enabled=True
-    ).select_related("group", "group__authgroup").order_by('group__name')
+    ).select_related(
+        "group", "group__authgroup"
+    ).order_by(
+        'group__name'
+    ).prefetch_related(
+        'group__authgroup__group_leaders',
+        'group__authgroup__group_leaders__profile__main_character',
+        'group__authgroup__group_leader_groups')
     graces_qs = GracePeriodRecord.objects.filter(user=request.user)
     graces = {}
     for g in graces_qs:
@@ -58,7 +67,10 @@ def groups_view(request):
         )
 
     context = {"groups": groups}
-    return render(request, "smartgroups/groups.html", context=context)
+    try:
+        return render(request, "smartgroups/groups_bs5.html", context=context)
+    except TemplateDoesNotExist:
+        return render(request, "smartgroups/groups.html", context=context)
 
 
 @permission_required("securegroups.audit_sec_group")
@@ -158,8 +170,10 @@ def smart_group_run_check(request, group_id):
         ctx = {
             "message": _("Running Group Check Failed, Please contact an Admin!") + "\n{}".format(e)
         }
-
-    return HttpResponse(render_to_string("smartgroups/user_check.html", ctx, request=request))
+    try:
+        return HttpResponse(render_to_string("smartgroups/user_check_bs5.html", ctx, request=request))
+    except TemplateDoesNotExist:
+        return HttpResponse(render_to_string("smartgroups/user_check.html", ctx, request=request))
 
 
 @permission_required("securegroups.audit_sec_group")

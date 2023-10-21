@@ -1,7 +1,9 @@
 {% extends "allianceauth/base.html" %}
 {% load static %}
 {% load i18n %}
-{% block page_title %}{% trans "Available Groups" %}{% endblock page_title %}
+
+{% block page_title %}{% translate "Available Groups" %}{% endblock page_title %}
+
 {% block extra_css %}
 <style>
     @media (min-width: 768px)
@@ -22,6 +24,7 @@
                     <tr>
                         <th class="text-center">{% trans "Name" %}</th>
                         <th class="text-center">{% trans "Description" %}</th>
+                        <th class="text-center">{% translate "Leaders" %}<span class="label label-primary">User</span><span class="label label-info">Group</span></th>
                         <th class="text-center">{% trans "Action" %}</th>
                     </tr>
                 </thead>
@@ -30,6 +33,11 @@
                         <tr>
                             <td class="text-center">{{ g.smart_group.group.name }}{% if g.grace_msg %}<br><span rel="tooltip" class="label label-warning" data-toggle="tooltip" data-placement="top" data-html="true" title data-original-title="{{g.grace_msg}}">{% translate 'Pending Removal' %}</span>{% endif %}</td></td>
                             <td class="text-center">{{ g.smart_group.group.authgroup.description|urlize }}<br>{{ g.smart_group.description|urlize }}</td>
+                            <td class="text-center">
+                                {% for leader in g.smart_group.group.authgroup.group_leaders.all %}{% if leader.profile.main_character %}<span class="label label-primary">{{leader.profile.main_character}}</span>{% endif %}{% endfor %}
+                                {% for group in g.smart_group.group.authgroup.group_leader_groups.all %}<span class="label label-info">{{group.name}}</span>{% endfor %}
+                            </td>
+
                             <td class="text-center">
                                 {% if g.smart_group.group in user.groups.all %}
                                     {% if not g.request %}
@@ -65,7 +73,7 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="main-modal-title">{% translate 'Account Checks'}</h5>
+                    <h5 class="modal-title" id="main-modal-title">{% translate 'Account Checks'%}</h5>
                 </div>
                 <div id="main-modal-body" class="modal-body"  style="overflow-y:auto;"></div>
                 </div>
