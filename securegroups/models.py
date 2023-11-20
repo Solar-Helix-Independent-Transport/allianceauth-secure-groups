@@ -140,7 +140,7 @@ class UserInGroupFilter(FilterBase):
         verbose_name = "Smart Filter: User Has Group"
         verbose_name_plural = verbose_name
 
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    groups = models.ManyToManyField(Group, related_name="in_group")
 
     # sometimes there are double standards.
     exempt_alliances = models.ManyToManyField(
@@ -151,14 +151,14 @@ class UserInGroupFilter(FilterBase):
     reversed_logic = models.BooleanField(default=False)
 
     def process_filter(self, user: User):
-        return smart_filters.check_group_on_account(user, self.group,
+        return smart_filters.check_group_on_account(user, self.groups.all(),
                                                     exempt_allis=self.exempt_alliances.all().values_list("alliance_id", flat=True),
                                                     exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
                                                     )
 
     def audit_filter(self, users):
         cl = users.prefetch_related('groups').filter(
-            groups__id__in=[self.group.id, ])
+            groups__id__in=self.groups.all().values_list("id", flat=True))
         chars = defaultdict(
             lambda: {"message": "", "check": self.reversed_logic})
         for c in cl:

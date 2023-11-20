@@ -1,4 +1,5 @@
 import logging
+from typing import List
 from django.contrib.auth.models import User, Group
 
 logger = logging.getLogger(__name__)
@@ -50,19 +51,18 @@ def check_alt_corp_on_account(user: User, alt_corp_id, exempt_corps=False, exemp
         return False
 
 
-def check_group_on_account(user: User, group: Group, exempt_corps=False, exempt_allis=False):
+def check_group_on_account(user: User, groups: List[Group], exempt_corps=False, exempt_allis=False):
     try:
         if exempt_allis:
-            if user.profile.main_character.alliance_id in exempt_alli:
+            if user.profile.main_character.alliance_id in exempt_allis:
                 return True
 
         if exempt_corps:
             if user.profile.main_character.corporation_id in exempt_corps:
                 return True
-
-        if group in user.groups.all():
-            return True
-        else:
-            return False
+        for group in groups:
+            if group in user.groups.all():
+                return True
+        return False
     except Exception:
         return False

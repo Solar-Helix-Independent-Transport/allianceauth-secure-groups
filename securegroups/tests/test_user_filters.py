@@ -25,6 +25,8 @@ class TestGroupBotFilters(TestCase):
         userids = range(1, 11)
 
         cls.test_group, _ = Group.objects.update_or_create(name="Test_Group")
+        cls.test_group_2, _ = Group.objects.update_or_create(
+            name="Test_Group_2")
         tst2 = EveCorporationInfo.objects.create(
             corporation_id=2,
             corporation_name="Test Corp 2",
@@ -98,12 +100,25 @@ class TestGroupBotFilters(TestCase):
         cls.alli_filter = gb_models.AltAllianceFilter.objects.create(
             name="Test Alli 1 Alt", description="Have Alt in TSTA2", alt_alli_id=_alli.pk
         )
+
         cls.grp_filter = gb_models.UserInGroupFilter.objects.create(
-            name="Test Group", description="Test Group", group=cls.test_group
+            name="Test Group", description="Test Group"
         )
+        cls.grp_filter.groups.add(cls.test_group)
+        cls.grp_filter.groups.add(cls.test_group_2)
+
         cls.grp_filter_inverted = gb_models.UserInGroupFilter.objects.create(
-            name="Test Group", description="Test Group", group=cls.test_group, reversed_logic=True
+            name="Test Group", description="Test Group", reversed_logic=True
         )
+
+        cls.grp_filter_inverted.groups.add(cls.test_group)
+        cls.grp_filter_inverted.groups.add(cls.test_group_2)
+
+        cls.grp_filter_single = gb_models.UserInGroupFilter.objects.create(
+            name="Test Group", description="Test Group"
+        )
+
+        cls.grp_filter_single.groups.add(cls.test_group_2)
 
     def test_user_alt_corp(self):
         users = {}
@@ -187,7 +202,7 @@ class TestGroupBotFilters(TestCase):
         self.assertTrue(tests[9]['check'])
         self.assertTrue(tests[10]['check'])
 
-    def test_user_group_filter(self):
+    def test_user_group_filter_g1(self):
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
 
@@ -211,6 +226,74 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[9])
         self.assertFalse(tests[10])
 
+    def test_user_group_filter_single(self):
+        User.objects.get(id=1).groups.add(self.test_group_2)
+        User.objects.get(id=7).groups.add(self.test_group)
+
+        users = {}
+        for user in User.objects.all():
+            users[user.pk] = None
+
+        tests = {}
+        for k, u in users.items():
+            tests[k] = self.grp_filter_single.process_filter(
+                User.objects.get(pk=k))
+
+        self.assertTrue(tests[1])
+        self.assertFalse(tests[2])
+        self.assertFalse(tests[3])
+        self.assertFalse(tests[4])
+        self.assertFalse(tests[5])
+        self.assertFalse(tests[6])
+        self.assertFalse(tests[7])
+        self.assertFalse(tests[8])
+        self.assertFalse(tests[9])
+        self.assertFalse(tests[10])
+
+    def test_user_group_filter_g2(self):
+        User.objects.get(id=1).groups.add(self.test_group_2)
+        User.objects.get(id=7).groups.add(self.test_group_2)
+
+        users = {}
+        for user in User.objects.all():
+            users[user.pk] = None
+
+        tests = {}
+        for k, u in users.items():
+            tests[k] = self.grp_filter.process_filter(
+                User.objects.get(pk=k))
+
+        self.assertTrue(tests[1])
+        self.assertFalse(tests[2])
+        self.assertFalse(tests[3])
+        self.assertFalse(tests[4])
+        self.assertFalse(tests[5])
+        self.assertFalse(tests[6])
+        self.assertTrue(tests[7])
+        self.assertFalse(tests[8])
+        self.assertFalse(tests[9])
+        self.assertFalse(tests[10])
+
+    def test_user_no_group_filter_audit(self):
+
+        users = []
+        for user in User.objects.all():
+            users.append(user.pk)
+
+        tests = self.grp_filter.audit_filter(
+            User.objects.filter(pk__in=users))
+
+        self.assertFalse(tests[1]['check'])
+        self.assertFalse(tests[2]['check'])
+        self.assertFalse(tests[3]['check'])
+        self.assertFalse(tests[4]['check'])
+        self.assertFalse(tests[5]['check'])
+        self.assertFalse(tests[6]['check'])
+        self.assertFalse(tests[7]['check'])
+        self.assertFalse(tests[8]['check'])
+        self.assertFalse(tests[9]['check'])
+        self.assertFalse(tests[10]['check'])
+
     def test_user_group_filter_audit(self):
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
@@ -233,9 +316,53 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[9]['check'])
         self.assertFalse(tests[10]['check'])
 
+    def test_user_group_filter_audit_g2(self):
+        User.objects.get(id=1).groups.add(self.test_group_2)
+        User.objects.get(id=7).groups.add(self.test_group_2)
+
+        users = []
+        for user in User.objects.all():
+            users.append(user.pk)
+
+        tests = self.grp_filter.audit_filter(
+            User.objects.filter(pk__in=users))
+
+        self.assertTrue(tests[1]['check'])
+        self.assertFalse(tests[2]['check'])
+        self.assertFalse(tests[3]['check'])
+        self.assertFalse(tests[4]['check'])
+        self.assertFalse(tests[5]['check'])
+        self.assertFalse(tests[6]['check'])
+        self.assertTrue(tests[7]['check'])
+        self.assertFalse(tests[8]['check'])
+        self.assertFalse(tests[9]['check'])
+        self.assertFalse(tests[10]['check'])
+
     def test_user_group_filter_audit_inverted(self):
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
+
+        users = []
+        for user in User.objects.all():
+            users.append(user.pk)
+
+        tests = self.grp_filter_inverted.audit_filter(
+            User.objects.filter(pk__in=users))
+
+        self.assertFalse(tests[1]['check'])
+        self.assertTrue(tests[2]['check'])
+        self.assertTrue(tests[3]['check'])
+        self.assertTrue(tests[4]['check'])
+        self.assertTrue(tests[5]['check'])
+        self.assertTrue(tests[6]['check'])
+        self.assertFalse(tests[7]['check'])
+        self.assertTrue(tests[8]['check'])
+        self.assertTrue(tests[9]['check'])
+        self.assertTrue(tests[10]['check'])
+
+    def test_user_group_filter_audit_inverted_g2(self):
+        User.objects.get(id=1).groups.add(self.test_group_2)
+        User.objects.get(id=7).groups.add(self.test_group_2)
 
         users = []
         for user in User.objects.all():

@@ -65,9 +65,31 @@ admin.site.register(AltCorpFilter, AltCorpAdmin)
 
 
 class UserInGroupFilterAdmin(admin.ModelAdmin):
-    list_select_related = ["group"]
-    list_display = ["__str__", "group", "reversed_logic"]
-    filter_horizontal = ["exempt_alliances", "exempt_corporations"]
+    list_display = ["__str__", "_groups", "reversed_logic"]
+    filter_horizontal = ["groups", "exempt_alliances", "exempt_corporations"]
+
+    def _list_2_html_w_tooltips(self, my_items: list, max_items: int) -> str:
+        """converts list of strings into HTML with cutoff and tooltip"""
+        items_truncated_str = ', '.join(my_items[:max_items])
+        if not my_items:
+            result = None
+        elif len(my_items) <= max_items:
+            result = items_truncated_str
+        else:
+            items_truncated_str += ', (...)'
+            items_all_str = ', '.join(my_items)
+            result = format_html(
+                '<span data-tooltip="{}" class="tooltip">{}</span>',
+                items_all_str,
+                items_truncated_str
+            )
+        return result
+
+    def _groups(self, obj):
+        my_groups = sorted(group.name for group in list(obj.groups.all()))
+        return self._list_2_html_w_tooltips(
+            my_groups, 250
+        )
 
 
 admin.site.register(UserInGroupFilter, UserInGroupFilterAdmin)
