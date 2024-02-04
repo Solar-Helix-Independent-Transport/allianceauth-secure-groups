@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save, pre_delete, m2m_changed
 from django.dispatch import receiver, Signal
 from django.db import transaction
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 from . import models
 
@@ -76,22 +76,19 @@ def m2m_changed_user_groups(sender, instance: User, action, pk_set, *args, **kwa
     def trigger_group_checks():
         logger.debug("Checking user is valid for SmartGroups! %s" % instance)
         # find the groups!
-        users_groups = instance.groups.filter(
+        users_groups = Group.objects.filter(
             pk__in=pk_set, smartgroup__isnull=False)
-        groups_to_remove = []
         for g in users_groups:
             logger.debug(
-                F"Checking {instance} can access ({g.id}) PK_SET:({pk_set})")
+                F"Checking {instance} can access ({g.id}) from PK_SET:({pk_set})")
             if g.id in pk_set:
                 sg_check = g.smartgroup.check_user(instance)
                 if not sg_check:
-                    groups_to_remove.append(g)
+                    pk_set.remove(g.id)
                     logger.warning(
-                        "Removing {} from {}, due to invalid join".format(instance, g))
-        if len(groups_to_remove) > 0:
-            instance.groups.remove(*groups_to_remove)
+                        f"Removing {g} from {instance}, due to invalid join")
 
-    if instance.pk and (action == "post_add"):
+    if instance.pk and (action == "pre_add"):
         logger.debug(
             "Waiting for commit to Checking user is valid for SmartGroups! %s" % instance)
-        transaction.on_commit(trigger_group_checks)
+        trigger_group_checks()

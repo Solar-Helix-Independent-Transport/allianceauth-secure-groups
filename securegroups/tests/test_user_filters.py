@@ -10,10 +10,23 @@ from datetime import timedelta
 from .. import filter as gb_filters
 from .. import models as gb_models
 from .. import tasks as gb_tasks
+from .. import signals as gb_signals
 from django.contrib.auth.models import Group
+from django.db.models.signals import m2m_changed
 
 
 class TestGroupBotFilters(TestCase):
+
+    @classmethod
+    def disconnect_signals(cls):
+        m2m_changed.disconnect(
+            gb_signals.m2m_changed_user_groups, sender=User.groups.through)
+
+    @classmethod
+    def connect_signals(cls):
+        m2m_changed.connect(gb_signals.m2m_changed_user_groups,
+                            sender=User.groups.through)
+
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
@@ -203,8 +216,10 @@ class TestGroupBotFilters(TestCase):
         self.assertTrue(tests[10]['check'])
 
     def test_user_group_filter_g1(self):
+        self.disconnect_signals()
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
+        self.connect_signals()
 
         users = {}
         for user in User.objects.all():
@@ -295,8 +310,10 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[10]['check'])
 
     def test_user_group_filter_audit(self):
+        self.disconnect_signals()
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
+        self.connect_signals()
 
         users = []
         for user in User.objects.all():
@@ -339,9 +356,10 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[10]['check'])
 
     def test_user_group_filter_audit_inverted(self):
+        self.disconnect_signals()
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
-
+        self.connect_signals()
         users = []
         for user in User.objects.all():
             users.append(user.pk)
@@ -385,10 +403,12 @@ class TestGroupBotFilters(TestCase):
     def test_generic_smart_group_task(self):
         cache.clear()
         reset_time = timezone.now() - timedelta(days=5)
+        self.disconnect_signals()
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=10).groups.add(self.test_group)
         User.objects.get(id=9).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
+        self.connect_signals()
         # users all good
         self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
         self.assertTrue(
@@ -475,3 +495,25 @@ class TestGroupBotFilters(TestCase):
         response = self.client.get(
             reverse("securegroups:request_check", args=[1]))
         self.assertEqual(response.status_code, 302)
+
+    def test_invalid_join_smart_group(self):
+        cache.clear()
+        User.objects.get(id=1).groups.add(self.test_group)
+        User.objects.get(id=2).groups.add(self.test_group)
+        User.objects.get(id=3).groups.add(self.test_group)
+        User.objects.get(id=10).groups.add(self.test_group)
+        User.objects.get(id=9).groups.add(self.test_group)
+        User.objects.get(id=7).groups.add(self.test_group)
+
+        # users all good
+        self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
+        self.assertTrue(self.test_group in User.objects.get(id=2).groups.all())
+        self.assertTrue(self.test_group in User.objects.get(id=3).groups.all())
+
+        # USers all bad!
+        self.assertFalse(
+            self.test_group in User.objects.get(id=10).groups.all())
+        self.assertFalse(
+            self.test_group in User.objects.get(id=9).groups.all())
+        self.assertFalse(
+            self.test_group in User.objects.get(id=7).groups.all())
