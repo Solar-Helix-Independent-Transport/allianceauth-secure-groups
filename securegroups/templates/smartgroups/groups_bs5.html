@@ -50,8 +50,8 @@
                         <td class="text-end">
                             {% if g.smart_group.group in user.groups.all %}
                                 {% if not g.request %}
-                                    <a href="{% url 'securegroups:request_leave' g.group.id %}" class="btn btn-danger">
-                                        {% translate "Leave" %}
+                                    <a href="{% url 'securegroups:request_leave' g.smart_group.group.id %}" class="btn btn-danger">
+                                        {% trans "Leave" %}
                                     </a>
                                 {% else %}
                                     <button type="button" class="btn btn-primary" disabled>
