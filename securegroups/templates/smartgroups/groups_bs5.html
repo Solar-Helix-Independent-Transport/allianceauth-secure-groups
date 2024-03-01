@@ -48,7 +48,7 @@
                             {% for group in g.smart_group.group.authgroup.group_leader_groups.all %}<span class="m-1 fw-lighter badge bg-secondary">{{group.name}}</span>{% endfor %}
                         </td>
                         <td class="text-end">
-                            {% if g.smart_group.group in user_groups %}
+                            {% if g.smart_group.group in user.groups.all %}
                                 {% if not g.request %}
                                     <a href="{% url 'securegroups:request_leave' g.group.id %}" class="btn btn-danger">
                                         {% translate "Leave" %}
