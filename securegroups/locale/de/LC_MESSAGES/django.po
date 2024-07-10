@@ -62,7 +62,7 @@ msgstr "Nein"
 
 #: templates/smartgroups/audit.html:134
 msgid "Kick Member"
-msgstr ""
+msgstr "Mitglied entfernen"
 
 #: templates/smartgroups/audit_list.html:5
 msgid "Smart Group Audit"
@@ -92,7 +92,7 @@ msgstr "Status"
 
 #: templates/smartgroups/audit_list.html:27
 msgid "Member Count"
-msgstr ""
+msgstr "Mitgliederanzahl"
 
 #: templates/smartgroups/audit_list.html:44
 msgid "Auto Group"
@@ -223,7 +223,7 @@ msgstr "Du kannst diese Gruppe nicht verlassen"
 
 #: views.py:265
 msgid "You are not a member of that group"
-msgstr ""
+msgstr "Du bist kein Mitglied dieser Gruppe"
 
 #: views.py:280
 msgid "You already have a pending leave request for that group."
