@@ -4,9 +4,11 @@
 {% endif %}
 <table class="table table-aa">
     <thead>
-        <th>{% translate 'Requirements' %}</th>
-        <th class="text-center">{% translate 'Note' %}</th>
-        <th class="text-right">{% translate 'Result' %}</th>
+        <tr>
+            <th>{% translate 'Requirements' %}</th>
+            <th class="text-center">{% translate 'Note' %}</th>
+            <th class="text-right">{% translate 'Result' %}</th>
+        </tr>
     </thead>
 {% for filter in filters %}
     <tr>
