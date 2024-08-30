@@ -33,19 +33,19 @@
                 <tr>
                     <th>{% translate "Name" %}</th>
                     <th>{% translate "Description" %}</th>
-                    <th>{% translate "Leaders" %}<span class="m-1 fw-lighter badge bg-primary">User</span><span class="m-1 fw-lighter badge bg-secondary ">Group</span></th>
+                    <th>{% translate "Leaders" %}<br><span class="m-1 fw-lighter badge bg-primary">{% translate "User" %}</span><span class="m-1 fw-lighter badge bg-secondary">{% translate "Group" %}</span></th>
                     <th class="text-center">{% trans "Action" %}</th>
                 </tr>
             </thead>
 
-            <tbody class>
+            <tbody>
                 {% for g in groups %}
                     <tr>
                         <td>{{ g.smart_group.group.name }}</td>
                         <td>{{ g.smart_group.group.authgroup.description|linebreaks|urlize }}</td>
                         <td style="max-width: 30%;">
-                            {% for leader in g.smart_group.group.authgroup.group_leaders.all %}{% if leader.profile.main_character %}<span class="m-1 fw-lighter badge bg-primary">{{leader.profile.main_character}}</span>{% endif %}{% endfor %}
-                            {% for group in g.smart_group.group.authgroup.group_leader_groups.all %}<span class="m-1 fw-lighter badge bg-secondary">{{group.name}}</span>{% endfor %}
+                            {% for leader in g.smart_group.group.authgroup.group_leaders.all %}{% if leader.profile.main_character %}<span class="my-1 me-1 badge bg-primary">{{leader.profile.main_character}}</span>{% endif %}{% endfor %}
+                            {% for group in g.smart_group.group.authgroup.group_leader_groups.all %}<span class="my-1 me-1 badge bg-secondary">{{group.name}}</span>{% endfor %}
                         </td>
                         <td class="text-end">
                             {% if g.smart_group.group in user.groups.all %}
@@ -85,7 +85,6 @@
                     <h5 class="modal-title" id="main-modal-title">{% translate 'Account Checks'%}</h5>
                 </div>
                 <div id="main-modal-body" class="modal-body"  style="overflow-y:auto;"></div>
-                </div>
             </div>
         </div>
     </div>
