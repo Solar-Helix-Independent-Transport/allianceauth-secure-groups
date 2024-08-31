@@ -1,11 +1,116 @@
+# Apply to all files without committing:
+#   pre-commit run --all-files
+# Update this file:
+#   pre-commit autoupdate
+
 repos:
-  -   repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.4.0
-      hooks:
-      -   id: trailing-whitespace
-      -   id: end-of-file-fixer
-          exclude: \.min\.css$
-  -   repo: https://github.com/pre-commit/mirrors-autopep8
-      rev: 'v2.0.2'
-      hooks:
-      -   id: autopep8
+  # Code Upgrades
+  # - repo: https://github.com/asottile/pyupgrade
+  #   rev: v3.17.0
+  #   hooks:
+  #     - id: pyupgrade
+  #       args: [--py38-plus]
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: 1.20.0
+    hooks:
+      - id: django-upgrade
+        args: [--target-version=4.0]
+  # Code Logic
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-check-mock-methods
+      - id: python-no-log-warn
+      - id: python-use-type-annotations
+      - id: text-unicode-replacement-char
+  # Formatting
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      # Identify invalid files
+      - id: check-ast
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      # git checks
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=10000]
+      - id: detect-private-key
+      - id: check-case-conflict
+      # Python checks
+      #      - id: check-docstring-first
+      - id: debug-statements
+      #      - id: requirements-txt-fixer
+      - id: fix-encoding-pragma
+        args: [--remove]
+      - id: fix-byte-order-marker
+      # General quality checks
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+        exclude: |
+          (?x)(
+            \.min\.css|
+            \.min\.js|
+            \.po|
+            \.mo|
+            swagger\.json
+          )
+      - id: check-executables-have-shebangs
+      - id: end-of-file-fixer
+        exclude: |
+          (?x)(
+            \.min\.css|
+            \.min\.js|
+            \.po|
+            \.mo|
+            swagger\.json
+          )
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 3.0.3
+    hooks:
+      - id: editorconfig-checker
+        exclude: |
+          (?x)(
+            LICENSE|
+            allianceauth\/static\/allianceauth\/css\/themes\/bootstrap-locals.less|
+            \.po|
+            \.mo|
+            swagger\.json
+          )
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        additional_dependencies: [Flake8-pyproject]
+  - repo: https://github.com/asottile/yesqa
+    rev: v1.5.0
+    hooks:
+      - id: yesqa
+
+  # Infrastructure
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: 2.2.1
+    hooks:
+      - id: pyproject-fmt
+        name: pyproject.toml formatter
+        description: "Format the pyproject.toml file."
+        args:
+          - --indent=4
+        additional_dependencies:
+          - tox==4.18.0 # https://github.com/tox-dev/tox/releases/latest
+
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.19
+    hooks:
+      - id: validate-pyproject
+        name: Validate pyproject.toml
+        description: "Validate the pyproject.toml file."

@@ -2,10 +2,7 @@
 Alliance Auth Test Suite Django settings.
 """
 
-from allianceauth.project_template.project_name.settings.base import *
-
-SITE_URL = "https://example.com"
-CSRF_TRUSTED_ORIGINS = [SITE_URL]
+from allianceauth.project_template.project_name.settings.base import *  # noqa
 
 # Celery configuration
 CELERY_ALWAYS_EAGER = True  # Forces celery to run locally for testing
@@ -13,8 +10,7 @@ CELERY_ALWAYS_EAGER = True  # Forces celery to run locally for testing
 INSTALLED_APPS += [
     "securegroups",
 ]
-
-ROOT_URLCONF = "tests.urls"
+ROOT_URLCONF = 'tests.urls'
 
 NOSE_ARGS = [
     # '--with-coverage',
@@ -24,7 +20,7 @@ NOSE_ARGS = [
 
 
 PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.MD5PasswordHasher",
+    'django.contrib.auth.hashers.MD5PasswordHasher',
 ]
 
 # LOGGING = None  # Comment out to enable logging for debugging
@@ -34,20 +30,17 @@ PASSWORD_HASHERS = [
 # to https://example.com/sso/callback substituting your domain for example.com
 # Logging in to auth requires the publicData scope (can be overridden through the
 # LOGIN_TOKEN_SCOPES setting). Other apps may require more (see their docs).
-ESI_SSO_CLIENT_ID = "123"
-ESI_SSO_CLIENT_SECRET = "123"
-ESI_SSO_CALLBACK_URL = "123"
-
+ESI_SSO_CLIENT_ID = '123'
+ESI_SSO_CLIENT_SECRET = '123'
+ESI_SSO_CALLBACK_URL = '123'
 
 CACHES = {
     "default": {
-        # AA 2.x
         # "BACKEND": "redis_cache.RedisCache",
         # "LOCATION": "localhost:6379",
         # "OPTIONS": {
         #    "DB": 1,
         # }
-        # AA 3.x
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://localhost:6379/1",
         "OPTIONS": {
