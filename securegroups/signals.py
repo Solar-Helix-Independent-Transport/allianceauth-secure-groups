@@ -1,16 +1,16 @@
+import logging
 from typing import Union
-from django.db.models.signals import post_save, pre_delete, m2m_changed
-from django.dispatch import receiver, Signal
-from django.db import transaction
-from django.contrib.auth.models import User, Group
+
+from django.contrib.auth.models import Group, User
+from django.db.models.signals import m2m_changed, post_save, pre_delete
+from django.dispatch import receiver
+
+from allianceauth import hooks
 
 from . import models
 
 # signals go here
 
-from allianceauth import hooks
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def new_filter(sender, instance, created, **kwargs):
         else:
             # this is an updated model we dont at this stage care about this.
             pass
-    except:
+    except Exception:
         logger.error("Bah Humbug")  # we failed! do something here
 
 
@@ -49,7 +49,7 @@ def rem_filter(sender, instance, **kwargs):
         models.SmartFilter.objects.get(
             object_id=instance.pk, content_type__model=instance.__class__.__name__
         ).delete()
-    except:
+    except Exception:
         logger.error("Bah Humbug")  # we failed! do something here
 
 
@@ -60,7 +60,7 @@ def new_group_filter(sender, instance: models.SmartGroup, created, **kwargs):
         instance.group.authgroup.hidden = True
         instance.group.authgroup.public = False
         instance.group.authgroup.save()
-    except:
+    except Exception:
         logger.error("Bah Humbug")  # we failed! do something here
 
 
@@ -81,13 +81,12 @@ def m2m_changed_user_groups(sender, instance: Union[User, Group], action, pk_set
                 pk__in=pk_set, smartgroup__isnull=False
             )
             for g in users_groups:
-                if g.id in pk_set:
-                    sg_check = g.smartgroup.check_user(instance)
-                    if not sg_check:
-                        pk_set.remove(g.id)
-                        logger.warning(
-                            f"Removing {g} from {instance}, due to invalid join"
-                        )
+                sg_check = g.smartgroup.check_user(instance)
+                if not sg_check:
+                    pk_set.remove(g.id)
+                    logger.warning(
+                        f"Removing {g} from {instance}, due to invalid join"
+                    )
         elif (
             isinstance(instance, Group)
             and kwargs.get("model") is User

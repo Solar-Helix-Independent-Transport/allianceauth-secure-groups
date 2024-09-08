@@ -1,18 +1,22 @@
-from django.test import TestCase, RequestFactory
-from django.urls import reverse
-from django.core.cache import cache
-from allianceauth.tests.auth_utils import AuthUtils
-from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo, EveAllianceInfo
-from allianceauth.authentication.models import CharacterOwnership
-from django.contrib.auth.models import User
-from django.utils import timezone
 from datetime import timedelta
-from .. import filter as gb_filters
-from .. import models as gb_models
-from .. import tasks as gb_tasks
-from .. import signals as gb_signals
-from django.contrib.auth.models import Group
+
+from django.contrib.auth.models import Group, User
+from django.core.cache import cache
 from django.db.models.signals import m2m_changed
+from django.test import RequestFactory, TestCase
+from django.urls import reverse
+from django.utils import timezone
+
+from allianceauth.authentication.models import CharacterOwnership
+from allianceauth.eveonline.models import (
+    EveAllianceInfo, EveCharacter, EveCorporationInfo,
+)
+from allianceauth.tests.auth_utils import AuthUtils
+
+from .. import (
+    filter as gb_filters, models as gb_models, signals as gb_signals,
+    tasks as gb_tasks,
+)
 
 
 class TestGroupBotFilters(TestCase):
@@ -554,18 +558,12 @@ class TestGroupBotFilters(TestCase):
         )
 
         # Users all good
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=1).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=2).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=3).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=10).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=9).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=7).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=1).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=2).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=3).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=10).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=9).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=7).groups.all())
 
     def test_invalid_join_smart_group_no_sg(self):
         cache.clear()
@@ -577,15 +575,9 @@ class TestGroupBotFilters(TestCase):
         User.objects.get(id=7).groups.add(self.test_group_2)
 
         # Users all good
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=1).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=2).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=3).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=10).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=9).groups.all())
-        self.assertTrue(
-            self.test_group_2 in User.objects.get(id=7).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=1).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=2).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=3).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=10).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=9).groups.all())
+        self.assertTrue(self.test_group_2 in User.objects.get(id=7).groups.all())
