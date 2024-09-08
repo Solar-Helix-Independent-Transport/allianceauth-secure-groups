@@ -1,3 +1,4 @@
+from typing import Union
 from django.db.models.signals import post_save, pre_delete, m2m_changed
 from django.dispatch import receiver, Signal
 from django.db import transaction
@@ -69,26 +70,33 @@ for _filter in filters.get_hooks():
 
 
 @receiver(m2m_changed, sender=User.groups.through)
-def m2m_changed_user_groups(sender, instance: User, action, pk_set, *args, **kwargs):
+def m2m_changed_user_groups(sender, instance: Union[User, Group], action, pk_set, *args, **kwargs):
     logger.debug("Received m2m_changed from %s groups with action %s" %
                  (instance, action))
 
-    def trigger_group_checks():
-        logger.debug("Checking user is valid for SmartGroups! %s" % instance)
-        # find the groups!
-        users_groups = Group.objects.filter(
-            pk__in=pk_set, smartgroup__isnull=False)
-        for g in users_groups:
-            logger.debug(
-                F"Checking {instance} can access ({g.id}) from PK_SET:({pk_set})")
-            if g.id in pk_set:
-                sg_check = g.smartgroup.check_user(instance)
-                if not sg_check:
-                    pk_set.remove(g.id)
-                    logger.warning(
-                        f"Removing {g} from {instance}, due to invalid join")
-
     if instance.pk and (action == "pre_add"):
-        logger.debug(
-            "Waiting for commit to Checking user is valid for SmartGroups! %s" % instance)
-        trigger_group_checks()
+        if isinstance(instance, User):
+            # Is a user update for all groups added
+            users_groups = Group.objects.filter(
+                pk__in=pk_set, smartgroup__isnull=False
+            )
+            for g in users_groups:
+                if g.id in pk_set:
+                    sg_check = g.smartgroup.check_user(instance)
+                    if not sg_check:
+                        pk_set.remove(g.id)
+                        logger.warning(
+                            f"Removing {g} from {instance}, due to invalid join"
+                        )
+        elif (
+            isinstance(instance, Group)
+            and kwargs.get("model") is User
+        ):
+
+            for user_pk in list(pk_set):
+                if hasattr(instance, "smartgroup"):
+                    sg_check = instance.smartgroup.check_user(
+                        User.objects.get(pk=user_pk)
+                    )
+                    if not sg_check:
+                        pk_set.remove(user_pk)

@@ -219,15 +219,24 @@ class SmartGroup(models.Model):
                 continue  # Skip as this is broken...
             try:
                 test_pass = _filter.audit_filter(
-                    User.objects.filter(pk=user.pk))
+                    User.objects.filter(pk=user.pk)
+                )
             except Exception as e:
                 try:
                     print(e)
-                    test_pass = {user.id: {"message": "",
-                                           "check": _filter.process_filter(user)}}
+                    test_pass = {
+                        user.id: {
+                            "message": "",
+                            "check": _filter.process_filter(user)
+                        }
+                    }
                 except Exception:
                     test_pass = {
-                        user.id: {"message": "Filter Failed", "check": False}}
+                        user.id: {
+                            "message": "Filter Failed",
+                            "check": False
+                        }
+                    }
                     logger.error("TEST FAILED")  # TODO Make pretty
             _check = {
                 "name": check.filter_object.description,

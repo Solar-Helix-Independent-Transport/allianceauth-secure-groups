@@ -517,3 +517,75 @@ class TestGroupBotFilters(TestCase):
             self.test_group in User.objects.get(id=9).groups.all())
         self.assertFalse(
             self.test_group in User.objects.get(id=7).groups.all())
+
+    def test_invalid_join_smart_group_reverse(self):
+        cache.clear()
+        self.test_group.user_set.add(
+            User.objects.get(id=1),
+            User.objects.get(id=2),
+            User.objects.get(id=3),
+            User.objects.get(id=10),
+            User.objects.get(id=9),
+            User.objects.get(id=7)
+        )
+
+        # Users all good
+        self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
+        self.assertTrue(self.test_group in User.objects.get(id=2).groups.all())
+        self.assertTrue(self.test_group in User.objects.get(id=3).groups.all())
+
+        # Users all bad!
+        self.assertFalse(
+            self.test_group in User.objects.get(id=10).groups.all())
+        self.assertFalse(
+            self.test_group in User.objects.get(id=9).groups.all())
+        self.assertFalse(
+            self.test_group in User.objects.get(id=7).groups.all())
+
+    def test_invalid_join_smart_group_reverse_no_sg(self):
+        cache.clear()
+        self.test_group_2.user_set.add(
+            User.objects.get(id=1),
+            User.objects.get(id=2),
+            User.objects.get(id=3),
+            User.objects.get(id=10),
+            User.objects.get(id=9),
+            User.objects.get(id=7)
+        )
+
+        # Users all good
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=1).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=2).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=3).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=10).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=9).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=7).groups.all())
+
+    def test_invalid_join_smart_group_no_sg(self):
+        cache.clear()
+        User.objects.get(id=1).groups.add(self.test_group_2)
+        User.objects.get(id=2).groups.add(self.test_group_2)
+        User.objects.get(id=3).groups.add(self.test_group_2)
+        User.objects.get(id=10).groups.add(self.test_group_2)
+        User.objects.get(id=9).groups.add(self.test_group_2)
+        User.objects.get(id=7).groups.add(self.test_group_2)
+
+        # Users all good
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=1).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=2).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=3).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=10).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=9).groups.all())
+        self.assertTrue(
+            self.test_group_2 in User.objects.get(id=7).groups.all())
