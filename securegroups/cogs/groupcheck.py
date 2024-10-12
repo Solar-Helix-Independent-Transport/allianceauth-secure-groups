@@ -77,11 +77,11 @@ class GroupCheck(commands.Cog):
             return await ctx.send(embed=embed)
 
     async def search_characters(ctx: AutocompleteContext):
-        """Returns a list of colors that begin with the characters entered so far."""
+        """Returns a list of chars that begin with the characters entered so far."""
         return list(EveCharacter.objects.filter(character_name__icontains=ctx.value).values_list('character_name', flat=True)[:10])
 
     async def search_groups(ctx: AutocompleteContext):
-        """Returns a list of colors that begin with the characters entered so far."""
+        """Returns a list of groups that begin with the characters entered so far."""
         return list(SmartGroup.objects.filter(group_name__icontains=ctx.value).values_list('group__name', flat=True)[:10])
 
     sg_commands = SlashCommandGroup("sec_groups", "Secure Group Admin Commands", guild_ids=[
@@ -89,7 +89,7 @@ class GroupCheck(commands.Cog):
 
     @sg_commands.command(name='audit_member', guild_ids=get_all_servers())
     @option("character", description="Search for a Character!", autocomplete=search_characters)
-    @option("group", description="Group to test!", autocomplete=search_characters)
+    @option("group", description="Group to test!", autocomplete=search_groups)
     async def slash_lookup(
         self,
         ctx,
