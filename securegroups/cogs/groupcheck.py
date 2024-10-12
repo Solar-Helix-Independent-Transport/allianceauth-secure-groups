@@ -10,8 +10,10 @@ from django.contrib.auth.models import User, Group
 from django.core.exceptions import ObjectDoesNotExist
 from allianceauth.eveonline.models import EveCharacter
 # AA-Discordbot
+from aadiscordbot.app_settings import get_all_servers
 from aadiscordbot.cogs.utils.decorators import has_any_perm, in_channels, sender_has_perm
 
+from ..models import SmartGroup
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class GroupCheck(commands.Cog):
     """
-    All about grouos!
+    All about groups!
     """
 
     def __init__(self, bot):
@@ -78,21 +80,24 @@ class GroupCheck(commands.Cog):
         """Returns a list of colors that begin with the characters entered so far."""
         return list(EveCharacter.objects.filter(character_name__icontains=ctx.value).values_list('character_name', flat=True)[:10])
 
+    async def search_groups(ctx: AutocompleteContext):
+        """Returns a list of colors that begin with the characters entered so far."""
+        return list(SmartGroup.objects.filter(group_name__icontains=ctx.value).values_list('group__name', flat=True)[:10])
+
     sg_commands = SlashCommandGroup("sec_groups", "Secure Group Admin Commands", guild_ids=[
                                     int(settings.DISCORD_GUILD_ID)])
 
-    @sg_commands.command(name='audit_member', guild_ids=[int(settings.DISCORD_GUILD_ID)])
+    @sg_commands.command(name='audit_member', guild_ids=get_all_servers())
     @option("character", description="Search for a Character!", autocomplete=search_characters)
-    @option("group", description="Group to test!")
+    @option("group", description="Group to test!", autocomplete=search_characters)
     async def slash_lookup(
         self,
         ctx,
         character: str,
-        group: Role
+        group: str
     ):
         embed = Embed(
-            title="{group} Audit: {character_name}".format(
-                character_name=character, group=group.name)
+            title=f"{group} Audit: {character}"
         )
 
         try:
@@ -101,7 +106,7 @@ class GroupCheck(commands.Cog):
                          'corputils.view_alliance_corpstats', 'corpstats.view_alliance_corpstats'])
             await ctx.defer()
             char = EveCharacter.objects.get(character_name=character)
-            group = Group.objects.get(name=group.name)
+            group = Group.objects.get(name=group)
 
             try:
                 main = char.character_ownership.user
@@ -144,7 +149,7 @@ class GroupCheck(commands.Cog):
 
             embed.description = (
                 "Group **{group_name}** does not exist in our Auth system"
-            ).format(group_name=group.name)
+            ).format(group_name=group)
 
             return await ctx.respond(embed=embed)
 
