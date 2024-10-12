@@ -84,8 +84,7 @@ class GroupCheck(commands.Cog):
         """Returns a list of groups that begin with the characters entered so far."""
         return list(SmartGroup.objects.filter(group_name__icontains=ctx.value).values_list('group__name', flat=True)[:10])
 
-    sg_commands = SlashCommandGroup("sec_groups", "Secure Group Admin Commands", guild_ids=[
-                                    int(settings.DISCORD_GUILD_ID)])
+    sg_commands = SlashCommandGroup("sec_groups", "Secure Group Admin Commands", guild_ids=get_all_servers())
 
     @sg_commands.command(name='audit_member', guild_ids=get_all_servers())
     @option("character", description="Search for a Character!", autocomplete=search_characters)
