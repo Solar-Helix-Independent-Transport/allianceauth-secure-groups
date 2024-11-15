@@ -34,7 +34,7 @@ Not in any particular order:
   - zKill - x Kills in x Months
 - Blacklist module ( link )
   - users has no flags or has or has never had blacklisted char
-- [Member Audit](https://gitlab.com/ErikKalkoken/aa-memberaudit) via its [integration](https://gitlab.com/eclipse-expeditions/aa-memberaudit-securegroups).
+- [Member Audit](https://gitlab.com/ErikKalkoken/aa-memberaudit) via its [integration](https://github.com/ppfeufer/aa-ma-securegroups).
   - Activity Filter
   - Asset Filter
   - Character Age Filter
