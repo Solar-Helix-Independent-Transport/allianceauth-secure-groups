@@ -28,13 +28,15 @@ def create_pending_notification(user, message, group, filter, remove=False):
 
 def send_discord_dm(user, title, message, color):
     if app_settings.discord_bot_active():
+        from aadiscordbot.utils.auth import get_discord_user_id
         try:
             e = Embed(title=title,
                       description=message,
                       color=color)
             aadiscordbot.tasks.send_message(
-                user_id=user.discord.uid,
-                embed=e)
+                user_id=get_discord_user_id(user),
+                embed=e
+            )
             logger.debug("sent discord ping to {}".format(user))
         except Exception as e:
             logger.error(e, exc_info=1)

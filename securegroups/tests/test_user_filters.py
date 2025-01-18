@@ -44,6 +44,9 @@ class TestGroupBotFilters(TestCase):
         cls.test_group, _ = Group.objects.update_or_create(name="Test_Group")
         cls.test_group_2, _ = Group.objects.update_or_create(
             name="Test_Group_2")
+        cls.test_group_3, _ = Group.objects.update_or_create(name="Test_Group_3")
+        cls.test_group_4, _ = Group.objects.update_or_create(
+            name="Test_Group_4")
         tst2 = EveCorporationInfo.objects.create(
             corporation_id=2,
             corporation_name="Test Corp 2",
@@ -224,7 +227,10 @@ class TestGroupBotFilters(TestCase):
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
         self.connect_signals()
-
+        print("************************************************************************************************************")
+        print(User.objects.get(id=1).groups.all())
+        print(User.objects.get(id=7).groups.all())
+        print("************************************************************************************************************")
         users = {}
         for user in User.objects.all():
             users[user.pk] = None
