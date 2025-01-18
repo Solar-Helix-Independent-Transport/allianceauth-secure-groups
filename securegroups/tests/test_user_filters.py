@@ -227,10 +227,6 @@ class TestGroupBotFilters(TestCase):
         User.objects.get(id=1).groups.add(self.test_group)
         User.objects.get(id=7).groups.add(self.test_group)
         self.connect_signals()
-        print("************************************************************************************************************")
-        print(User.objects.get(id=1).groups.all())
-        print(User.objects.get(id=7).groups.all())
-        print("************************************************************************************************************")
         users = {}
         for user in User.objects.all():
             users[user.pk] = None
