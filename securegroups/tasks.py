@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 def create_pending_notification(user, message, group, filter, remove=False):
-    logger.debug(
-        "Adding {} to pending notifications for {}".format(user, group))
+    logger.info(
+        "Adding {} to {} pending notifications for {}".format(group, user, message))
     PendingNotification.objects.create(
         user=user, filter=filter, group=group, message=message, removal=remove)
 
@@ -346,6 +346,7 @@ def notify_grace():
             message,
             "warning"
         )
+        logger.warning(message)
         if app_settings.discord_bot_active():
             send_discord_dm(
                 u,
@@ -378,6 +379,7 @@ def notify_removal():
             message,
             "warning"
         )
+        logger.warning(message)
         if app_settings.discord_bot_active():
             send_discord_dm(
                 u,
