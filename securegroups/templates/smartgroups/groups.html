@@ -123,7 +123,12 @@
     <script>
         $(document).ready(function () {
             $('#groupsTable').DataTable();
-            $("[rel='tooltip']").tooltip();
+
+            // Bootstrap 5 Tooltip
+            [].slice.call(document.querySelectorAll(`[data-bs-tooltip="allianceauth-secure-groups"]`))
+                .map((tooltipTriggerEl) => {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
         });
 
         $(".check-user-button").on("click", function() {

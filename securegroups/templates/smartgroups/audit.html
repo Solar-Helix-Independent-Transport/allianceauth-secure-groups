@@ -2,7 +2,6 @@
 
 {% load static %}
 {% load i18n %}
-{% load sg_audit %}
 {% load evelinks %}
 
 {% block page_title %}{% translate "Secure Group Audit" %}{% endblock page_title %}
@@ -209,16 +208,18 @@
                 const cell_body = $(tag)[0];
 
                 if (result == null) {
-                    cell_body.innerHTML = `<a class="label label-default" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}"><i class="fa-solid fa-question"></i></a>`;
+                    cell_body.innerHTML = `<a class="badge bg-default" type="button" data-bs-tooltip="allianceauth-secure-groups" title="${message}"><i class="fa-solid fa-question"></i></a>`;
                 } else if (result === true) {
-                    cell_body.innerHTML = `<a class="label label-success" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}" data-html="true"><i class="fa-solid fa-check-circle"></i></a>`;
+                    cell_body.innerHTML = `<a class="badge bg-success" type="button" data-bs-tooltip="allianceauth-secure-groups" title="${message}" data-html="true"><i class="fa-solid fa-check-circle"></i></a>`;
                 } else {
-                    cell_body.innerHTML = `<a class="label label-danger" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}" data-html="true"><i class="fa-solid fa-times-circle"></i></a>`;
+                    cell_body.innerHTML = `<a class="badge bg-danger" type="button" data-bs-tooltip="allianceauth-secure-groups" title="${message}" data-html="true"><i class="fa-solid fa-times-circle"></i></a>`;
                 }
 
-                const ts = `tooltip${fid}`;
-
-                $(`[rel=${ts}]`).tooltip();
+                // Bootstrap 5 Tooltip
+                [].slice.call(document.querySelectorAll(`[data-bs-tooltip="allianceauth-secure-groups"]`))
+                    .map((tooltipTriggerEl) => {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
             };
 
             const filter_post = (data) => {
