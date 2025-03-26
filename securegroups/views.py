@@ -12,7 +12,6 @@ from django.db.models import Q
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from collections import defaultdict
-from django.template import TemplateDoesNotExist
 
 from django.http import Http404
 from django.db.models import Count
@@ -72,10 +71,8 @@ def groups_view(request):
         count = GroupManager.pending_requests_count_for_user(request.user)
 
     context = {"groups": groups, "req_count": count}
-    try:
-        return render(request, "smartgroups/groups_bs5.html", context=context)
-    except TemplateDoesNotExist:
-        return render(request, "smartgroups/groups.html", context=context)
+
+    return render(request, "smartgroups/groups.html", context=context)
 
 
 @permission_required("securegroups.audit_sec_group")
@@ -175,10 +172,8 @@ def smart_group_run_check(request, group_id):
         ctx = {
             "message": _("Running Group Check Failed, Please contact an Admin!") + "\n{}".format(e)
         }
-    try:
-        return HttpResponse(render_to_string("smartgroups/user_check_bs5.html", ctx, request=request))
-    except TemplateDoesNotExist:
-        return HttpResponse(render_to_string("smartgroups/user_check.html", ctx, request=request))
+
+    return HttpResponse(render_to_string("smartgroups/user_check.html", ctx, request=request))
 
 
 @permission_required("securegroups.audit_sec_group")

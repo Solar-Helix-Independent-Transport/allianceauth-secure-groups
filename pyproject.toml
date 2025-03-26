@@ -41,7 +41,7 @@ dynamic = [
     "version",
 ]
 dependencies = [
-    "allianceauth<5,>=3",
+    "allianceauth<5,>=4",
 ]
 urls.Homepage = "https://github.com/Solar-Helix-Independent-Transport/allianceauth-secure-groups"
 urls.Source = "https://github.com/Solar-Helix-Independent-Transport/allianceauth-secure-groupss"

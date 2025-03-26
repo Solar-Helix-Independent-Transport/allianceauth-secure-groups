@@ -1,116 +1,136 @@
-{% extends "allianceauth/base.html" %}
+{% extends "allianceauth/base-bs5.html" %}
+
 {% load static %}
 {% load i18n %}
 {% load sg_audit %}
 {% load evelinks %}
 
-{% block page_title %}{% translate "Group Audit" %}{% endblock page_title %}
+{% block page_title %}{% translate "Secure Group Audit" %}{% endblock page_title %}
+
+{% block header_nav_brand %}{% translate "Secure Group Audit" %}{% endblock %}
+
 {% block extra_css %}
-{% include 'bundles/datatables-css.html' %}
+    {% include 'bundles/datatables-css-bs5.html' %}
 
-<style>
-.form-control {
-    margin: 2px;
-}
-</style>
-<style>
-.lds-ellipsis {
-  display: inline-block;
-  position: relative;
-  width: 25px;
-  height: 10px;
-}
-.lds-ellipsis div {
-  position: absolute;
-  top: 3px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #aaa;
-  animation-timing-function: cubic-bezier(0, 1, 1, 0);
-}
-.lds-ellipsis div:nth-child(1) {
-  left: 0px;
-  animation: lds-ellipsis1 0.6s infinite;
-}
-.lds-ellipsis div:nth-child(2) {
-  left: 0px;
-  animation: lds-ellipsis2 0.6s infinite;
-}
-.lds-ellipsis div:nth-child(3) {
-  left: 10px;
-  animation: lds-ellipsis2 0.6s infinite;
-}
-.lds-ellipsis div:nth-child(4) {
-  left: 20px;
-  animation: lds-ellipsis3 0.6s infinite;
-}
-@keyframes lds-ellipsis1 {
-  0% {
-    transform: scale(0);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-@keyframes lds-ellipsis3 {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(0);
-  }
-}
-@keyframes lds-ellipsis2 {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(10px, 0);
-  }
-}
+    <style>
+        .lds-ellipsis {
+            display: inline-block;
+            position: relative;
+            width: 25px;
+            height: 10px;
+        }
 
-table.dataTable tbody td {
-  vertical-align: middle;
-}
-</style>
+        .lds-ellipsis div {
+            position: absolute;
+            top: 3px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgb(170 170 170);
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+
+        .lds-ellipsis div:nth-child(1) {
+            left: 0;
+            animation: lds-ellipsis1 0.6s infinite;
+        }
+
+        .lds-ellipsis div:nth-child(2) {
+            left: 0;
+            animation: lds-ellipsis2 0.6s infinite;
+        }
+
+        .lds-ellipsis div:nth-child(3) {
+            left: 10px;
+            animation: lds-ellipsis2 0.6s infinite;
+        }
+
+        .lds-ellipsis div:nth-child(4) {
+            left: 20px;
+            animation: lds-ellipsis3 0.6s infinite;
+        }
+
+        @keyframes lds-ellipsis1 {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes lds-ellipsis3 {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(0);
+            }
+        }
+
+        @keyframes lds-ellipsis2 {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(10px, 0);
+            }
+        }
+
+        table.dataTable tbody td {
+            vertical-align: middle;
+        }
+    </style>
 {% endblock extra_css %}
+
 {% block content %}
     {% csrf_token %}
 
-    <div class="col-lg-12">
-        <br>
-        {% include 'smartgroups/menu.html' %}
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                {{sg.group.name}}
+    <div class="allianceauth-secure-groups">
+        <div class="card card-default">
+            <div class="card-header mb-0">
+                <div class="card-title">{{ sg.group.name }}</div>
             </div>
 
-            <div class="panel-body">
-                <table class="table table-aa datatables" id="audit-table">
+            <div class="card-body">
+                <table class="table table-striped table-hover datatables" id="audit-table">
                     <thead>
                         <tr>
-                            <th class="">{% translate "User" %}</th>
+                            <th>{% translate "User" %}</th>
                             <th>{% translate "Organization" %}</th>
-                            <th>{% translate "Pending Removal" %}</th>
-                            {% for fl in filters %}<th class="text-center">{{fl.filter_object.description}}</th>{% endfor %}
-                            <th>{% translate "Actions" %}</th>
+
+                            <th>
+                                <!-- {% translate "Pending Removal" %} -->
+                            </th>
+
+                            {% for fl in filters %}
+                                <th class="text-center">{{fl.filter_object.description}}</th>
+                            {% endfor %}
+
+                            <th class="text-end">{% translate "Actions" %}</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {% for u, vals in characters.items %}
                             <tr id="uid_{{u}}">
-                                <td class="">{{ vals }}
-                                {% if u in graces %}
-                                    <span class="label label-warning text-center"><i class="fas fa-clock"></i></span>
-                                {% endif %}
+                                <td class="">
+                                    {{ vals }}
+
+                                    {% if u in graces %}
+                                        <span class="label label-warning text-center"><i class="fa-solid fa-clock"></i></span>
+                                    {% endif %}
                                 </td>
+
                                 <td>
                                   {% if vals %}
                                       <a href="{{ vals|dotlan_corporation_url }}" target="_blank">
                                           {{ vals.corporation_name }}
                                       </a><br>
+
                                       <a href="{{ vals|dotlan_alliance_url }}" target="_blank">
                                           {{ vals.alliance_name|default_if_none:"" }}
                                       </a>
@@ -118,21 +138,31 @@ table.dataTable tbody td {
                                       {% trans "(unknown)" %}
                                   {% endif %}
                                 </td>
+
                                 <td>
-                                {% if u in graces %}
-                                  {% translate "Yes" %}
-                                {% else %}
-                                  {% translate "No" %}
-                                {% endif %}
+                                    {% if u in graces %}
+                                      {% translate "Yes" %}
+                                    {% else %}
+                                      {% translate "No" %}
+                                    {% endif %}
                                 </td>
+
                                 {% for fv in filters %}
                                     <td class="text-center" id="{{ u }}_{{ fv.id }}">
-                                        <div class="label label-default text-center"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
+                                        <div class="label label-default text-center">
+                                            <div class="lds-ellipsis">
+                                                <div></div>
+                                                <div></div>
+                                                <div></div>
+                                                <div></div>
+                                            </div>
+                                        </div>
                                     </td>
                                 {% endfor %}
-                                <td class="text-center">
+
+                                <td class="text-end">
                                     <a href="#" id="{{ u }}" class="btn btn-warning rem-user-button" title="{% translate "Kick Member" %}">
-                                        <i class="glyphicon glyphicon-remove"></i>
+                                        <i class="fa-solid fa-xmark"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -143,95 +173,101 @@ table.dataTable tbody td {
         </div>
     </div>
 {% endblock content %}
+
 {% block extra_javascript %}
-  {% include 'bundles/datatables-js.html' %}
-	<script>!function(t){function e(t){var e={columns:[],columnsIdxList:[],bootstrap:!1,autoSize:!0,label:"Filter "};if("bootstrap"in t&&"boolean"==typeof t.bootstrap&&(e.bootstrap=t.bootstrap),"autoSize"in t&&"boolean"==typeof t.autoSize&&(e.autoSize=t.autoSize),"label"in t&&"string"==typeof t.label&&(e.label=t.label),"columns"in t)for(var i=0;i<t.columns.length;i++){var n=t.columns[i];if("idx"in n&&"number"==typeof n.idx){var o=n.idx;e.columns[o]={title:null,maxWidth:null,autoSize:!0},e.columnsIdxList.push(o),"title"in n&&"string"==typeof n.title&&(e.columns[o].title=n.title),"maxWidth"in n&&"string"==typeof n.maxWidth&&(e.columns[o].maxWidth=n.maxWidth),"autoSize"in n&&"boolean"==typeof n.autoSize&&(e.columns[o].autoSize=n.autoSize)}}return e}t(document).on("preInit.dt",function(i,n){if("dt"===i.namespace){var o=new t.fn.dataTable.Api(n),a=o.table().node().id,l=o.init();if("filterDropDown"in l){var r=e(l.filterDropDown);if(0!=r.columns.length){var u=o.table().container(),s=a+"_filterWrapper",c=s+" "+(r.bootstrap?"form-inline":"");t(u).prepend('<div id="'+s+'" class="'+c+'">'+r.label+"</div>"),o.columns(r.columnsIdxList).every(function(){var e=this.index(),i=null!==r.columns[e].title?r.columns[e].title:t(this.header()).html();""==i&&(i="column "+(e+1));var n="form-control "+a+"_filterSelect",o=a+"_filterSelect"+e;t("#"+s).append('<select id="'+o+'" class="'+n+'"></select>');var l=t("#"+o).empty().append('<option value="">('+i+")</option>");})}}}}),t(document).on("init.dt",function(i,n){if("dt"===i.namespace){var o=new t.fn.dataTable.Api(n),a=o.table().node().id,l=o.init();if("filterDropDown"in l){var r=e(l.filterDropDown);o.table().container();o.columns(r.columnsIdxList).every(function(){var e=this,i=e.index(),n=t("#"+(a+"_filterSelect"+i));n.on("change",function(){var i=t.fn.dataTable.util.escapeRegex(t(this).val());e.search(i?"^"+i+"$":"",!0,!1).draw()}),e.data().unique().sort().each(function(t,e){""!=t&&n.append('<option value="'+t+'">'+t+"</option>")})})}}})}(jQuery);</script>
+    {% include 'bundles/datatables-js-bs5.html' %}
+    {% include 'bundles/filterdropdown-js.html' %}
 
-{% endblock %}
+    {% translate "Pending Removal" as l10nPendingRemoval %}
 
-{% block extra_script %}
+    <script>
+        $(document).ready(function () {
+            'use strict';
 
-$(document).ready(function() {
+            const load_filter = (filter_id) => {
+                let url = '{% url "securegroups:audit_check" sg.id 1234567890 %}';
+                url = url.replace('1234567890', filter_id);
 
-    function load_filter(filter_id){
-        var url = "{% url 'securegroups:audit_check' sg.id 1234567890 %}";
-        url = url.replace('1234567890', filter_id);
-        var token = document.getElementsByName('csrfmiddlewaretoken')
-        token = token[1].value
-        $.ajax({
-            headers: {'X-CSRFToken': token},
-            method:"POST",
-            url:url,
-            data:{},
-            success:filter_post});
-    };
+                let token = document.getElementsByName('csrfmiddlewaretoken');
+                token = token[1].value;
 
-    function update_cell(data) {
-        uid = data.uid;
-        fid = data.fid;
-        result = data.result;
-        message = data.message;
-        tag = "#" + uid + "_" + fid;
-        cell_body = $(tag)[0];
-        if (result == null){
-          msg = "Error in Filter"
-          if (message!=""){
-            msg=message
-          }
-          cell_body.innerHTML = `<a class="label label-default" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}"><i class="fas fa-question"></i></a>`;
-        }else if (result == true) {
-            cell_body.innerHTML = `<a class="label label-success" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}" data-html="true"><i class="fas fa-check-circle"></i></a>`;
-        } else {
-            cell_body.innerHTML = `<a class="label label-danger" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}" data-html="true"><i class="fas fa-times-circle"></i></a>`;
-        }
-        ts = "tooltip" + fid
-        $("[rel="+ts+"]").tooltip();
+                $.ajax({
+                    headers: {'X-CSRFToken': token},
+                    method: 'POST',
+                    url: url,
+                    data: {},
+                    success: filter_post
+                });
+            };
 
-    };
+            const update_cell = (data) => {
+                const uid = data.uid;
+                const fid = data.fid;
+                const result = data.result;
+                const message = data.message;
+                const tag = '#' + uid + '_' + fid;
+                const cell_body = $(tag)[0];
 
+                if (result == null) {
+                    cell_body.innerHTML = `<a class="label label-default" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}"><i class="fa-solid fa-question"></i></a>`;
+                } else if (result === true) {
+                    cell_body.innerHTML = `<a class="label label-success" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}" data-html="true"><i class="fa-solid fa-check-circle"></i></a>`;
+                } else {
+                    cell_body.innerHTML = `<a class="label label-danger" type="button" data-toggle="tooltip" rel="tooltip${fid}" data-placement="top" title="" data-original-title="${message}" data-html="true"><i class="fa-solid fa-times-circle"></i></a>`;
+                }
 
-    function filter_post(data) {
-        console.log(data);
-        data.forEach(update_cell)
-    };
+                const ts = `tooltip${fid}`;
 
-    {% for fltr in filters %}
-    load_filter({{fltr.id}});
-    {% endfor %}
+                $(`[rel=${ts}]`).tooltip();
+            };
 
-    $('#audit-table').DataTable({
-        "filterDropDown": {
-        columns: [
-            {"idx":2}
-        ],
-            },
-        "columnDefs": [
-            { "searchable": true, "targets": [0] },
-            { "visible": false, "targets": [2] },
-            { "sortable": true, "targets": [0] }
-        ],
-        "order": [
-            [0, "asc"]
-        ],
-        "paging": false,
-        "responsive" : true
-    });
+            const filter_post = (data) => {
+                console.log(data);
 
-    $(".rem-user-button").on("click", function() {
-        var url = "{% url 'securegroups:rem_user' sg.group.id 123456 %}";
-        var id = this.id;
-        url = url.replace('123456', id);
-        var token =  document.getElementsByName('csrfmiddlewaretoken')[1].value
-        $.get(url, function(data, status) {
-            if(status=="success"){
-                console.log(data)
-                $("#uid_"+data.user_id).remove()
-            } else {
+                data.forEach(update_cell);
+            };
 
-            }
+            {% for fltr in filters %}
+                load_filter({{ fltr.id }});
+            {% endfor %}
 
+            $('#audit-table').DataTable({
+                filterDropDown: {
+                    columns: [
+                        {
+                            idx: 2,
+                            title: '{{ l10nPendingRemoval|escapejs }}'
+                        }
+                    ],
+                    bootstrap: true,
+                    bootstrap_version: 5
+                },
+                columnDefs: [
+                    {searchable: true, targets: [0]},
+                    {visible: false, targets: [2]},
+                    {sortable: true, targets: [0]}
+                ],
+                order: [
+                    [0, 'asc']
+                ],
+                paging: false,
+                responsive: true
+            });
+
+            $('.rem-user-button').on('click', function () {
+                const id = this.id;
+
+                let url = '{% url "securegroups:rem_user" sg.group.id 123456 %}';
+                url = url.replace('123456', id);
+
+                $.get(url, function (data, status) {
+                    if (status === 'success') {
+                        console.log(data);
+
+                        $(`#uid_${data.user_id}`).remove();
+                    }
+                });
+            });
         });
-    });
-
-});
+    </script>
 {% endblock %}

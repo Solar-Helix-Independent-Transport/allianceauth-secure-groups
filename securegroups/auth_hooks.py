@@ -53,6 +53,8 @@ class GroupManagementMenuItem(MenuItemHook):
             url_name="securegroups:audit_list",
             order=55,
             navactive=[
+                "securegroups:audit",
+                "securegroups:audit_check",
                 "securegroups:audit_list",
             ],
         )

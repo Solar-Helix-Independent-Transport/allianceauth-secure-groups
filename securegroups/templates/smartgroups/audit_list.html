@@ -1,32 +1,31 @@
-{% extends "allianceauth/base.html" %}
+{% extends "allianceauth/base-bs5.html" %}
+
 {% load static %}
 {% load i18n %}
 
-{% block page_title %}{% translate "Smart Group Audit" %}{% endblock page_title %}
-{% block extra_css %}{% endblock extra_css %}
+{% block page_title %}{% translate "Secure Group Audit" %}{% endblock page_title %}
+
+{% block header_nav_brand %}{% translate "Secure Group Audit" %}{% endblock %}
 
 {% block content %}
-    <div class="col-lg-12">
-        <br>
-        {% include 'smartgroups/menu.html' %}
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                {% translate "Secure Groups" %}
+    <div class="allianceauth-secure-groups">
+        <div class="card card-default">
+            <div class="card-header mb-0">
+                <div class="card-title">{% translate "Secure Groups" %}</div>
             </div>
 
-            <div class="panel-body">
+            <div class="card-body">
                 {% if sgs %}
                     <div class="table-responsive">
-                        <table class="table table-aa">
+                        <table class="table table-striped table-hover" id="groupsTable">
                             <thead>
                                 <tr>
                                     <th>{% translate "Name" %}</th>
                                     <th>{% translate "Description" %}</th>
-                                    <th class="text-center">{% translate "Status" %}</th>
-                                    <th class="text-center">{% translate "Member Count" %}</th>
-                                    <th class="text-center">{% translate "Pending Removal" %}</th>
-                                    <th style="white-space: nowrap;"></th>
+                                    <th>{% translate "Status" %}</th>
+                                    <th>{% translate "Member Count" %}</th>
+                                    <th>{% translate "Pending Removal" %}</th>
+                                    <th></th>
                                 </tr>
                             </thead>
 
@@ -37,9 +36,17 @@
                                             {{ sg.group.name }}
                                         </td>
 
-                                        <td>{{ sg.group.authgroup.description|linebreaks|urlize }}{{ sg.description|linebreaks|urlize }}</td>
+                                        <td>
+                                            {% if sg.group.authgroup.description %}
+                                                {{ sg.group.authgroup.description|linebreaks|urlize }}
+                                            {% endif %}
 
-                                        <td class="text-center">
+                                            {% if sg.description %}
+                                                {{ sg.description|linebreaks|urlize }}
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
                                             {% if sg.auto_group %}
                                                 <span class="label label-default">{% trans "Auto Group" %}</span>
                                             {% elif sg.group.authgroup.open %}
@@ -49,18 +56,21 @@
                                             {% endif %}
                                         </td>
 
-                                        <td class="text-center">
+                                        <td class="text-end">
                                             {{ sg.num_members }}
                                         </td>
-                                        <td class="text-center">
+
+                                        <td class="text-end">
                                             {{ sg.pending_rem }}
                                         </td>
-                                        <td class="text-right">
-                                            <a href="{% url 'securegroups:audit' sg.id %}" class="btn btn-primary" title="{% translate "Audit Members" %}">
-                                                <i class="glyphicon glyphicon-eye-open"></i>
+
+                                        <td class="text-end">
+                                            <a href="{% url 'securegroups:audit' sg.id %}" class="btn btn-sm btn-primary" title="{% translate "Audit Members" %}">
+                                                <i class="fa-solid fa-eye"></i>
                                             </a>
-                                            <a href="{% url 'securegroups:update_group' sg.id %}" class="btn btn-primary" title="{% translate "Request Update" %}">
-                                                <i class="glyphicon glyphicon-refresh"></i>
+
+                                            <a href="{% url 'securegroups:update_group' sg.id %}" class="btn btn-sm btn-primary" title="{% translate "Request Update" %}">
+                                                <i class="fa-solid fa-rotate"></i>
                                             </a>
                                         </td>
 
