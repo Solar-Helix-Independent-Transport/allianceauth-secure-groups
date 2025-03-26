@@ -94,7 +94,7 @@ class TestGroupBotFilters(TestCase):
                 corporation_ticker="TST2",
             )
             CharacterOwnership.objects.create(
-                character=character, user=users[uid], owner_hash=f"ownalt{11+uid}"
+                character=character, user=users[uid], owner_hash=f"ownalt{11 + uid}"
             )
             characters.append(character)
 
@@ -110,7 +110,7 @@ class TestGroupBotFilters(TestCase):
                 alliance_ticker="TSTA1",
             )
             CharacterOwnership.objects.create(
-                character=character, user=users[uid], owner_hash=f"ownalt{11+uid}"
+                character=character, user=users[uid], owner_hash=f"ownalt{11 + uid}"
             )
             characters.append(character)
         _alli = EveAllianceInfo.objects.create(alliance_id=1,

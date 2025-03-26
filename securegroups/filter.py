@@ -1,6 +1,7 @@
 import logging
 from typing import List
-from django.contrib.auth.models import User, Group
+
+from django.contrib.auth.models import Group, User
 
 logger = logging.getLogger(__name__)
 
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 def check_alt_alli_on_account(user: User, alt_alli_id, exempt_corps=False, exempt_allis=False):
     try:
         if exempt_allis:
-            if user.profile.main_character.alliance_id in exempt_alli:
+            if user.profile.main_character.alliance_id in exempt_allis:
                 return True
 
         if exempt_corps:
@@ -33,7 +34,7 @@ def check_alt_corp_on_account(user: User, alt_corp_id, exempt_corps=False, exemp
         character_list = user.character_ownerships.all().select_related("character")
 
         if exempt_allis:
-            if user.profile.main_character.alliance_id in exempt_alli:
+            if user.profile.main_character.alliance_id in exempt_allis:
                 return True
 
         if exempt_corps:

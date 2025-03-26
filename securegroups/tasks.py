@@ -1,20 +1,24 @@
+import json
 import logging
+from datetime import timedelta
 
-from celery import shared_task, chain
+import requests
+from celery import chain, shared_task
+
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.db.models.expressions import Col
 from django.utils import timezone
-from datetime import timedelta
+
 from allianceauth.notifications import notify
-from .models import GroupUpdateWebhook, PendingNotification, SmartGroup, GracePeriodRecord
+
 from . import app_settings
-import requests
-import json
+from .models import (
+    GracePeriodRecord, GroupUpdateWebhook, PendingNotification, SmartGroup,
+)
 
 if app_settings.discord_bot_active():
     import aadiscordbot
-    from discord import Embed, Color
+    from discord import Color, Embed
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +68,7 @@ def send_update_to_webhook(group, update):
                 logger.error(e, exc_info=1)
 
 
-CACHE_TIMEOUT = 60*60*4
+CACHE_TIMEOUT = 60 * 60 * 4
 
 
 def get_failure_key(sg_id, user_id) -> str:
@@ -126,7 +130,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     for f in filters:
         try:
             bulk_checks[f.id] = f.filter_object.audit_filter(users)
-        except Exception as e:
+        except Exception:
             pass
 
     count = 0
@@ -136,7 +140,8 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     for u in users:
         try:
             assert u.profile.main_character is not None
-        except:  # no main character kickeroo!
+        except:  # noqa: E722
+            # no main character kickeroo!
             removed += 1
             if not fake_run:
                 u.groups.remove(group)
@@ -159,11 +164,11 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
             try:
                 _c["check"] = bulk_checks[f.id][u.id]['check']
                 _c["message"] = bulk_checks[f.id][u.id]['message']
-            except Exception as e:
+            except Exception:
                 try:
                     _c["check"] = f.filter_object.process_filter(u)
                     _c["message"] = ""
-                except Exception as e:
+                except Exception:
                     _c["check"] = False
                     _c["message"] = "Filter Failed"
             checks.append(_c)
@@ -282,15 +287,15 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                 elif was_graced:
                     pending_removals += 1
 
-    message = "**{4}**: Checked {0} Members, Approved {5}, Added {1}, Removed {2}(Pending Removals {6}) {7}".format(
-        count,
-        added,
-        removed,
-        len(all_users),
-        group.name,
-        group.user_set.all().count(),
-        pending_removals,
-        "(Fake)" if fake_run else "",
+    message = "**{group_name}**: Checked {checked} Members, Approved {approved}, Added {added}, Removed {removed} (Pending Removals {pending_removal}){fake}".format(
+        checked=count,
+        added=added,
+        removed=removed,
+        # number_users=len(all_users),
+        group_name=group.name,
+        approved=group.user_set.all().count(),
+        pending_removal=pending_removals,
+        fake=" (Fake)" if fake_run else "",
     )
 
     logger.info(message)

@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+
 from . import __version__
 
 
@@ -8,4 +9,4 @@ class SecureGroupsConfig(AppConfig):
     verbose_name = f"Secure Groups v{__version__}"
 
     def ready(self):
-        import securegroups.signals
+        import securegroups.signals  # noqa: F401

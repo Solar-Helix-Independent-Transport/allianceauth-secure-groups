@@ -1,5 +1,5 @@
-from django.utils.safestring import mark_safe
 from django.template.defaulttags import register
+from django.utils.safestring import mark_safe
 
 
 @register.simple_tag()

@@ -1,16 +1,13 @@
-from django.db import models
-from allianceauth.eveonline.models import (
-    EveCorporationInfo,
-    EveAllianceInfo,
-)
-from allianceauth.authentication.models import CharacterOwnership
-from django.contrib.auth.models import Group
-from django.contrib.auth.models import User
+from collections import defaultdict
+
+from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-
+from django.db import models
 from django.utils import timezone
-from collections import defaultdict
+
+from allianceauth.authentication.models import CharacterOwnership
+from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
 
 from . import app_settings, filter as smart_filters
 
@@ -47,7 +44,7 @@ class SmartFilter(models.Model):
     def __str__(self):
         try:
             return f"{self.filter_object.name}: {self.filter_object.description}"
-        except:
+        except:  # noqa: E722
             return f"Error: {self.content_type.app_label}:{self.content_type} {self.object_id} Not Found"
 
 
@@ -199,7 +196,7 @@ class SmartGroup(models.Model):
                     logger.warning(f"Failed to run filter for {check}")
                     continue  # Skip as this is broken...
                 test_pass = _filter.process_filter(user)
-            except:
+            except:  # noqa: E722
                 test_pass = False
                 logger.error("TEST FAILED")  # TODO Make pretty
             _check = {

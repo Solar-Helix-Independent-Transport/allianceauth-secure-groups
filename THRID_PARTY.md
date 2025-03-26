@@ -8,7 +8,7 @@ Please keep a few key design factors in mind. Consider these Loose Rules:
    - As we could be running thousands of these in very quick succession we dont want to have issues with network/blacklists
  - A filter shall be gentle to the database and CPU.
    - where possible keep the amount of db queries to a minimum and bulk grab all users data at once. Consider using `values()` on your queries if you only need a couple of fields on complex models.
- - Include both the single and bulk functions. 
+ - Include both the single and bulk functions.
    - The Audit pages only use bulk checks
    - The Smart Group update task will fallback to single user checks if the bulk checks fail for what ever reason.
  - Hide filters in admin from people who do not have this app installed.
@@ -33,17 +33,17 @@ The "Key Model Assumptions" are as follows;
           - `check` Boolean, True they Pass, False they Fail.
           - `message` String, an optional messaage for either pass or fails. ( use `<br>` for linebreaks )
 
-        ``` 
+        ```
         {
             1: {
-                "check":False, 
+                "check":False,
                 "Message":"Some Message"
             },
             2: {
-                "check":False, 
+                "check":False,
                 "Message":"Some Message"
             }, ...
-        } 
+        }
         ```
 
 
@@ -65,7 +65,7 @@ class BaseFilter(models.Model):
     def __str__(self):
         return f"{self.name}: {self.description}"
 
-    def process_filter(self, user: User): #Single User Pass Fail system 
+    def process_filter(self, user: User): #Single User Pass Fail system
         raise NotImplementedError("Please Create a filter!")
 
     def audit_filter(self, users): # Bulk check system that also advises the user with simple messages
@@ -88,7 +88,7 @@ class ExampleAltCorpFilter(BaseFilter):
                 return False
         except:
             return False
-    
+
     def audit_filter(self, users): # bulk pass fail
         co = CharacterOwnership.objects.filter(user__in=users, character__corporation_id=self.alt_corp.corporation_id).values(
             'user__id', 'character__character_name')

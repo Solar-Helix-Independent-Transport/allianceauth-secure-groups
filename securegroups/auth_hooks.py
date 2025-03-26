@@ -1,11 +1,13 @@
-from . import urls
-from allianceauth import hooks
-from allianceauth.services.hooks import MenuItemHook, UrlHook
-from .models import AltCorpFilter, AltAllianceFilter, UserInGroupFilter
-from allianceauth.groupmanagement.managers import GroupManager
 from django.utils.translation import gettext_lazy as _
-from .models import GracePeriodRecord
-from . import app_settings
+
+from allianceauth import hooks
+from allianceauth.groupmanagement.managers import GroupManager
+from allianceauth.services.hooks import MenuItemHook, UrlHook
+
+from . import app_settings, urls
+from .models import (
+    AltAllianceFilter, AltCorpFilter, GracePeriodRecord, UserInGroupFilter,
+)
 
 
 @hooks.register("url_hook")
