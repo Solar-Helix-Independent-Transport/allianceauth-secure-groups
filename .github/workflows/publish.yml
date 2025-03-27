@@ -12,13 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: "16"
+          node-version: "22" # [LTS] End of Life: 30 Apr 2027 (https://endoflife.date/nodejs)
 
       - run: npm install -g yarn
 
