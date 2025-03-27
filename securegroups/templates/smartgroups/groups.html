@@ -100,12 +100,17 @@
             </div>
         {% endif %}
 
-        <div class="modal fade " id="modal-main" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal fade" id="modal-account-checks" tabindex="-1" role="dialog" aria-labelledby="{% translate 'Account Checks' %}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <div class="modal-title" id="main-modal-title">{% translate 'Account Checks' %}</div>
+                        <div class="modal-title fs-5">
+                            {% translate 'Account Checks' %}
+                        </div>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Close' %}"></button>
                     </div>
+
                     <div id="main-modal-body" class="modal-body" style="overflow-y: auto;"></div>
                 </div>
             </div>
@@ -141,7 +146,7 @@
                 const modal_body = $('#main-modal-body')[0];
                 modal_body.innerHTML = data;
 
-                const myModal = new bootstrap.Modal(document.getElementById('modal-main'));
+                const myModal = new bootstrap.Modal(document.getElementById('modal-account-checks'));
 
                 myModal.show();
             });
