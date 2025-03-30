@@ -19,29 +19,39 @@ from .models import (
 if app_settings.discord_bot_active():
     import aadiscordbot
     from discord import Color, Embed
+    from aadiscordbot.utils.auth import get_discord_user_id
 
 logger = logging.getLogger(__name__)
 
 
 def create_pending_notification(user, message, group, filter, remove=False):
     logger.info(
-        "Adding {} to {} pending notifications for {}".format(group, user, message))
+        f"Adding {group} to {user} pending notifications for {message}"
+    )
     PendingNotification.objects.create(
-        user=user, filter=filter, group=group, message=message, removal=remove)
+        user=user,
+        filter=filter,
+        group=group,
+        message=message,
+        removal=remove
+    )
 
 
 def send_discord_dm(user, title, message, color):
     if app_settings.discord_bot_active():
-        from aadiscordbot.utils.auth import get_discord_user_id
         try:
-            e = Embed(title=title,
-                      description=message,
-                      color=color)
+            e = Embed(
+                title=title,
+                description=message,
+                color=color
+            )
             aadiscordbot.tasks.send_message(
                 user_id=get_discord_user_id(user),
                 embed=e
             )
-            logger.debug("sent discord ping to {}".format(user))
+            logger.info(
+                f"sent discord ping to {user} - {message}"
+            )
         except Exception as e:
             logger.error(e, exc_info=1)
             pass
@@ -57,11 +67,14 @@ def send_update_to_webhook(group, update):
                 grp.webhook,
                 headers=custom_headers,
                 data=json.dumps(
-                    {"content": "{}\n{}".format(update, grp.extra_message)}
+                    {
+                        "content": f"{update}\n{grp.extra_message}"
+                    }
                 ),
             )
-            logger.debug("Got status code %s after sending ping" %
-                         r.status_code)
+            logger.debug(
+                f"Got status code {r.status_code} after sending ping"
+            )
             try:
                 r.raise_for_status()
             except Exception as e:
@@ -87,30 +100,86 @@ def clear_failure(sg_id, user_id):
     cache.delete(get_failure_key(sg_id, user_id))
 
 
+def process_grace(smart_group, all_users):
+    output = {}
+
+    _all_graced_members = GracePeriodRecord.objects.filter(
+        group=smart_group, user__username__in=all_users
+    )
+
+    if smart_group.can_grace:
+        for gm in _all_graced_members:
+            if gm.user.username not in output:
+                output[gm.user.username] = {}
+            output[gm.user.username][gm.grace_filter] = gm
+
+    return output
+
+
+def process_users_in_bulk(smart_group, users):
+    bulk_checks = {}
+    filters = smart_group.filters.all()
+    for f in filters:
+        try:
+            bulk_checks[f.id] = f.filter_object.audit_filter(users)
+        except Exception as e:
+            pass
+    return bulk_checks
+
+def process_user(filter, user, bulk_checks = None):
+    _c = {
+        "name": filter.filter_object.description,
+        "filter": filter
+    }
+    try:
+        _c["check"] = bulk_checks[filter.id][user.id]['check']
+        _c["message"] = bulk_checks[filter.id][user.id]['message']
+    except Exception as e:
+        try:
+            _c["check"] = filter.filter_object.process_filter(user)
+            _c["message"] = ""
+        except Exception as e:
+            _c["check"] = False
+            _c["message"] = "Filter Failed"
+    return _c
+
+
+def check_user_has_main(smart_group, user, fake_run):
+    try:
+        assert user.profile.main_character is not None
+        return True
+    except:  # no main character kickeroo!
+        removed += 1
+        if not fake_run:
+            user.groups.remove(smart_group.group)
+            # remove user
+            if smart_group.notify_on_remove:
+                message = f'{user.username} - Removed from "{smart_group.group.name}" No Main'
+                notify(
+                    user,
+                    f'Auto Group Removal "{smart_group.group.name}"',
+                    message,
+                    "warning"
+                )
+            logger.info(message)
+        return False
+
 @shared_task
 def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     # Run Smart Group and add/remove members as required
     smart_group = SmartGroup.objects.get(id=sg_id)
     if smart_group.can_grace:
         can_grace = smart_group.can_grace
+
     logger.info(
-        "Starting '{}' Checks. {}".format(
-            smart_group.group.name, "(Fake)" if fake_run else ""
-        )
+        f"Starting '{smart_group.group.name}' Checks. {'(Fake)' if fake_run else ''}"
     )
 
     group = smart_group.group
     all_users = group.user_set.all().values_list("username", flat=True)
-    all_graced_members = {}
-    _all_graced_members = GracePeriodRecord.objects.filter(
-        group=smart_group, user__username__in=all_users
-    )
-    if smart_group.can_grace:
-        for gm in _all_graced_members:
-            if gm.user.username not in all_graced_members:
-                all_graced_members[gm.user.username] = {}
-            all_graced_members[gm.user.username][gm.grace_filter] = gm
+    all_graced_members = process_grace(smart_group, all_users)
 
+    # who are we going to process?
     if smart_group.auto_group:
         states = group.authgroup.states.all()
         if states.count() > 0:
@@ -123,67 +192,40 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
         users = group.user_set.all()
 
     users = users.select_related(
-        "profile", "profile__main_character").distinct()
+        "profile",
+        "profile__main_character"
+    ).distinct()
 
-    bulk_checks = {}
-    filters = smart_group.filters.all()
-    for f in filters:
-        try:
-            bulk_checks[f.id] = f.filter_object.audit_filter(users)
-        except Exception:
-            pass
+    bulk_checks = process_users_in_bulk(smart_group, users)
 
     count = 0
     added = 0
     removed = 0
     pending_removals = 0
     for u in users:
-        try:
-            assert u.profile.main_character is not None
-        except:  # noqa: E722
-            # no main character kickeroo!
-            removed += 1
-            if not fake_run:
-                u.groups.remove(group)
-                # remove user
-                if smart_group.notify_on_remove:
-                    message = '{} - Removed from "{}" No Main'.format(
-                        u.username, group.name
-                    )
-                    notify(
-                        u, f'Auto Group Removal "{group.name}"', message, "warning")
-                logger.info(message)
+        if not check_user_has_main(smart_group, u, fake_run):
             continue
-
         checks = []
+        
+        filters = smart_group.filters.all()
         for f in filters:
-            _c = {
-                "name": f.filter_object.description,
-                "filter": f
-            }
-            try:
-                _c["check"] = bulk_checks[f.id][u.id]['check']
-                _c["message"] = bulk_checks[f.id][u.id]['message']
-            except Exception:
-                try:
-                    _c["check"] = f.filter_object.process_filter(u)
-                    _c["message"] = ""
-                except Exception:
-                    _c["check"] = False
-                    _c["message"] = "Filter Failed"
+            _c = process_user(f, u, bulk_checks)
             checks.append(_c)
+
         if len(checks) == 0:
+            logging.warning("No checks to process on group?")
             break
 
         count += 1
-        out = True
+        check_pass = True
+
         reasons = []
         for c in checks:
             if not c.get("check", False):
-                out = False
+                check_pass = False
                 reasons.append(f'{c.get("name", "")}  {c.get("message", "")}')
 
-        if out:
+        if check_pass:
             if u.username in all_graced_members:
                 if not fake_run:
                     GracePeriodRecord.objects.filter(
@@ -227,8 +269,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
                                         c.get("filter"),
                                         remove=True
                                     )
-                                all_graced_members[u.username][filter_name].delete(
-                                )
+                                all_graced_members[u.username][filter_name].delete()
                                 remove = True
                                 continue
                             else:

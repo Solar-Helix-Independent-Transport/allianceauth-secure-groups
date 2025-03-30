@@ -57,6 +57,8 @@ class TestGroupBotFilters(TestCase):
             name="Test Corp 2 Alt", description="Have Alt in TST2", alt_corp_id=tst2.pk
         )
         _sf = gb_models.SmartFilter.objects.all().last()
+        print(vars(cls.corp_filter))
+        print(vars(_sf))
         cls.test_s_group = gb_models.SmartGroup.objects.create(
             group=cls.test_group,
             can_grace=True,
@@ -416,36 +418,63 @@ class TestGroupBotFilters(TestCase):
         User.objects.get(id=7).groups.add(self.test_group)
         self.connect_signals()
         # users all good
-        self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
         self.assertTrue(
-            self.test_group in User.objects.get(id=10).groups.all())
-        self.assertTrue(self.test_group in User.objects.get(id=9).groups.all())
-        self.assertTrue(self.test_group in User.objects.get(id=7).groups.all())
+            self.test_group in User.objects.get(id=1).groups.all()
+        )
+        self.assertTrue(
+            self.test_group in User.objects.get(id=10).groups.all()
+        )
+        self.assertTrue(
+            self.test_group in User.objects.get(id=9).groups.all()
+        )
+        self.assertTrue(
+            self.test_group in User.objects.get(id=7).groups.all()
+        )
 
         # first pass test hit the pre notify
         gb_tasks.run_smart_group_update(self.test_s_group.id)
 
-        self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
         self.assertTrue(
-            self.test_group in User.objects.get(id=10).groups.all())
-        self.assertTrue(self.test_group in User.objects.get(id=9).groups.all())
-        self.assertTrue(self.test_group in User.objects.get(id=7).groups.all())
+            self.test_group in User.objects.get(id=1).groups.all()
+        )
+        self.assertTrue(
+            self.test_group in User.objects.get(id=10).groups.all()
+        )
+        self.assertTrue(
+            self.test_group in User.objects.get(id=9).groups.all()
+        )
+        self.assertTrue(
+            self.test_group in User.objects.get(id=7).groups.all()
+        )
+
         self.assertEqual(
-            gb_models.GracePeriodRecord.objects.all().count(), 0)  # not notified
+            gb_models.GracePeriodRecord.objects.all().count(),
+            0
+        )  # not notified
 
         # the data should have been updated by now so try again
         gb_tasks.run_smart_group_update(self.test_s_group.id)
 
-        self.assertTrue(self.test_group in User.objects.get(id=1).groups.all())
         self.assertTrue(
-            self.test_group in User.objects.get(id=10).groups.all())
-        self.assertTrue(self.test_group in User.objects.get(id=9).groups.all())
-        self.assertTrue(self.test_group in User.objects.get(id=7).groups.all())
+            self.test_group in User.objects.get(id=1).groups.all()
+        )
+        self.assertTrue(
+            self.test_group in User.objects.get(id=10).groups.all()
+        )
+        self.assertTrue(
+            self.test_group in User.objects.get(id=9).groups.all()
+        )
+        self.assertTrue(
+            self.test_group in User.objects.get(id=7).groups.all()
+        )
+
         self.assertEqual(
-            gb_models.GracePeriodRecord.objects.all().count(), 3)  # now notified
+            gb_models.GracePeriodRecord.objects.all().count(),
+            3
+        )  # now notified
 
         gb_models.GracePeriodRecord.objects.all().update(
-            expires=reset_time)  # reset he grace to remove
+            expires=reset_time)  # reset the grace to remove
 
         gb_tasks.run_smart_group_update(self.test_s_group.id)
 
