@@ -1,11 +1,13 @@
-from . import urls
-from allianceauth import hooks
-from allianceauth.services.hooks import MenuItemHook, UrlHook
-from .models import AltCorpFilter, AltAllianceFilter, UserInGroupFilter
-from allianceauth.groupmanagement.managers import GroupManager
 from django.utils.translation import gettext_lazy as _
-from .models import GracePeriodRecord
-from . import app_settings
+
+from allianceauth import hooks
+from allianceauth.groupmanagement.managers import GroupManager
+from allianceauth.services.hooks import MenuItemHook, UrlHook
+
+from . import app_settings, urls
+from .models import (
+    AltAllianceFilter, AltCorpFilter, GracePeriodRecord, UserInGroupFilter,
+)
 
 
 @hooks.register("url_hook")
@@ -18,7 +20,7 @@ class GroupMenu(MenuItemHook):
         MenuItemHook.__init__(
             self,
             "Secure Groups",
-            "fas fa-user-lock fa-fw",
+            "fa-solid fa-user-lock",
             "securegroups:groups",
             45,
             navactive=["securegroups:groups"],
@@ -26,9 +28,14 @@ class GroupMenu(MenuItemHook):
 
     def render(self, request):
         if request.user.has_perm("securegroups.access_sec_group"):
-            _cnt = GracePeriodRecord.objects.filter(
-                user=request.user,
-                group__auto_group=False).values('group_id').distinct().count()
+            _cnt = (
+                GracePeriodRecord.objects.filter(
+                    user=request.user, group__auto_group=False
+                )
+                .values("group_id")
+                .distinct()
+                .count()
+            )
             if _cnt > 0:
                 self.count = _cnt
             return MenuItemHook.render(self, request)
@@ -42,17 +49,19 @@ def register_menu():
 
 
 class GroupManagementMenuItem(MenuItemHook):
-    """ This class ensures only authorized users will see the menu entry """
+    """This class ensures only authorized users will see the menu entry"""
 
     def __init__(self):
         # setup menu entry for sidebar
         MenuItemHook.__init__(
             self,
             text=_("Secure Group Audit"),
-            classes="fas fa-user-check fa-fw",
+            classes="fa-solid fa-user-check",
             url_name="securegroups:audit_list",
             order=55,
             navactive=[
+                "securegroups:audit",
+                "securegroups:audit_check",
                 "securegroups:audit_list",
             ],
         )
@@ -75,6 +84,6 @@ def filters():
     return [AltAllianceFilter, AltCorpFilter, UserInGroupFilter]
 
 
-@hooks.register('discord_cogs_hook')
+@hooks.register("discord_cogs_hook")
 def register_cogs():
     return app_settings.DISCORD_BOT_COGS

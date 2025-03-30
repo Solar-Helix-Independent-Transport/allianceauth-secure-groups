@@ -1,13 +1,15 @@
 {% load i18n %}
+
 {% if message %}
-<p class="alert text-center alert-warning">{% blocktranslate %}Group Error: {{message}} {% endblocktranslate %}</p>
+    <p class="alert text-center alert-warning">{% blocktranslate %}Group Error: {{ message }} {% endblocktranslate %}</p>
 {% endif %}
+
 <table class="table table-aa">
     <thead>
         <tr>
             <th>{% translate 'Requirements' %}</th>
             <th class="text-center">{% translate 'Note' %}</th>
-            <th class="text-right">{% translate 'Result' %}</th>
+            <th class="text-end">{% translate 'Result' %}</th>
         </tr>
     </thead>
 
@@ -16,12 +18,22 @@
             <tr>
                 <td>{{ filter.name }}</td>
                 <td class="text-center">{{ filter.message|safe }}</td>
-                <td>{% if filter.check %}<a class="pull-right btn btn-success" type="button" ><i class="fas fa-check-circle"></i></a>{% else %}<a class="pull-right btn btn-danger" type="button" ><i class="fas fa-times-circle"></i></a>{% endif %}</td>
+                <td class="text-end">
+                    {% if filter.check %}
+                        <a class="btn btn-success" type="button">
+                            <i class="fa-solid fa-check-circle"></i>
+                        </a>
+                    {% else %}
+                        <a class="text-end btn btn-danger" type="button">
+                            <i class="fa-solid fa-times-circle"></i>
+                        </a>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<div class="col-xs-12">
-    <a class="btn btn-{% if pass_checks %}primary{% else %}warning{% endif %} col-xs-12" {% if pass_checks %}href="{% url 'securegroups:request_add' group_id %}">{% translate 'Join Group' %}{% else %} disabled>{% translate 'Ineligible' %}{% endif %}</a>
+<div class="w-100">
+    <a class="btn btn-{% if pass_checks %}primary{% else %}warning{% endif %} w-100" {% if pass_checks %}href="{% url 'securegroups:request_add' group_id %}">{% translate 'Join Group' %}{% else %} disabled>{% translate 'Ineligible' %}{% endif %}</a>
 </div>

@@ -1,15 +1,11 @@
-from django.test import TransactionTestCase, RequestFactory
-from django.urls import reverse
-from allianceauth.tests.auth_utils import AuthUtils
-from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
+from django.contrib.auth.models import Group, User
+from django.test import RequestFactory, TransactionTestCase
+
 from allianceauth.authentication.models import CharacterOwnership
-from django.contrib.auth.models import User
-from django.utils import timezone
-from datetime import timedelta
-from .. import filter as gb_filters
+from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
+from allianceauth.tests.auth_utils import AuthUtils
+
 from .. import models as gb_models
-from .. import tasks as gb_tasks
-from django.contrib.auth.models import Group
 
 
 class TestGroupBotTransactions(TransactionTestCase):
@@ -39,10 +35,10 @@ class TestGroupBotTransactions(TransactionTestCase):
             corporation_ticker="TST2",
             member_count=100,
         )
-        cls.user = AuthUtils.create_user(f"User_transactions_test")
+        cls.user = AuthUtils.create_user("User_transactions_test")
         main_char = AuthUtils.add_main_character_2(
             cls.user,
-            f"Main Trans",
+            "Main Trans",
             cls.user.id,
             corp_id=1,
             corp_name="Test Corp 1",
@@ -53,7 +49,7 @@ class TestGroupBotTransactions(TransactionTestCase):
         )
 
         character = EveCharacter.objects.create(
-            character_name=f"Alt 9999",
+            character_name="Alt 9999",
             character_id=9999,
             corporation_name="Test Corp 2",
             corporation_id=2,

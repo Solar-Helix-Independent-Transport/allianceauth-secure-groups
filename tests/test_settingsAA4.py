@@ -10,7 +10,7 @@ CSRF_TRUSTED_ORIGINS = [SITE_URL]
 # Celery configuration
 CELERY_ALWAYS_EAGER = True  # Forces celery to run locally for testing
 
-INSTALLED_APPS += [
+INSTALLED_APPS += [  # noqa: F405
     "securegroups",
 ]
 
@@ -37,6 +37,7 @@ PASSWORD_HASHERS = [
 ESI_SSO_CLIENT_ID = '123'
 ESI_SSO_CLIENT_SECRET = '123'
 ESI_SSO_CALLBACK_URL = '123'
+ESI_USER_CONTACT_EMAIL = "noreply@example.con"
 
 CACHES = {
     "default": {

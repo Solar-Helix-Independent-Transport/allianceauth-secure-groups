@@ -1,20 +1,24 @@
 # Cog Stuff
-from discord import AutocompleteContext, Role, SlashCommandGroup, option
-from discord.ext import commands
-from discord.embeds import Embed
-from discord.colour import Color
-# AA Contexts
-from django.conf import settings
-from django.contrib.auth.models import User, Group
+import logging
 
-from django.core.exceptions import ObjectDoesNotExist
-from allianceauth.eveonline.models import EveCharacter
 # AA-Discordbot
 from aadiscordbot.app_settings import get_all_servers
-from aadiscordbot.cogs.utils.decorators import has_any_perm, in_channels, sender_has_perm
+from aadiscordbot.cogs.utils.decorators import (
+    has_any_perm, in_channels, sender_has_perm,
+)
+from discord import AutocompleteContext, SlashCommandGroup, option
+from discord.colour import Color
+from discord.embeds import Embed
+from discord.ext import commands
+
+# AA Contexts
+from django.conf import settings
+from django.contrib.auth.models import Group
+from django.core.exceptions import ObjectDoesNotExist
+
+from allianceauth.eveonline.models import EveCharacter
 
 from ..models import SmartGroup
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +68,7 @@ class GroupCheck(commands.Cog):
                     )
 
                 return await ctx.send(embed=embed)
-            except ObjectDoesNotExist as e:
+            except ObjectDoesNotExist:
                 return await ctx.send("Member or Group issues")
 
         except EveCharacter.DoesNotExist:
@@ -132,7 +136,7 @@ class GroupCheck(commands.Cog):
                         embed.color = Color.red()
 
                 return await ctx.respond(embed=embed)
-            except ObjectDoesNotExist as e:
+            except ObjectDoesNotExist:
                 return await ctx.respond("Error Processing Filters")
 
         except EveCharacter.DoesNotExist:

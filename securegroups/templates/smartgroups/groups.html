@@ -1,44 +1,74 @@
-{% extends "allianceauth/base.html" %}
+{% extends "allianceauth/base-bs5.html" %}
+
 {% load static %}
 {% load i18n %}
 
-{% block page_title %}{% translate "Available Groups" %}{% endblock page_title %}
+{% block page_title %}{% translate "Secure Groups" %}{% endblock page_title %}
 
-{% block extra_css %}
-<style>
-    @media (min-width: 768px)
-    {
-        .modal-dialog {
-            width: 800px;
-            margin: 30px auto;
-        }
-    }
-</style>
-{% endblock extra_css %}
+{% block header_nav_brand %}{% translate "Secure Groups" %}{% endblock header_nav_brand %}
+
+{% if manager_perms %}
+    {% block header_nav_collapse_left %}
+        {% if perms.groupmanagement.management %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'groupmanagement:management' %}">{% translate "Group Management" %}
+                    {% if req_count %}
+                        <span class="badge bg-secondary">{{ req_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+
+            {% if perms.securegroups.audit_sec_group %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'securegroups:audit_list' %}">{% translate "Secure Group Audit" %}
+                    </a>
+                </li>
+            {% endif %}
+        {% endif %}
+    {% endblock %}
+{% endif %}
+
 {% block content %}
-    <div class="col-lg-12">
-        <h1 class="page-header text-center">{% trans "Available Groups" %}</h1>
+    <div class="allianceauth-secure-groups">
         {% if groups %}
-            <table class="table table-aa">
+            <table class="table" id="groupsTable" >
                 <thead>
                     <tr>
-                        <th class="text-center">{% trans "Name" %}</th>
-                        <th class="text-center">{% trans "Description" %}</th>
-                        <th class="text-center">{% translate "Leaders" %}<span class="label label-primary">User</span><span class="label label-info">Group</span></th>
+                        <th>{% translate "Name" %}</th>
+                        <th>{% translate "Description" %}</th>
+                        <th>
+                            {% translate "Leaders" %}<br>
+                            <span class="m-1 fw-lighter badge bg-primary">{% translate "User" %}</span>
+                            <span class="m-1 fw-lighter badge bg-secondary">{% translate "Group" %}</span>
+                        </th>
                         <th class="text-center">{% trans "Action" %}</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {% for g in groups %}
                         <tr>
-                            <td class="text-center">{{ g.smart_group.group.name }}{% if g.grace_msg %}<br><span rel="tooltip" class="label label-warning" data-toggle="tooltip" data-placement="top" data-html="true" title data-original-title="{{g.grace_msg}}">{% translate 'Pending Removal' %}</span>{% endif %}</td>
-                            <td class="text-center">{{ g.smart_group.group.authgroup.description|urlize }}<br>{{ g.smart_group.description|urlize }}</td>
-                            <td class="text-center">
-                                {% for leader in g.smart_group.group.authgroup.group_leaders.all %}{% if leader.profile.main_character %}<span class="label label-primary">{{leader.profile.main_character}}</span>{% endif %}{% endfor %}
-                                {% for group in g.smart_group.group.authgroup.group_leader_groups.all %}<span class="label label-info">{{group.name}}</span>{% endfor %}
+                            <td>{{ g.smart_group.group.name }}</td>
+
+                            <td>
+                                {% if g.smart_group.group.authgroup.description %}
+                                    {{ g.smart_group.group.authgroup.description|linebreaks|urlize }}
+                                {% endif %}
                             </td>
 
-                            <td class="text-center">
+                            <td style="max-width: 30%;">
+                                {% for leader in g.smart_group.group.authgroup.group_leaders.all %}
+                                    {% if leader.profile.main_character %}
+                                        <span class="my-1 me-1 badge bg-primary">{{ leader.profile.main_character }}</span>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% for group in g.smart_group.group.authgroup.group_leader_groups.all %}
+                                    <span class="my-1 me-1 badge bg-secondary">{{ group.name }}</span>
+                                {% endfor %}
+                            </td>
+
+                            <td class="text-end">
                                 {% if g.smart_group.group in user.groups.all %}
                                     {% if not g.request %}
                                         <a href="{% url 'securegroups:request_leave' g.smart_group.group.id %}" class="btn btn-danger">
@@ -63,39 +93,63 @@
                     {% endfor %}
                 </tbody>
             </table>
+
         {% else %}
             <div class="alert alert-warning text-center">
-                {% trans "No groups available." %}
+                {% translate "No groups available." %}
             </div>
         {% endif %}
-    </div>
-    <div class="modal fade" id="modal-main" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="main-modal-title">{% translate 'Account Checks'%}</h5>
+
+        <div class="modal fade" id="modal-account-checks" tabindex="-1" role="dialog" aria-labelledby="{% translate 'Account Checks' %}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-title fs-5">
+                            {% translate 'Account Checks' %}
+                        </div>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Close' %}"></button>
+                    </div>
+
+                    <div id="main-modal-body" class="modal-body" style="overflow-y: auto;"></div>
                 </div>
-                <div id="main-modal-body" class="modal-body"  style="overflow-y:auto;"></div>
             </div>
         </div>
     </div>
 {% endblock content %}
 
-{% block extra_script %}
-$(".check-user-button").on("click", function() {
-    var url = "{% url 'securegroups:request_check' 123456 %}";
-    var id = this.id;
-    url = url.replace('123456', id);
-    $.get(url, function(data) {
-        console.log(data);
-        modal_body = $("#main-modal-body")[0];
-        modal_body.innerHTML = data;
-        $("#modal-main").modal();
-    });
-});
-$(document).ready(function() {
-    $("[rel='tooltip']").tooltip();
-    }
-)
+{% block extra_css %}
+    {% include 'bundles/datatables-css-bs5.html' %}
+{% endblock %}
 
+{% block extra_javascript %}
+    {% include 'bundles/datatables-js-bs5.html' %}
+
+    <script>
+        $(document).ready(function () {
+            $('#groupsTable').DataTable();
+
+            // Bootstrap 5 Tooltip
+            [].slice.call(document.querySelectorAll(`[data-bs-tooltip="allianceauth-secure-groups"]`))
+                .map((tooltipTriggerEl) => {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+        });
+
+        $(".check-user-button").on("click", function() {
+            const id = this.id;
+
+            let url = "{% url 'securegroups:request_check' 123456 %}";
+            url = url.replace('123456', id);
+
+            $.get(url, function(data) {
+                const modal_body = $('#main-modal-body')[0];
+                modal_body.innerHTML = data;
+
+                const myModal = new bootstrap.Modal(document.getElementById('modal-account-checks'));
+
+                myModal.show();
+            });
+        });
+    </script>
 {% endblock %}

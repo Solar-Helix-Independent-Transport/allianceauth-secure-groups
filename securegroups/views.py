@@ -1,27 +1,25 @@
-from .models import GracePeriodRecord, SmartGroup, SmartFilter
-from allianceauth.groupmanagement.models import GroupRequest, RequestLog
-from allianceauth.groupmanagement.managers import GroupManager
-from django.utils.translation import gettext_lazy as _
-from django.http import HttpResponse, JsonResponse
 import logging
-
-from django.contrib.auth.decorators import permission_required
-from django.contrib import messages
-from django.contrib.auth.models import Group
-from django.db.models import Q
-from django.conf import settings
-from django.shortcuts import render, redirect, get_object_or_404
 from collections import defaultdict
-from django.template import TemplateDoesNotExist
 
-from django.http import Http404
-from django.db.models import Count
-from django.contrib.auth.decorators import user_passes_test
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import (
+    permission_required, user_passes_test,
+)
+from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-
+from django.db.models import Count, Q
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.utils.translation import gettext_lazy as _
 
+from allianceauth.groupmanagement.managers import GroupManager
+from allianceauth.groupmanagement.models import GroupRequest, RequestLog
+
+from .models import GracePeriodRecord, SmartFilter, SmartGroup
 from .tasks import run_smart_group_update
+
 logger = logging.getLogger(__name__)
 
 
@@ -72,10 +70,8 @@ def groups_view(request):
         count = GroupManager.pending_requests_count_for_user(request.user)
 
     context = {"groups": groups, "req_count": count}
-    try:
-        return render(request, "smartgroups/groups_bs5.html", context=context)
-    except TemplateDoesNotExist:
-        return render(request, "smartgroups/groups.html", context=context)
+
+    return render(request, "smartgroups/groups.html", context=context)
 
 
 @permission_required("securegroups.audit_sec_group")
@@ -175,10 +171,8 @@ def smart_group_run_check(request, group_id):
         ctx = {
             "message": _("Running Group Check Failed, Please contact an Admin!") + "\n{}".format(e)
         }
-    try:
-        return HttpResponse(render_to_string("smartgroups/user_check_bs5.html", ctx, request=request))
-    except TemplateDoesNotExist:
-        return HttpResponse(render_to_string("smartgroups/user_check.html", ctx, request=request))
+
+    return HttpResponse(render_to_string("smartgroups/user_check.html", ctx, request=request))
 
 
 @permission_required("securegroups.audit_sec_group")
