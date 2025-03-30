@@ -18,8 +18,8 @@ from .models import (
 
 if app_settings.discord_bot_active():
     import aadiscordbot
-    from discord import Color, Embed
     from aadiscordbot.utils.auth import get_discord_user_id
+    from discord import Color, Embed
 
 logger = logging.getLogger(__name__)
 
@@ -122,11 +122,12 @@ def process_users_in_bulk(smart_group, users):
     for f in filters:
         try:
             bulk_checks[f.id] = f.filter_object.audit_filter(users)
-        except Exception as e:
+        except Exception:
             pass
     return bulk_checks
 
-def process_user(filter, user, bulk_checks = None):
+
+def process_user(filter, user, bulk_checks=None):
     _c = {
         "name": filter.filter_object.description,
         "filter": filter
@@ -134,11 +135,11 @@ def process_user(filter, user, bulk_checks = None):
     try:
         _c["check"] = bulk_checks[filter.id][user.id]['check']
         _c["message"] = bulk_checks[filter.id][user.id]['message']
-    except Exception as e:
+    except Exception:
         try:
             _c["check"] = filter.filter_object.process_filter(user)
             _c["message"] = ""
-        except Exception as e:
+        except Exception:
             _c["check"] = False
             _c["message"] = "Filter Failed"
     return _c
@@ -148,8 +149,7 @@ def check_user_has_main(smart_group, user, fake_run):
     try:
         assert user.profile.main_character is not None
         return True
-    except:  # no main character kickeroo!
-        removed += 1
+    except Exception:  # no main character kickeroo!
         if not fake_run:
             user.groups.remove(smart_group.group)
             # remove user
@@ -163,6 +163,7 @@ def check_user_has_main(smart_group, user, fake_run):
                 )
             logger.info(message)
         return False
+
 
 @shared_task
 def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
@@ -204,9 +205,10 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     pending_removals = 0
     for u in users:
         if not check_user_has_main(smart_group, u, fake_run):
+            removed += 1
             continue
         checks = []
-        
+
         filters = smart_group.filters.all()
         for f in filters:
             _c = process_user(f, u, bulk_checks)
