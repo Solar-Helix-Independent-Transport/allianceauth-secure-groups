@@ -1,0 +1,241 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# Bandera Primary, 2025
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-20 16:56+0800\n"
+"PO-Revision-Date: 2023-10-13 09:06+0000\n"
+"Last-Translator: Bandera Primary, 2025\n"
+"Language-Team: Ukrainian (https://app.transifex.com/alliance-auth/teams/107430/uk/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: uk\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != 11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || (n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+
+#: auth_hooks.py:51 templates/smartgroups/groups_bs5.html:21
+#: templates/smartgroups/menu.html:14
+msgid "Secure Group Audit"
+msgstr "Аудит закритих груп"
+
+#: templates/smartgroups/audit.html:7
+msgid "Group Audit"
+msgstr "Аудит групи"
+
+#: templates/smartgroups/audit.html:94
+msgid "User"
+msgstr "Користувач"
+
+#: templates/smartgroups/audit.html:95
+msgid "Organization"
+msgstr "Організація"
+
+#: templates/smartgroups/audit.html:96
+#: templates/smartgroups/audit_list.html:28
+#: templates/smartgroups/groups.html:34
+msgid "Pending Removal"
+msgstr "Очікують видалення"
+
+#: templates/smartgroups/audit.html:98
+msgid "Actions"
+msgstr "Дії"
+
+#: templates/smartgroups/audit.html:118
+msgid "(unknown)"
+msgstr "(невідомо)"
+
+#: templates/smartgroups/audit.html:123
+msgid "Yes"
+msgstr "Так"
+
+#: templates/smartgroups/audit.html:125
+msgid "No"
+msgstr "Ні"
+
+#: templates/smartgroups/audit.html:134
+msgid "Kick Member"
+msgstr "Виключити учасника"
+
+#: templates/smartgroups/audit_list.html:5
+msgid "Smart Group Audit"
+msgstr "Аудит смарт-груп"
+
+#: templates/smartgroups/audit_list.html:15
+#: templates/smartgroups/groups_bs5.html:5
+#: templates/smartgroups/groups_bs5.html:6
+msgid "Secure Groups"
+msgstr "Закриті групи"
+
+#: templates/smartgroups/audit_list.html:24
+#: templates/smartgroups/groups.html:25
+#: templates/smartgroups/groups_bs5.html:34
+msgid "Name"
+msgstr "Назва"
+
+#: templates/smartgroups/audit_list.html:25
+#: templates/smartgroups/groups.html:26
+#: templates/smartgroups/groups_bs5.html:35
+msgid "Description"
+msgstr "Опис"
+
+#: templates/smartgroups/audit_list.html:26
+msgid "Status"
+msgstr "Статус"
+
+#: templates/smartgroups/audit_list.html:27
+msgid "Member Count"
+msgstr "Кількість учасників"
+
+#: templates/smartgroups/audit_list.html:44
+msgid "Auto Group"
+msgstr "Автоматична група"
+
+#: templates/smartgroups/audit_list.html:46
+msgid "Open"
+msgstr "Відкрита"
+
+#: templates/smartgroups/audit_list.html:48
+msgid "Requestable"
+msgstr "Запит"
+
+#: templates/smartgroups/audit_list.html:59
+msgid "Audit Members"
+msgstr "Аудит учасників"
+
+#: templates/smartgroups/audit_list.html:62
+msgid "Request Update"
+msgstr "Запит оновлення"
+
+#: templates/smartgroups/audit_list.html:74
+msgid "No groups to list."
+msgstr "Немає груп для переліку."
+
+#: templates/smartgroups/filter_list.html:4
+#: templates/smartgroups/user_check.html:7
+#: templates/smartgroups/user_check_bs5.html:7
+msgid "Requirements"
+msgstr "Вимоги"
+
+#: templates/smartgroups/filter_list.html:5
+#: templates/smartgroups/user_check.html:8
+#: templates/smartgroups/user_check_bs5.html:8
+msgid "Note"
+msgstr "Примітка"
+
+#: templates/smartgroups/filter_list.html:6
+#: templates/smartgroups/user_check.html:9
+#: templates/smartgroups/user_check_bs5.html:9
+msgid "Result"
+msgstr "Результат"
+
+#: templates/smartgroups/groups.html:5 templates/smartgroups/groups.html:20
+msgid "Available Groups"
+msgstr "Доступні групи"
+
+#: templates/smartgroups/groups.html:27
+#: templates/smartgroups/groups_bs5.html:36
+msgid "Leaders"
+msgstr "Лідери"
+
+#: templates/smartgroups/groups.html:28
+#: templates/smartgroups/groups_bs5.html:37
+msgid "Action"
+msgstr "Дія"
+
+#: templates/smartgroups/groups.html:45
+#: templates/smartgroups/groups_bs5.html:54
+msgid "Leave"
+msgstr "Вийти"
+
+#: templates/smartgroups/groups.html:49 templates/smartgroups/groups.html:58
+#: templates/smartgroups/groups_bs5.html:58
+#: templates/smartgroups/groups_bs5.html:67 views.py:231 views.py:295
+msgid "Pending"
+msgstr "Очікування"
+
+#: templates/smartgroups/groups.html:54
+#: templates/smartgroups/groups_bs5.html:63
+msgid "Request"
+msgstr "Запит"
+
+#: templates/smartgroups/groups.html:68
+#: templates/smartgroups/groups_bs5.html:78
+msgid "No groups available."
+msgstr "Немає доступних груп."
+
+#: templates/smartgroups/groups.html:76
+#: templates/smartgroups/groups_bs5.html:85
+msgid "Account Checks"
+msgstr "Перевірки облікового запису"
+
+#: templates/smartgroups/groups_bs5.html:13
+msgid "Group Management"
+msgstr "Керування групами"
+
+#: templates/smartgroups/menu.html:9
+msgid "Toggle navigation"
+msgstr "Перемкнути навігацію"
+
+#: templates/smartgroups/user_check.html:3
+#: templates/smartgroups/user_check_bs5.html:3
+#, python-format
+msgid "Group Error: %(message)s "
+msgstr "Помилка групи: %(message)s "
+
+#: templates/smartgroups/user_check.html:21
+#: templates/smartgroups/user_check_bs5.html:21
+msgid "Join Group"
+msgstr "Приєднатися до групи"
+
+#: templates/smartgroups/user_check.html:21
+#: templates/smartgroups/user_check_bs5.html:21
+msgid "Ineligible"
+msgstr "Неприйнятий"
+
+#: views.py:176
+msgid "Running Group Check Failed, Please contact an Admin!"
+msgstr ""
+"Помилка проведення перевірки групи, будь ласка, зв'яжіться з "
+"адміністратором!"
+
+#: views.py:209
+msgid "You are already a member of that group."
+msgstr "Ви вже є учасником цієї групи."
+
+#: views.py:227
+msgid "You already have a pending application for that group."
+msgstr "Ви вже надіслали запит на приєднання до цієї групи."
+
+#: views.py:241
+#, python-format
+msgid "Applied to group %(group)s."
+msgstr "Заявка на приєднання до групи %(group)s."
+
+#: views.py:258
+msgid "You cannot leave that group"
+msgstr "Ви не можете вийти з цієї групи"
+
+#: views.py:265
+msgid "You are not a member of that group"
+msgstr "Ви не є учасником цієї групи"
+
+#: views.py:280
+msgid "You already have a pending leave request for that group."
+msgstr "Ви вже надіслали запит на вихід з цієї групи."
+
+#: views.py:306
+#, python-format
+msgid "Applied to leave group %(group)s."
+msgstr "Заявка на вихід з групи %(group)s."
+
+#: views.py:336 views.py:339
+msgid "Does not Exist"
+msgstr "Не існує"
