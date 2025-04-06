@@ -66,6 +66,98 @@ class FilterBase(models.Model):
         raise NotImplementedError("Please Create an audit function!")
 
 
+class FilterExpression(FilterBase):
+    class Meta:
+        verbose_name = "Smart Filter: Expression"
+        verbose_name_plural = verbose_name
+
+    first_term = models.ForeignKey(
+        SmartFilter,
+        on_delete=models.CASCADE,
+        related_name="+"
+    )
+
+    class OperatorChoices(models.TextChoices):
+        AND = "and"
+        OR = "or"
+        XOR = "xor"
+
+    operator = models.CharField(
+        max_length=10,
+        choices=OperatorChoices.choices,
+    )
+
+    second_term = models.ForeignKey(
+        SmartFilter,
+        on_delete=models.CASCADE,
+        related_name="+",
+    )
+
+    negate_result = models.BooleanField(default=False)
+
+    def process_filter(self, user: User):
+        first = self.first_term.filter_object.process_filter(user)
+        second = self.second_term.filter_object.process_filter(user)
+
+        result = False
+
+        if self.operator == self.OperatorChoices.AND:
+            result = first and second
+        elif self.operator == self.OperatorChoices.OR:
+            result = first or second
+        elif self.operator == self.OperatorChoices.XOR:
+            result = first ^ second
+        else:
+            return False
+
+        if self.negate_result:
+            result = not result
+        return result
+
+    def audit_filter(self, users):
+        first_res = self.first_term.filter_object.audit_filter(users)
+        second_res = self.second_term.filter_object.audit_filter(users)
+
+        output = defaultdict(lambda: {"message": "", "check": False})
+
+        for user in users:
+            first = first_res[user.id]
+            second = second_res[user.id]
+
+            if self.operator == self.OperatorChoices.AND:
+                check = first["check"] and second["check"]
+                if self.negate_result:
+                    check = not check
+
+                output[user.id] = {
+                    "check": check,
+                    "message": f"{'NOT ' if self.negate_result else ''}{first['message']} AND {second['message']}",
+                }
+            elif self.operator == self.OperatorChoices.OR:
+                check = first["check"] or second["check"]
+                if self.negate_result:
+                    check = not check
+
+                output[user.id] = {
+                    "check": check,
+                    "message": f"{'NOT ' if self.negate_result else ''}{first['message']} OR {second['message']}",
+                }
+            elif self.operator == self.OperatorChoices.XOR:
+                check = first["check"] ^ second["check"]
+                if self.negate_result:
+                    check = not check
+
+                output[user.id] = {
+                    "check": check,
+                    "message": f"{'NOT ' if self.negate_result else ''}{first['message']} XOR {second['message']}",
+                }
+            else:
+                output[user.id]["check"] = False
+                output[user.id]["message"] = "Invalid operator"
+
+        return output
+
+
 class AltCorpFilter(FilterBase):
     class Meta:
         verbose_name = "Smart Filter: Character in Corporation"
