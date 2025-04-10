@@ -3,6 +3,7 @@ import logging
 from datetime import timedelta
 
 import requests
+from aadiscordbot.cogs.utils.exceptions import NotAuthenticated
 from celery import chain, shared_task
 
 from django.contrib.auth.models import User
@@ -45,13 +46,17 @@ def send_discord_dm(user, title, message, color):
                 description=message,
                 color=color
             )
-            aadiscordbot.tasks.send_message(
-                user_id=get_discord_user_id(user),
-                embed=e
-            )
-            logger.info(
-                f"sent discord ping to {user} - {message}"
-            )
+            try:
+                aadiscordbot.tasks.send_message(
+                    user_id=get_discord_user_id(user),
+                    embed=e
+                )
+                logger.info(
+                    f"sent discord ping to {user} - {message}"
+                )
+            except NotAuthenticated:
+                logger.warning(f"Unable to ping {user} - {message}")
+
         except Exception as e:
             logger.error(e, exc_info=1)
             pass
@@ -380,10 +385,14 @@ def notify_grace():
         for m in msgs:
             groups.add(m.group.group.name)
             messages.add(f"{m.filter.filter_object.description}: {m.message}")
-
+        name = u.username
+        try:
+            name = u.profile.main_character.character_name
+        except AttributeError:
+            pass
         message = (
             '{} - Pending Removal from these Groups:\n```\n- {}\n```\nDue to failing:\n```\n- {}\n```'.format(
-                u.profile.main_character.character_name,
+                name,
                 "\n- ".join(list(groups)),
                 "\n- ".join(list(messages)),
             )
@@ -413,10 +422,14 @@ def notify_removal():
         for m in msgs:
             groups.add(m.group.group.name)
             messages.add(f"{m.filter.filter_object.description}: {m.message}")
-
+        name = u.username
+        try:
+            name = u.profile.main_character.character_name
+        except AttributeError:
+            pass
         message = (
             '{} - Removed from these Groups:\n```\n- {}\n```\nDue to failing:\n```\n- {}\n```'.format(
-                u.profile.main_character.character_name,
+                name,
                 "\n- ".join(list(groups)),
                 "\n- ".join(list(messages)),
             )
