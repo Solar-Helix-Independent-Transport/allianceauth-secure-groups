@@ -3,7 +3,6 @@ import logging
 from datetime import timedelta
 
 import requests
-from aadiscordbot.cogs.utils.exceptions import NotAuthenticated
 from celery import chain, shared_task
 
 from django.contrib.auth.models import User
@@ -19,6 +18,7 @@ from .models import (
 
 if app_settings.discord_bot_active():
     import aadiscordbot
+    from aadiscordbot.cogs.utils.exceptions import NotAuthenticated
     from aadiscordbot.utils.auth import get_discord_user_id
     from discord import Color, Embed
 
