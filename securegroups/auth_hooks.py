@@ -6,7 +6,8 @@ from allianceauth.services.hooks import MenuItemHook, UrlHook
 
 from . import app_settings, urls
 from .models import (
-    AltAllianceFilter, AltCorpFilter, GracePeriodRecord, UserInGroupFilter,
+    AltAllianceFilter, AltCorpFilter, FilterExpression, GracePeriodRecord,
+    UserInGroupFilter,
 )
 
 
@@ -81,7 +82,7 @@ def register_audit():
 
 @hooks.register("secure_group_filters")
 def filters():
-    return [AltAllianceFilter, AltCorpFilter, UserInGroupFilter]
+    return [AltAllianceFilter, AltCorpFilter, UserInGroupFilter, FilterExpression]
 
 
 @hooks.register("discord_cogs_hook")

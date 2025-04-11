@@ -30,6 +30,7 @@ Not in any particular order:
   - Corporate Role checks
   - Corporate Title check
   - Highest SP on a Character check
+  - Expression filter that allows to combine any check to form a more complex logic expression
 - [Statistics](https://github.com/pvyParts/allianceauth-analitics)
   - zKill - x Kills in x Months
 - Blacklist module ( link )
