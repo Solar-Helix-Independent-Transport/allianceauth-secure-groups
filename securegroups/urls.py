@@ -15,6 +15,8 @@ urlpatterns = [
     path('group/', include([
         re_path(r'^request_check/(?P<group_id>(\d)*)/$', views.smart_group_run_check,
                 name='request_check'),
+        re_path(r'^request_show/(?P<group_id>(\d)*)/$', views.smart_group_show_check,
+                name='request_show'),
         re_path(r'^request_update/(?P<sg_id>(\d)*)/$', views.group_manual_refresh,
                 name='update_group'),
         re_path(r'^request_add/(\w+)', views.group_request_add,

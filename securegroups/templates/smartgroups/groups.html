@@ -41,14 +41,32 @@
                             <span class="m-1 fw-lighter badge bg-primary">{% translate "User" %}</span>
                             <span class="m-1 fw-lighter badge bg-secondary">{% translate "Group" %}</span>
                         </th>
-                        <th class="text-center">{% trans "Action" %}</th>
+                        <th class="text-center">{% trans "Actions" %}</th>
+                        <th class="text-center">{% trans "Status" %}</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     {% for g in groups %}
-                        <tr>
-                            <td>{{ g.smart_group.group.name }}</td>
+                        <tr
+                            {% if g.smart_group.group in user.groups.all %}
+                                {% if not g.request %}
+                                    {% if g.grace_msg %}
+                                        class="bg-warning bg-opacity-25"
+                                    {% else %}
+                                        class="bg-success bg-opacity-25"
+                                    {% endif %}
+                                {% else %}
+                                    class="bg-info bg-opacity-25"
+                                {% endif %}
+                            {% elif not g.request %}
+                            {% else %}
+                                class="bg-info bg-opacity-25"
+                            {% endif %}
+                        >
+                            <td>
+                                {{ g.smart_group.group.name }}
+                            </td>
 
                             <td>
                                 {% if g.smart_group.group.authgroup.description %}
@@ -71,9 +89,15 @@
                             <td class="text-end">
                                 {% if g.smart_group.group in user.groups.all %}
                                     {% if not g.request %}
+                                        {% if g.grace_msg %}
+                                            <a id="{{ g.smart_group.group.id }}" class="btn btn-warning show-user-button">
+                                                {% translate "Pending Removal - Check Status" %}
+                                            </a>
+                                        {% endif %}
                                         <a href="{% url 'securegroups:request_leave' g.smart_group.group.id %}" class="btn btn-danger">
                                             {% trans "Leave" %}
                                         </a>
+
                                     {% else %}
                                         <button type="button" class="btn btn-primary" disabled>
                                             {% translate "Pending" %}
@@ -89,6 +113,23 @@
                                     </button>
                                 {% endif %}
                             </td>
+                            <td class="text-end">
+                                {% if g.smart_group.group in user.groups.all %}
+                                    {% if not g.request %}
+                                        {% if g.grace_msg %}
+                                            {% trans "Pending Removal" %}
+                                        {% else %}
+                                            {% trans "Joined" %}
+                                        {% endif %}
+                                    {% else %}
+                                        {% translate "Pending Leave Requet" %}
+                                    {% endif %}
+                                {% elif not g.request %}
+                                    {% translate "Available to Join" %}
+                                {% else %}
+                                    {% translate "Pending Join Requet" %}
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -99,7 +140,19 @@
                 {% translate "No groups available." %}
             </div>
         {% endif %}
-
+        <div class="d-flex align-items-center flex-column text-center">
+            <div class="" style="width: 200px">
+                <h4 class="">Key</h4>
+            </div>
+            <table class="table" style="width: 200px">
+                <tbody>
+                    <tr class="bg-warning bg-opacity-25"><td>{% translate "Pending Removal" %}</td></tr>
+                    <tr class=""><td>{% translate "Available to Join" %}</td></tr>
+                    <tr class="bg-info bg-opacity-25"><td>{% translate "Pending Request" %}</td></tr>
+                    <tr class="bg-success bg-opacity-25"><td>{% translate "Currently Joined" %}</td></tr>
+                </tbody>
+            </table>
+        </div>
         <div class="modal fade" id="modal-account-checks" tabindex="-1" role="dialog" aria-labelledby="{% translate 'Account Checks' %}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
                 <div class="modal-content">
@@ -124,10 +177,27 @@
 
 {% block extra_javascript %}
     {% include 'bundles/datatables-js-bs5.html' %}
+    {% include 'bundles/filterdropdown-js.html' %}
 
     <script>
         $(document).ready(function () {
-            $('#groupsTable').DataTable();
+            $('#groupsTable').DataTable({
+                filterDropDown: {
+                    bootstrap: true,
+                    bootstrap_version: 5,
+                    columns: [
+                        {idx: 4}
+                    ]
+                },
+                columnDefs: [
+                    {
+                        target: 4,
+                        visible: false,
+                        searchable: false
+                    },
+                ],
+                autoWidth: false
+            });
 
             // Bootstrap 5 Tooltip
             [].slice.call(document.querySelectorAll(`[data-bs-tooltip="allianceauth-secure-groups"]`))
@@ -140,6 +210,22 @@
             const id = this.id;
 
             let url = "{% url 'securegroups:request_check' 123456 %}";
+            url = url.replace('123456', id);
+
+            $.get(url, function(data) {
+                const modal_body = $('#main-modal-body')[0];
+                modal_body.innerHTML = data;
+
+                const myModal = new bootstrap.Modal(document.getElementById('modal-account-checks'));
+
+                myModal.show();
+            });
+        });
+
+        $(".show-user-button").on("click", function() {
+            const id = this.id;
+
+            let url = "{% url 'securegroups:request_show' 123456 %}";
             url = url.replace('123456', id);
 
             $.get(url, function(data) {

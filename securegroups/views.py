@@ -175,6 +175,23 @@ def smart_group_run_check(request, group_id):
     return HttpResponse(render_to_string("smartgroups/user_check.html", ctx, request=request))
 
 
+@permission_required("securegroups.access_sec_group")
+def smart_group_show_check(request, group_id):
+    try:
+        smart_group = SmartGroup.objects.get(group__id=group_id)
+        filters = smart_group.run_check_on_user(request.user)
+        pass_checks = smart_group.process_checks(filters)
+        ctx = {"filters": filters,
+               "pass_checks": pass_checks, "group_id": group_id}
+    except Exception as e:
+        logger.error("Smart Group Failed to process!", exc_info=1)
+        ctx = {
+            "message": _("Running Group Check Failed, Please contact an Admin!") + "\n{}".format(e)
+        }
+
+    return HttpResponse(render_to_string("smartgroups/show_check.html", ctx, request=request))
+
+
 @permission_required("securegroups.audit_sec_group")
 @user_passes_test(GroupManager.can_manage_groups)
 def group_manual_refresh(request, sg_id=None):
