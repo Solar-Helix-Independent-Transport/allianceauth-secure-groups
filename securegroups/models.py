@@ -5,6 +5,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
+from django.apps import apps
 
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
@@ -64,6 +65,24 @@ class FilterBase(models.Model):
 
     def audit_filter(self, users):
         raise NotImplementedError("Please Create an audit function!")
+
+
+class DiscordActivatedFilter(FilterBase):
+    class Meta:
+        verbose_name = "Smart Filter: Discord"
+        verbose_name_plural = verbose_name
+
+    def process_filter(self, user: User) -> bool:
+        if not apps.is_installed("allianceauth.services.modules.discord"):
+            return False
+
+        from allianceauth.services.modules.discord.models import DiscordUser
+
+        try:
+            discord_user = DiscordUser.objects.get(user=user)
+            return discord_user.activated is not None
+        except DiscordUser.DoesNotExist:
+            return False
 
 
 class FilterExpression(FilterBase):

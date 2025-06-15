@@ -4,7 +4,7 @@ from django.utils.html import format_html
 # Register your models here.
 from .models import (
     AltAllianceFilter, AltCorpFilter, FilterExpression, GracePeriodRecord,
-    GroupUpdateWebhook, SmartFilter, SmartGroup, UserInGroupFilter,
+    GroupUpdateWebhook, SmartFilter, SmartGroup, UserInGroupFilter, DiscordActivatedFilter
 )
 
 
@@ -94,5 +94,9 @@ class AltAlliAdmin(admin.ModelAdmin):
 class FilterExpressionAdmin(admin.ModelAdmin):
     list_display = ["__str__",]
 
+
+@admin.register(DiscordActivatedFilter)
+class DiscordActivatedFilterAdmin(admin.ModelAdmin):
+    list_display = ["__str__",]
 
 admin.site.register(GroupUpdateWebhook)

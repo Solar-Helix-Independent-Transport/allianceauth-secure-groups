@@ -119,13 +119,9 @@ class TestGroupBotFilters(TestCase):
                                                alliance_name="Test Alliance 1",
                                                alliance_ticker="TSTA1",
                                                executor_corp_id=3)
-        cls.alli_filter = gb_models.AltAllianceFilter.objects.create(
-            name="Test Alli 1 Alt", description="Have Alt in TSTA2", alt_alli_id=_alli.pk
-        )
+        cls.alli_filter = gb_models.AltAllianceFilter.objects
 
-        cls.grp_filter = gb_models.UserInGroupFilter.objects.create(
-            name="Test Group", description="Test Group"
-        )
+        cls.grp_filter = gb_models.UserInGroupFilter.objects
         cls.grp_filter.groups.add(cls.test_group)
         cls.grp_filter.groups.add(cls.test_group_2)
 
@@ -136,9 +132,7 @@ class TestGroupBotFilters(TestCase):
         cls.grp_filter_inverted.groups.add(cls.test_group)
         cls.grp_filter_inverted.groups.add(cls.test_group_2)
 
-        cls.grp_filter_single = gb_models.UserInGroupFilter.objects.create(
-            name="Test Group", description="Test Group"
-        )
+        cls.grp_filter_single = gb_models.UserInGroupFilter.objects
 
         cls.grp_filter_single.groups.add(cls.test_group_2)
 
