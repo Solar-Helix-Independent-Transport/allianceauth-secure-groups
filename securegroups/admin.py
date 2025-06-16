@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from app_settings import USING_DISCORD_SERVICE
+from .app_settings import USING_DISCORD_SERVICE
 
 # Register your models here.
 from .models import (
