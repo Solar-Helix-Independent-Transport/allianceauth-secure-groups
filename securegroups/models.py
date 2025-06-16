@@ -75,16 +75,21 @@ class DiscordActivatedFilter(FilterBase):
     negate_result = models.BooleanField(default=False)
 
     def process_filter(self, user: User) -> bool:
-        if not apps.is_installed("allianceauth.services.modules.discord"):
+        if not apps.is_installed("allianceauth.services.modules.discord") or not app_settings.USING_DISCORD_SERVICE:
             return False
+        else:
+            from allianceauth.services.modules.discord.models import DiscordUser
 
-        from allianceauth.services.modules.discord.models import DiscordUser
-
-        try:
-            discord_user = DiscordUser.objects.get(user=user)
-            return discord_user.activated is not None
-        except DiscordUser.DoesNotExist:
-            return False
+            try:
+                discord_user = DiscordUser.objects.get(user=user)
+                logger.info(f"Got Discord status for {user}: {discord_user.activated is not None}")
+                return discord_user.activated is not None
+            except DiscordUser.DoesNotExist:
+                logger.warning(f"{user} Does not have Discord activated or Does not exist in Discord user DB")
+                return False
+            except Exception as e:
+                logger.error(f"Error occurred when processing Discord filter: {e}")
+                return False
 
     def audit_filter(self, users):
         output = defaultdict(lambda: {"message": "", "check": False})
