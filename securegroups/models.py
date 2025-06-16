@@ -83,7 +83,7 @@ class DiscordActivatedFilter(FilterBase):
             try:
                 discord_user = DiscordUser.objects.get(user=user)
                 logger.info(f"Got Discord status for {user}: {discord_user.activated is not None}")
-                return discord_user.activated is None if self.negate_result else discord_user.activated is not None
+                return discord_user.activated is not None
             except DiscordUser.DoesNotExist:
                 logger.warning(f"{user} Does not have Discord activated or Does not exist in Discord user DB")
                 return False
