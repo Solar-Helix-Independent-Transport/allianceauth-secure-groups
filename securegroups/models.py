@@ -72,6 +72,8 @@ class DiscordActivatedFilter(FilterBase):
         verbose_name = "Smart Filter: Discord"
         verbose_name_plural = verbose_name
 
+    negate_result = models.BooleanField(default=False)
+
     def process_filter(self, user: User) -> bool:
         if not apps.is_installed("allianceauth.services.modules.discord"):
             return False
@@ -83,6 +85,37 @@ class DiscordActivatedFilter(FilterBase):
             return discord_user.activated is not None
         except DiscordUser.DoesNotExist:
             return False
+
+    def audit_filter(self, users):
+        output = defaultdict(lambda: {"message": "", "check": False})
+
+        if not apps.is_installed("allianceauth.services.modules.discord"):
+            for user in users:
+                output[user.id] = {
+                    "message": "Discord service not installed",
+                    "check": False
+                }
+            return output
+
+        from allianceauth.services.modules.discord.models import DiscordUser
+
+        discord_users = DiscordUser.objects.filter(
+            user__in=users
+        ).select_related('user')
+
+        activated_map = {
+            du.user.id: du.activated is not None
+            for du in discord_users
+        }
+
+        for user in users:
+            is_active = activated_map.get(user.id, False)
+            output[user.id] = {
+                "message": "Activated" if is_active else "Not activated or not linked",
+                "check": is_active
+            }
+
+        return output
 
 
 class FilterExpression(FilterBase):
