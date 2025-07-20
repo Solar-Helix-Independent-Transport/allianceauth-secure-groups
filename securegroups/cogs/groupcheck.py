@@ -86,7 +86,7 @@ class GroupCheck(commands.Cog):
 
     async def search_groups(ctx: AutocompleteContext):
         """Returns a list of groups that begin with the characters entered so far."""
-        return list(SmartGroup.objects.filter(group__group_name__icontains=ctx.value).values_list('group__name', flat=True)[:10])
+        return list(SmartGroup.objects.filter(group__group_name__icontains=ctx.value).values_list('group__group_name', flat=True)[:10])
 
     sg_commands = SlashCommandGroup("sec_groups", "Secure Group Admin Commands", guild_ids=get_all_servers())
 
