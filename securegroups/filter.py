@@ -29,7 +29,7 @@ def check_alt_alli_on_account(user: User, alt_alli_id, exempt_corps=False, exemp
 
 
 def check_alt_corp_on_account(user: User, alt_corp_id, main_only=False, exempt_corps=False, exempt_allis=False):
-    logger.debug("Checking {0} for alt in corp {1}".format(character_id, alt_corp_id))
+    #logger.debug("Checking {0} for alt in corp {1}".format(character_id, alt_corp_id))
     try:
         main = getattr(user.profile, "main_character", None)
         if not main:
