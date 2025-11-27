@@ -165,6 +165,11 @@ class AltCorpFilter(FilterBase):
 
     alt_corp = models.ForeignKey(EveCorporationInfo, on_delete=models.CASCADE)
 
+    main_only = models.BooleanField(
+        default=False,
+        help_text="Only check the user's main character"
+    )
+
     # sometimes there are double standards.
     exempt_alliances = models.ManyToManyField(
         EveAllianceInfo, related_name="corp_exempt_alliances", blank=True)
@@ -174,17 +179,30 @@ class AltCorpFilter(FilterBase):
     def process_filter(self, user: User):
         return smart_filters.check_alt_corp_on_account(
             user, self.alt_corp.corporation_id,
+            main_only=self.main_only,
             exempt_allis=self.exempt_alliances.all().values_list("alliance_id", flat=True),
             exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
         )
 
     def audit_filter(self, users):
-        co = CharacterOwnership.objects.filter(user__in=users, character__corporation_id=self.alt_corp.corporation_id).values(
-            'user__id', 'character__character_name')
+        if self.main_only:
+            co = (
+                users.filter(
+                    profile__main_character__corporation_id=self.alt_corp.corporation_id
+                )
+                .select_related("profile__main_character")
+                .values("id", "profile__main_character__character_name")
+            )
+        else:
+            co = CharacterOwnership.objects.filter(user__in=users, character__corporation_id=self.alt_corp.corporation_id).values(
+                'user__id', 'character__character_name')
 
         chars = defaultdict(list)
         for c in co:
-            chars[c['user__id']].append(c['character__character_name'])
+            if self.main_only:
+                chars[c['id']].append(c['profile__main_character__character_name'])
+            else:
+                chars[c['user__id']].append(c['character__character_name'])
 
         output = defaultdict(lambda: {"message": "", "check": False})
         for c, char_list in chars.items():
