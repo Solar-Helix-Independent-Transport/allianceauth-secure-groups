@@ -196,7 +196,7 @@ def smart_group_show_check(request, group_id):
 @user_passes_test(GroupManager.can_manage_groups)
 def group_manual_refresh(request, sg_id=None):
     logger.debug("group_manual_refresh called by user %s" % request.user)
-    run_smart_group_update.apply_async(args=[sg_id], priority=4)
+    run_smart_group_update.apply_async(args=[sg_id], kwargs={"notify_after": True}, priority=4)
     # think about doing notifications here
     sg = SmartGroup.objects.get(id=sg_id)
 

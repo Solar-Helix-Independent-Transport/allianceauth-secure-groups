@@ -171,7 +171,7 @@ def check_user_has_main(smart_group, user, fake_run):
 
 
 @shared_task
-def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
+def run_smart_group_update(sg_id, can_grace=False, fake_run=False, notify_after=False):
     # Run Smart Group and add/remove members as required
     smart_group = SmartGroup.objects.get(id=sg_id)
     if smart_group.can_grace:
@@ -349,6 +349,9 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
     logger.info(message)
 
     send_update_to_webhook(group, message)
+
+    if notify_after:
+        notify_users.apply_async(priority=5)
 
     # cleanup graces
     GracePeriodRecord.objects.filter(
