@@ -1,5 +1,4 @@
 import json
-import logging
 from datetime import timedelta
 
 import requests
@@ -10,6 +9,7 @@ from django.core.cache import cache
 from django.utils import timezone
 
 from allianceauth.notifications import notify
+from allianceauth.services.hooks import get_extension_logger
 
 from . import app_settings
 from .models import (
@@ -22,7 +22,7 @@ if app_settings.discord_bot_active():
     from aadiscordbot.utils.auth import get_discord_user_id
     from discord import Color, Embed
 
-logger = logging.getLogger(__name__)
+logger = get_extension_logger(__name__)
 
 
 def create_pending_notification(user, message, group, filter, remove=False):
@@ -220,7 +220,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False):
             checks.append(_c)
 
         if len(checks) == 0:
-            logging.warning("No checks to process on group?")
+            logger.warning("No checks to process on group?")
             break
 
         count += 1
