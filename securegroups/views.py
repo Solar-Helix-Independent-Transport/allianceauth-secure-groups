@@ -1,4 +1,3 @@
-import logging
 from collections import defaultdict
 
 from django.conf import settings
@@ -16,11 +15,12 @@ from django.utils.translation import gettext_lazy as _
 
 from allianceauth.groupmanagement.managers import GroupManager
 from allianceauth.groupmanagement.models import GroupRequest, RequestLog
+from allianceauth.services.hooks import get_extension_logger
 
 from .models import GracePeriodRecord, SmartFilter, SmartGroup
 from .tasks import run_smart_group_update
 
-logger = logging.getLogger(__name__)
+logger = get_extension_logger(__name__)
 
 
 @permission_required("securegroups.access_sec_group")

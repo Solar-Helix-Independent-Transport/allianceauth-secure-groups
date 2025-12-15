@@ -1,4 +1,3 @@
-import logging
 from typing import Union
 
 from django.contrib.auth.models import Group, User
@@ -6,13 +5,14 @@ from django.db.models.signals import m2m_changed, post_save, pre_delete
 from django.dispatch import receiver
 
 from allianceauth import hooks
+from allianceauth.services.hooks import get_extension_logger
 
 from . import models
 
 # signals go here
 
 
-logger = logging.getLogger(__name__)
+logger = get_extension_logger(__name__)
 
 
 class hook_cache:

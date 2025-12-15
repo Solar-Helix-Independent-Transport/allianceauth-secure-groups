@@ -1,9 +1,10 @@
-import logging
 from typing import List
 
 from django.contrib.auth.models import Group, User
 
-logger = logging.getLogger(__name__)
+from allianceauth.services.hooks import get_extension_logger
+
+logger = get_extension_logger(__name__)
 
 
 def check_alt_alli_on_account(user: User, alt_alli_id, exempt_corps=False, exempt_allis=False):

@@ -1,6 +1,3 @@
-# Cog Stuff
-import logging
-
 # AA-Discordbot
 from aadiscordbot.app_settings import get_all_servers
 from aadiscordbot.cogs.utils.decorators import (
@@ -17,10 +14,11 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
 
 from allianceauth.eveonline.models import EveCharacter
+from allianceauth.services.hooks import get_extension_logger
 
 from ..models import SmartGroup
 
-logger = logging.getLogger(__name__)
+logger = get_extension_logger(__name__)
 
 
 class GroupCheck(commands.Cog):
