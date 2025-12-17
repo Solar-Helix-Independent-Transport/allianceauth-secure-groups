@@ -5,6 +5,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
+from django.apps import apps
 
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
@@ -63,6 +64,62 @@ class FilterBase(models.Model):
 
     def audit_filter(self, users):
         raise NotImplementedError("Please Create an audit function!")
+
+
+class DiscordActivatedFilter(FilterBase):
+    class Meta:
+        verbose_name = "Smart Filter: Discord"
+        verbose_name_plural = verbose_name
+
+    negate_result = models.BooleanField(default=False)
+
+    def process_filter(self, user: User) -> bool:
+        if not apps.is_installed("allianceauth.services.modules.discord") or not app_settings.USING_DISCORD_SERVICE:
+            return False
+        else:
+            from allianceauth.services.modules.discord.models import DiscordUser
+
+            try:
+                discord_user = DiscordUser.objects.get(user=user)
+                logger.info(f"Got Discord status for {user}: {discord_user.activated is not None}")
+                return discord_user.activated is None if self.negate_result else discord_user.activated is not None
+            except DiscordUser.DoesNotExist:
+                logger.warning(f"{user} Does not have Discord activated or Does not exist in Discord user DB")
+                return False
+            except Exception as e:
+                logger.error(f"Error occurred when processing Discord filter: {e}")
+                return False
+
+    def audit_filter(self, users):
+        output = defaultdict(lambda: {"message": "", "check": False})
+
+        if not apps.is_installed("allianceauth.services.modules.discord"):
+            for user in users:
+                output[user.id] = {
+                    "message": "Discord service not installed",
+                    "check": False
+                }
+            return output
+
+        from allianceauth.services.modules.discord.models import DiscordUser
+
+        discord_users = DiscordUser.objects.filter(
+            user__in=users
+        ).select_related('user')
+
+        activated_map = {
+            du.user.id: du.activated is not None
+            for du in discord_users
+        }
+
+        for user in users:
+            is_active = activated_map.get(user.id, False)
+            output[user.id] = {
+                "message": "Activated" if is_active else "Not activated or not linked",
+                "check": is_active
+            }
+
+        return output
 
 
 class FilterExpression(FilterBase):
