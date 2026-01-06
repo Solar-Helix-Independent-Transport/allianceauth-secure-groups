@@ -8,15 +8,14 @@ from django.utils import timezone
 
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
+from allianceauth.services.hooks import get_extension_logger
 
 from . import app_settings, filter as smart_filters
 
 if app_settings.discord_bot_active():
     import aadiscordbot
 
-import logging
-
-logger = logging.getLogger(__name__)
+logger = get_extension_logger(__name__)
 
 
 class GroupUpdateWebhook(models.Model):

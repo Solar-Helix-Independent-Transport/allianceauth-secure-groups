@@ -1,4 +1,3 @@
-import logging
 from collections import defaultdict
 
 from django.conf import settings
@@ -16,11 +15,12 @@ from django.utils.translation import gettext_lazy as _
 
 from allianceauth.groupmanagement.managers import GroupManager
 from allianceauth.groupmanagement.models import GroupRequest, RequestLog
+from allianceauth.services.hooks import get_extension_logger
 
 from .models import GracePeriodRecord, SmartFilter, SmartGroup
 from .tasks import run_smart_group_update
 
-logger = logging.getLogger(__name__)
+logger = get_extension_logger(__name__)
 
 
 @permission_required("securegroups.access_sec_group")
@@ -196,7 +196,7 @@ def smart_group_show_check(request, group_id):
 @user_passes_test(GroupManager.can_manage_groups)
 def group_manual_refresh(request, sg_id=None):
     logger.debug("group_manual_refresh called by user %s" % request.user)
-    run_smart_group_update.apply_async(args=[sg_id], priority=4)
+    run_smart_group_update.apply_async(args=[sg_id], kwargs={"notify_after": True}, priority=4)
     # think about doing notifications here
     sg = SmartGroup.objects.get(id=sg_id)
 
