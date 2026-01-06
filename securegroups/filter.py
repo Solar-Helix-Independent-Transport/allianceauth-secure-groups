@@ -29,9 +29,13 @@ def check_alt_alli_on_account(user: User, alt_alli_id, exempt_corps=False, exemp
         return False
 
 
-def check_alt_corp_on_account(user: User, alt_corp_id, exempt_corps=False, exempt_allis=False):
-    # logger.debug("Checking {0} for alt in corp {1}".format(character_id, alt_corp_id))
+def check_alt_corp_on_account(user: User, alt_corp_id, main_only=False, exempt_corps=False, exempt_allis=False):
+    #logger.debug("Checking {0} for alt in corp {1}".format(character_id, alt_corp_id))
     try:
+        main = getattr(user.profile, "main_character", None)
+        if not main:
+            return False
+
         character_list = user.character_ownerships.all().select_related("character")
 
         if exempt_allis:
@@ -41,6 +45,10 @@ def check_alt_corp_on_account(user: User, alt_corp_id, exempt_corps=False, exemp
         if exempt_corps:
             if user.profile.main_character.corporation_id in exempt_corps:
                 return True
+
+        if main_only:
+            # Only evaluate the main character
+            return main.corporation_id == alt_corp_id
 
         character_count = character_list.filter(
             character__corporation_id=alt_corp_id

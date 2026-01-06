@@ -48,7 +48,7 @@ class SmartGroupAdmin(admin.ModelAdmin):
 @admin.register(AltCorpFilter)
 class AltCorpAdmin(admin.ModelAdmin):
     list_select_related = ["alt_corp"]
-    list_display = ["__str__", "alt_corp"]
+    list_display = ["__str__", "alt_corp", "main_only"]
     raw_id_fields = ["alt_corp"]
     filter_horizontal = ["exempt_alliances", "exempt_corporations"]
 
