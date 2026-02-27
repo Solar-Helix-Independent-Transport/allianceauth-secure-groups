@@ -29,6 +29,20 @@ def check_alt_alli_on_account(user: User, alt_alli_id, exempt_corps=False, exemp
         return False
 
 
+def check_alt_fac_on_account(user: User, alt_fac_id):
+    try:
+        character_list = user.character_ownerships.all().select_related("character")
+        character_count = character_list.filter(
+            character__faction_id=alt_fac_id
+        ).count()
+        if character_count > 0:
+            return True
+        else:
+            return False
+    except Exception:
+        return False
+
+
 def check_alt_corp_on_account(user: User, alt_corp_id, exempt_corps=False, exempt_allis=False):
     # logger.debug("Checking {0} for alt in corp {1}".format(character_id, alt_corp_id))
     try:

@@ -3,8 +3,9 @@ from django.utils.html import format_html
 
 # Register your models here.
 from .models import (
-    AltAllianceFilter, AltCorpFilter, FilterExpression, GracePeriodRecord,
-    GroupUpdateWebhook, SmartFilter, SmartGroup, UserInGroupFilter,
+    AltAllianceFilter, AltCorpFilter, AltFactionFilter, FilterExpression,
+    GracePeriodRecord, GroupUpdateWebhook, SmartFilter, SmartGroup,
+    UserInGroupFilter,
 )
 
 
@@ -88,6 +89,13 @@ class AltAlliAdmin(admin.ModelAdmin):
     list_display = ["__str__", "alt_alli"]
     raw_id_fields = ["alt_alli"]
     filter_horizontal = ["exempt_alliances", "exempt_corporations"]
+
+
+@admin.register(AltFactionFilter)
+class AltFactionAdmin(admin.ModelAdmin):
+    list_select_related = ["alt_faction"]
+    list_display = ["__str__", "alt_faction"]
+    raw_id_fields = ["alt_faction"]
 
 
 @admin.register(FilterExpression)

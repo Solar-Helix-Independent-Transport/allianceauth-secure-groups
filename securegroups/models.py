@@ -7,7 +7,9 @@ from django.db import models
 from django.utils import timezone
 
 from allianceauth.authentication.models import CharacterOwnership
-from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
+from allianceauth.eveonline.models import (
+    EveAllianceInfo, EveCorporationInfo, EveFactionInfo,
+)
 from allianceauth.services.hooks import get_extension_logger
 
 from . import app_settings, filter as smart_filters
@@ -252,6 +254,37 @@ class UserInGroupFilter(FilterBase):
         for c in cl:
             chars[c.id] = {"message": "", "check": not self.reversed_logic}
         return chars
+
+
+class AltFactionFilter(FilterBase):
+    class Meta:
+        verbose_name = "Smart Filter: Character in Faction"
+        verbose_name_plural = verbose_name
+
+    alt_faction = models.ForeignKey(EveFactionInfo, on_delete=models.CASCADE)
+
+    def process_filter(self, user: User):
+        return smart_filters.check_alt_fac_on_account(
+            user,
+            self.alt_faction.faction_id,
+        )
+
+    def audit_filter(self, users):
+        co = CharacterOwnership.objects.filter(
+            user__in=users,
+            character__faction_id=self.alt_faction.faction_id
+        ).values(
+            'user__id',
+            'character__character_name'
+        )
+        chars = defaultdict(list)
+        for c in co:
+            chars[c['user__id']].append(c['character__character_name'])
+
+        output = defaultdict(lambda: {"message": "", "check": False})
+        for c, char_list in chars.items():
+            output[c] = {"message": ", ".join(char_list), "check": True}
+        return output
 
 
 class SmartGroup(models.Model):

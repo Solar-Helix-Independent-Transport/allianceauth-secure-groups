@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import (
-    EveAllianceInfo, EveCharacter, EveCorporationInfo,
+    EveAllianceInfo, EveCharacter, EveCorporationInfo, EveFactionInfo,
 )
 from allianceauth.tests.auth_utils import AuthUtils
 
@@ -47,6 +47,8 @@ class TestGroupBotFilters(TestCase):
         cls.test_group_3, _ = Group.objects.update_or_create(name="Test_Group_3")
         cls.test_group_4, _ = Group.objects.update_or_create(
             name="Test_Group_4")
+        cls.test_group_5, _ = Group.objects.update_or_create(
+            name="Test_Group_5")
         tst2 = EveCorporationInfo.objects.create(
             corporation_id=2,
             corporation_name="Test Corp 2",
@@ -66,6 +68,22 @@ class TestGroupBotFilters(TestCase):
             include_in_updates=True,
         )
         cls.test_s_group.filters.add(_sf)
+
+        tstfact1 = EveFactionInfo.objects.create(
+            faction_id=1,
+            faction_name="Test Faction 1",
+        )
+        cls.fac_filter = gb_models.AltFactionFilter.objects.create(
+            name="Test Fac 1 Alt", description="Have Alt in tstfact1", alt_faction_id=tstfact1.pk
+        )
+        _sf = gb_models.SmartFilter.objects.all().last()
+        cls.test_s_group_fac = gb_models.SmartGroup.objects.create(
+            group=cls.test_group_5,
+            can_grace=True,
+            auto_group=False,
+            include_in_updates=True,
+        )
+        cls.test_s_group_fac.filters.add(_sf)
 
         users = []
         characters = []
@@ -110,6 +128,7 @@ class TestGroupBotFilters(TestCase):
                 alliance_id=1,
                 alliance_name="Test Alliance 1",
                 alliance_ticker="TSTA1",
+                faction_id=1
             )
             CharacterOwnership.objects.create(
                 character=character, user=users[uid], owner_hash=f"ownalt{11 + uid}"
@@ -183,6 +202,49 @@ class TestGroupBotFilters(TestCase):
         self.assertFalse(tests[8]['check'])
         self.assertFalse(tests[9]['check'])
         self.assertFalse(tests[10]['check'])
+
+    def test_user_alt_fac(self):
+        users = {}
+        for user in User.objects.all():
+            users[user.pk] = None
+
+        tests = {}
+        for k, u in users.items():
+            tests[k] = self.fac_filter.process_filter(
+                User.objects.get(pk=k)
+            )
+
+        self.assertFalse(tests[1])
+        self.assertFalse(tests[2])
+        self.assertFalse(tests[3])
+        self.assertFalse(tests[4])
+        self.assertFalse(tests[5])
+        self.assertTrue(tests[6])
+        self.assertTrue(tests[7])
+        self.assertTrue(tests[8])
+        self.assertTrue(tests[9])
+        self.assertTrue(tests[10])
+
+    def test_user_fac_filter_audit(self):
+
+        users = []
+        for user in User.objects.all():
+            users.append(user.pk)
+
+        tests = self.fac_filter.audit_filter(
+            User.objects.filter(pk__in=users)
+        )
+
+        self.assertFalse(tests[1]['check'])
+        self.assertFalse(tests[2]['check'])
+        self.assertFalse(tests[3]['check'])
+        self.assertFalse(tests[4]['check'])
+        self.assertFalse(tests[5]['check'])
+        self.assertTrue(tests[6]['check'])
+        self.assertTrue(tests[7]['check'])
+        self.assertTrue(tests[8]['check'])
+        self.assertTrue(tests[9]['check'])
+        self.assertTrue(tests[10]['check'])
 
     def test_user_alt_alli(self):
         users = {}
