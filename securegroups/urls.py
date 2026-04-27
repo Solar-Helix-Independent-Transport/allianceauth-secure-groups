@@ -23,8 +23,11 @@ urlpatterns = [
                 name='request_add'),
         re_path(r'^request_leave/(\w+)', views.group_request_leave,
                 name='request_leave'),
-        re_path(r'^remove/(?P<group_id>(\d)*)/(?P<user_id>(\d)*)/$',
-                views.group_membership_remove, name='rem_user'),
+        re_path(
+            r'^remove/(?P<group_id>(\d)*)/(?P<user_id>(\d)*)/$',
+            views.group_membership_remove,
+            name='rem_user'
+        ),
     ])
     ),
 ]
