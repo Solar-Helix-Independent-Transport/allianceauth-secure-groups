@@ -1,3 +1,4 @@
+import time
 from collections import defaultdict
 
 from django.contrib.auth.models import Group, User
@@ -313,13 +314,19 @@ class SmartGroup(models.Model):
 
     def run_checks(self, user: User):
         output = []
+        group_start = time.perf_counter()
         for check in self.filters.all():
             try:
                 _filter = check.filter_object
                 if _filter is None:
                     logger.warning(f"Failed to run filter for {check}")
                     continue  # Skip as this is broken...
+                t0 = time.perf_counter()
                 test_pass = _filter.process_filter(user)
+                logger.debug(
+                    "run_checks [%s] filter '%s' took %.3fs",
+                    self.group.name, check, time.perf_counter() - t0
+                )
             except:  # noqa: E722
                 test_pass = False
                 logger.error("TEST FAILED")  # TODO Make pretty
@@ -329,18 +336,27 @@ class SmartGroup(models.Model):
             _check["check"] = test_pass
             _check["filter"] = check
             output.append(_check)
+        logger.debug(
+            "run_checks [%s] total %.3fs", self.group.name, time.perf_counter() - group_start
+        )
         return output
 
     def run_check_on_user(self, user: User):
         output = []
+        group_start = time.perf_counter()
         for check in self.filters.all():
             _filter = check.filter_object
             if _filter is None:
                 logger.warning(f"Failed to run filter for {check}")
                 continue  # Skip as this is broken...
             try:
+                t0 = time.perf_counter()
                 test_pass = _filter.audit_filter(
                     User.objects.filter(pk=user.pk)
+                )
+                logger.debug(
+                    "run_check_on_user [%s] filter '%s' took %.3fs",
+                    self.group.name, check, time.perf_counter() - t0
                 )
             except Exception as e:
                 try:
@@ -351,7 +367,8 @@ class SmartGroup(models.Model):
                             "check": _filter.process_filter(user)
                         }
                     }
-                except Exception:
+                except Exception as e2:
+                    print(e2)
                     test_pass = {
                         user.id: {
                             "message": "Filter Failed",
@@ -366,6 +383,9 @@ class SmartGroup(models.Model):
             _check["message"] = test_pass[user.id]['message']
             _check["filter"] = check
             output.append(_check)
+        logger.debug(
+            "run_check_on_user [%s] total %.3fs", self.group.name, time.perf_counter() - group_start
+        )
         return output
 
     def process_checks(self, checks):

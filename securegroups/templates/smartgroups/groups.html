@@ -30,6 +30,37 @@
 
 {% block content %}
     <div class="allianceauth-secure-groups">
+        {% if pending_removals %}
+        <div class="card border-warning mb-4">
+            <div class="card-header bg-warning bg-opacity-25">
+                <h5 class="mb-0">{% translate "Pending Removals" %}</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>{% translate "Group" %}</th>
+                            <th>{% translate "Grace Expires" %}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pr in pending_removals %}
+                        <tr>
+                            <td><strong>{{ pr.group_name }}</strong></td>
+                            <td>{{ pr.expires|date:"N j, Y, P" }}</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-warning show-pending-button" data-group-id="{{ pr.group_id }}">
+                                    {% translate "Check Status" %}
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
         {% if groups %}
             <table class="table" id="groupsTable" >
                 <thead>
@@ -224,16 +255,34 @@
         $(".show-user-button").on("click", function() {
             const id = this.id;
 
+            const modal_body = $('#main-modal-body')[0];
+            modal_body.innerHTML = '<div class="d-flex justify-content-center align-items-center p-4"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">{% translate "Loading..." %}</span></div></div>';
+
+            const myModal = new bootstrap.Modal(document.getElementById('modal-account-checks'));
+            myModal.show();
+
             let url = "{% url 'securegroups:request_show' 123456 %}";
             url = url.replace('123456', id);
 
             $.get(url, function(data) {
-                const modal_body = $('#main-modal-body')[0];
                 modal_body.innerHTML = data;
+            });
+        });
 
-                const myModal = new bootstrap.Modal(document.getElementById('modal-account-checks'));
+        $(".show-pending-button").on("click", function() {
+            const id = $(this).data("group-id");
 
-                myModal.show();
+            const modal_body = $('#main-modal-body')[0];
+            modal_body.innerHTML = '<div class="d-flex justify-content-center align-items-center p-4"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">{% translate "Loading..." %}</span></div></div>';
+
+            const myModal = new bootstrap.Modal(document.getElementById('modal-account-checks'));
+            myModal.show();
+
+            let url = "{% url 'securegroups:request_show' 123456 %}";
+            url = url.replace('123456', id);
+
+            $.get(url, function(data) {
+                modal_body.innerHTML = data;
             });
         });
     </script>

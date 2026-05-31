@@ -41,13 +41,30 @@ def groups_view(request):
         'group__authgroup__group_leaders',
         'group__authgroup__group_leaders__profile__main_character',
         'group__authgroup__group_leader_groups')
-    graces_qs = GracePeriodRecord.objects.filter(user=request.user)
+    graces_qs = GracePeriodRecord.objects.filter(user=request.user, group__enabled=True).select_related(
+        'group__group', 'grace_filter'
+    )
     graces = {}
+    pending_removals_by_group = {}
     for g in graces_qs:
-        if g.group.group.name not in graces:
-            graces[g.group.group.name] = []
-        graces[g.group.group.name].append(
-            g.grace_filter.filter_object.description)
+        group_name = g.group.group.name
+        group_id = g.group.group.id
+        if group_name not in graces:
+            graces[group_name] = []
+        try:
+            filter_desc = g.grace_filter.filter_object.description
+        except Exception:
+            filter_desc = ""
+        graces[group_name].append(filter_desc)
+        if group_id not in pending_removals_by_group:
+            pending_removals_by_group[group_id] = {
+                'group_name': group_name,
+                'group_id': group_id,
+                'expires': g.expires,
+            }
+        elif g.expires < pending_removals_by_group[group_id]['expires']:
+            pending_removals_by_group[group_id]['expires'] = g.expires
+    pending_removals = list(pending_removals_by_group.values())
     groups = []
     for smart_group in smart_groups_qs:
         group_request = GroupRequest.objects.filter(user=request.user).filter(
@@ -69,7 +86,7 @@ def groups_view(request):
     if perms:
         count = GroupManager.pending_requests_count_for_user(request.user)
 
-    context = {"groups": groups, "req_count": count}
+    context = {"groups": groups, "req_count": count, "pending_removals": pending_removals}
 
     return render(request, "smartgroups/groups.html", context=context)
 
