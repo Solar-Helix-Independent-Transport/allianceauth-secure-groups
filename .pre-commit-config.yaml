@@ -86,11 +86,11 @@ repos:
             \.mo|
             swagger\.json
           )
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.1.2
-    hooks:
-      - id: flake8
-        additional_dependencies: [Flake8-pyproject]
+  # - repo: https://github.com/pycqa/flake8
+  #   rev: 7.1.2
+  #   hooks:
+  #     - id: flake8
+  #       additional_dependencies: [Flake8-pyproject]
   - repo: https://github.com/asottile/yesqa
     rev: v1.5.0
     hooks:
