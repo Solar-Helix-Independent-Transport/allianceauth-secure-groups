@@ -43,7 +43,8 @@ class SmartfilterAdmin(admin.ModelAdmin):
 class SmartGroupAdmin(admin.ModelAdmin):
     filter_horizontal = ["filters"]
     list_display = ["__str__", "enabled", "auto_group",
-                    "include_in_updates", "can_grace"]
+                    "include_in_updates", "can_grace", "last_scheduled", "last_run"]
+    readonly_fields = ["last_scheduled", "last_run", "last_run_timing"]
 
 
 @admin.register(AltCorpFilter)

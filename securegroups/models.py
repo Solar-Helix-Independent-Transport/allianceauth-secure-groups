@@ -293,6 +293,9 @@ class SmartGroup(models.Model):
     description = models.CharField(max_length=500, default="", blank=True)
     filters = models.ManyToManyField(SmartFilter)
     last_update = models.DateTimeField(auto_now=True)
+    last_run = models.DateTimeField(null=True, blank=True, editable=False)
+    last_scheduled = models.DateTimeField(null=True, blank=True, editable=False)
+    last_run_timing = models.TextField(blank=True, default="", editable=False)
 
     auto_group = models.BooleanField(default=False)
     enabled = models.BooleanField(default=True)

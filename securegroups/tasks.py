@@ -337,8 +337,11 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False, notify_after=
     logger.debug(
         f"'{group.name}' update finished in {_task_elapsed:.2f}s — filter audit timings:"
     )
+    timing_lines = [f"Total: {_task_elapsed:.2f}s"]
     for fname, duration in sorted(filter_timings.items(), key=lambda x: x[1], reverse=True):
         logger.debug(f"  {duration:.3f}s  {fname}")
+        timing_lines.append(f"{duration:.3f}s  {fname}")
+    timing_text = "\n".join(timing_lines)
 
     send_update_to_webhook(group, message)
 
@@ -352,6 +355,8 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False, notify_after=
         user__in=group.user_set.all()
     ).delete()
 
+    SmartGroup.objects.filter(pk=smart_group.pk).update(last_run=timezone.now(), last_run_timing=timing_text)
+
     return message
 
 
@@ -363,9 +368,14 @@ def run_smart_groups(only_hidden=False):
     if only_hidden:
         groups = groups.filter(auto_group=True)
 
+    now = timezone.now()
     sig_list = []
+    pks = []
     for g in groups:
         sig_list.append(run_smart_group_update.si(g.id))
+        pks.append(g.pk)
+
+    SmartGroup.objects.filter(pk__in=pks).update(last_scheduled=now)
 
     sig_list.append(notify_users.si())
 
