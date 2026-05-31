@@ -1,4 +1,6 @@
 import json
+import time
+from collections import defaultdict
 from datetime import timedelta
 
 import requests
@@ -87,6 +89,13 @@ def send_update_to_webhook(group, update):
 
 
 CACHE_TIMEOUT = 60 * 60 * 4
+USER_CHUNK_SIZE = 150
+
+
+def chunked_users(users, chunk_size=USER_CHUNK_SIZE):
+    pks = list(users.values_list('pk', flat=True))
+    for i in range(0, len(pks), chunk_size):
+        yield users.filter(pk__in=pks[i:i + chunk_size])
 
 
 def get_failure_key(sg_id, user_id) -> str:
@@ -121,15 +130,17 @@ def process_grace(smart_group, all_users):
     return output
 
 
-def process_users_in_bulk(smart_group, users):
+def run_filter_audits(filters, users):
     bulk_checks = {}
-    filters = smart_group.filters.all()
+    filter_timings = {}
     for f in filters:
+        _start = time.perf_counter()
         try:
             bulk_checks[f.id] = f.filter_object.audit_filter(users)
         except Exception:
             pass
-    return bulk_checks
+        filter_timings[f.filter_object.description] = time.perf_counter() - _start
+    return bulk_checks, filter_timings
 
 
 def process_user(filter, user, bulk_checks=None):
@@ -173,6 +184,7 @@ def check_user_has_main(smart_group, user, fake_run):
 @shared_task
 def run_smart_group_update(sg_id, can_grace=False, fake_run=False, notify_after=False):
     # Run Smart Group and add/remove members as required
+    _task_start = time.perf_counter()
     smart_group = SmartGroup.objects.get(id=sg_id)
     if smart_group.can_grace:
         can_grace = smart_group.can_grace
@@ -202,83 +214,77 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False, notify_after=
         "profile__main_character"
     ).distinct()
 
-    bulk_checks = process_users_in_bulk(smart_group, users)
+    filters = smart_group.filters.all()
+    if not filters.exists():
+        logger.warning(f"'{group.name}': no filters configured, skipping user checks.")
 
+    filter_timings = defaultdict(float)
     count = 0
     added = 0
     removed = 0
     pending_removals = 0
-    for u in users:
-        if not check_user_has_main(smart_group, u, fake_run):
-            removed += 1
-            continue
-        checks = []
+    for user_chunk in chunked_users(users) if filters.exists() else []:
+        bulk_checks, chunk_timings = run_filter_audits(filters, user_chunk)
+        for fname, duration in chunk_timings.items():
+            filter_timings[fname] += duration
+        for u in user_chunk:
+            if not check_user_has_main(smart_group, u, fake_run):
+                removed += 1
+                continue
+            checks = [process_user(f, u, bulk_checks) for f in filters]
+            count += 1
+            check_pass = True
+            for c in checks:
+                if not c.get("check", False):
+                    check_pass = False
 
-        filters = smart_group.filters.all()
-        for f in filters:
-            _c = process_user(f, u, bulk_checks)
-            checks.append(_c)
-
-        if len(checks) == 0:
-            logger.warning("No checks to process on group?")
-            break
-
-        count += 1
-        check_pass = True
-
-        reasons = []
-        for c in checks:
-            if not c.get("check", False):
-                check_pass = False
-                reasons.append(f'{c.get("name", "")}  {c.get("message", "")}')
-
-        if check_pass:
-            if u.username in all_graced_members:
-                if not fake_run:
-                    GracePeriodRecord.objects.filter(
-                        user=u, group=smart_group).delete()
-            if smart_group.auto_group:
-                if u.username not in all_users:
-                    # Add user
-                    added += 1
+            if check_pass:
+                if u.username in all_graced_members:
                     if not fake_run:
-                        u.groups.add(group)
-                        message = f"{u.profile.main_character.character_name} - Passed the requirements for {group.name}"
-                        if smart_group.notify_on_add:
-                            if app_settings.discord_bot_active():
-                                send_discord_dm(
-                                    u,
-                                    f'Auto Group Added "{group.name}"',
-                                    message,
-                                    Color.blue()
-                                )
-                            notify(
-                                u, f'Auto Group Added "{group.name}"', message, "info")
-                        logger.info(message)
+                        GracePeriodRecord.objects.filter(
+                            user=u, group=smart_group).delete()
+                if smart_group.auto_group:
+                    if u.username not in all_users:
+                        # Add user
+                        added += 1
+                        if not fake_run:
+                            u.groups.add(group)
+                            message = f"{u.profile.main_character.character_name} - Passed the requirements for {group.name}"
+                            if smart_group.notify_on_add:
+                                if app_settings.discord_bot_active():
+                                    send_discord_dm(
+                                        u,
+                                        f'Auto Group Added "{group.name}"',
+                                        message,
+                                        Color.blue()
+                                    )
+                                notify(
+                                    u, f'Auto Group Added "{group.name}"', message, "info")
+                            logger.info(message)
 
-        else:
-            if u.username in all_users:
-                remove = False
-                grace = False
-                was_graced = False
-                for c in checks:
-                    filter_name = c.get("filter")
-                    grace_days = filter_name.grace_period
-                    expires = timezone.now() + timedelta(days=grace_days)
-                    if u.username in all_graced_members:
-                        if filter_name in all_graced_members.get(u.username, {}):
-                            if all_graced_members[u.username][filter_name].is_expired():
+            else:
+                if u.username in all_users:
+                    remove = False
+                    grace = False
+                    was_graced = False
+                    for c in checks:
+                        smart_filter = c.get("filter")
+                        grace_days = smart_filter.grace_period
+                        expires = timezone.now() + timedelta(days=grace_days)
+                        grace_record = all_graced_members.get(u.username, {}).get(smart_filter)
+
+                        if grace_record is not None:
+                            if grace_record.is_expired():
                                 if smart_group.notify_on_remove:
                                     create_pending_notification(
                                         u,
                                         c.get("message", ""),
                                         smart_group,
-                                        c.get("filter"),
+                                        smart_filter,
                                         remove=True
                                     )
-                                all_graced_members[u.username][filter_name].delete()
+                                grace_record.delete()
                                 remove = True
-                                continue
                             else:
                                 was_graced = True
                         elif not c.get("check", False):
@@ -288,7 +294,7 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False, notify_after=
                                     GracePeriodRecord.objects.create(
                                         user=u,
                                         group=smart_group,
-                                        grace_filter=filter_name,
+                                        grace_filter=smart_filter,
                                         expires=expires,
                                     )
                                     if smart_group.notify_on_grace:
@@ -296,44 +302,23 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False, notify_after=
                                             u,
                                             c.get("message", ""),
                                             smart_group,
-                                            c.get("filter")
+                                            smart_filter
                                         )
                             else:
                                 remove = True
-                                continue
-                    elif not c.get("check", False):
-                        if can_grace and grace_days > 0:
-                            grace = True
-                            if not fake_run and get_failure(sg_id, u.id):
-                                GracePeriodRecord.objects.create(
-                                    user=u,
-                                    group=smart_group,
-                                    grace_filter=filter_name,
-                                    expires=expires,
-                                )
-                                if smart_group.notify_on_grace:
-                                    create_pending_notification(
-                                        u,
-                                        c.get("message", ""),
-                                        smart_group,
-                                        c.get("filter")
-                                    )
-                        else:
-                            remove = True
-                            continue
-                if remove:
-                    removed += 1
-                    if not fake_run:
-                        u.groups.remove(group)
-                elif grace:
-                    pending_removals += 1
-                    if not fake_run:
-                        if get_failure(sg_id, u.id):
-                            clear_failure(sg_id, u.id)
-                        else:
-                            set_failure(sg_id, u.id)
-                elif was_graced:
-                    pending_removals += 1
+                    if remove:
+                        removed += 1
+                        if not fake_run:
+                            u.groups.remove(group)
+                    elif grace:
+                        pending_removals += 1
+                        if not fake_run:
+                            if get_failure(sg_id, u.id):
+                                clear_failure(sg_id, u.id)
+                            else:
+                                set_failure(sg_id, u.id)
+                    elif was_graced:
+                        pending_removals += 1
 
     message = "**{group_name}**: Checked {checked} Members, Approved {approved}, Added {added}, Removed {removed} (Pending Removals {pending_removal}){fake}".format(
         checked=count,
@@ -347,6 +332,13 @@ def run_smart_group_update(sg_id, can_grace=False, fake_run=False, notify_after=
     )
 
     logger.info(message)
+
+    _task_elapsed = time.perf_counter() - _task_start
+    logger.debug(
+        f"'{group.name}' update finished in {_task_elapsed:.2f}s — filter audit timings:"
+    )
+    for fname, duration in sorted(filter_timings.items(), key=lambda x: x[1], reverse=True):
+        logger.debug(f"  {duration:.3f}s  {fname}")
 
     send_update_to_webhook(group, message)
 
