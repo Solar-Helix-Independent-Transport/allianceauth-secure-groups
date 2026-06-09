@@ -1,3 +1,4 @@
+from django.apps import apps as django_apps
 from django.utils.translation import gettext_lazy as _
 
 from allianceauth import hooks
@@ -9,6 +10,23 @@ from .models import (
     AltAllianceFilter, AltCorpFilter, AltFactionFilter, FilterExpression,
     GracePeriodRecord, UserInGroupFilter,
 )
+from .service_filters import (
+    DiscordActiveFilter, DiscourseActiveFilter, Ips4ActiveFilter,
+    MumbleActiveFilter, OpenfireActiveFilter, Phpbb3ActiveFilter,
+    SmfActiveFilter, Teamspeak3ActiveFilter, XenforoActiveFilter,
+)
+
+_SERVICE_FILTERS = [
+    ("allianceauth.services.modules.discord",    DiscordActiveFilter),
+    ("allianceauth.services.modules.mumble",     MumbleActiveFilter),
+    ("allianceauth.services.modules.teamspeak3", Teamspeak3ActiveFilter),
+    ("allianceauth.services.modules.openfire",   OpenfireActiveFilter),
+    ("allianceauth.services.modules.phpbb3",     Phpbb3ActiveFilter),
+    ("allianceauth.services.modules.smf",        SmfActiveFilter),
+    ("allianceauth.services.modules.xenforo",    XenforoActiveFilter),
+    ("allianceauth.services.modules.discourse",  DiscourseActiveFilter),
+    ("allianceauth.services.modules.ips4",       Ips4ActiveFilter),
+]
 
 
 @hooks.register("url_hook")
@@ -82,7 +100,15 @@ def register_audit():
 
 @hooks.register("secure_group_filters")
 def filters():
-    return [AltAllianceFilter, AltCorpFilter, UserInGroupFilter, FilterExpression, AltFactionFilter]
+    service_filters = [
+        cls for app, cls in _SERVICE_FILTERS
+        if django_apps.is_installed(app)
+    ]
+    return [
+        AltAllianceFilter, AltCorpFilter, UserInGroupFilter,
+        FilterExpression, AltFactionFilter,
+        *service_filters,
+    ]
 
 
 @hooks.register("discord_cogs_hook")

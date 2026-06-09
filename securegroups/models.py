@@ -428,6 +428,12 @@ class GracePeriodRecord(models.Model):
         else:
             pass
 
+from .service_filters import (  # noqa: E402, F401
+    DiscordActiveFilter, DiscourseActiveFilter, Ips4ActiveFilter,
+    MumbleActiveFilter, OpenfireActiveFilter, Phpbb3ActiveFilter,
+    SmfActiveFilter, Teamspeak3ActiveFilter, XenforoActiveFilter,
+)
+
 
 class PendingNotification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
