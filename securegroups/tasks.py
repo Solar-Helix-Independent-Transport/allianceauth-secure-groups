@@ -138,7 +138,11 @@ def run_filter_audits(filters, users):
         try:
             bulk_checks[f.id] = f.filter_object.audit_filter(users)
         except Exception:
-            pass
+            logger.error(
+                "audit_filter failed for filter '%s' — affected users will fall back to process_filter",
+                f.filter_object.description,
+                exc_info=True,
+            )
         filter_timings[f.filter_object.description] = time.perf_counter() - _start
     return bulk_checks, filter_timings
 
@@ -166,11 +170,10 @@ def check_user_has_main(smart_group, user, fake_run):
         assert user.profile.main_character is not None
         return True
     except Exception:  # no main character kickeroo!
+        message = f'{user.username} - Removed from "{smart_group.group.name}" No Main'
         if not fake_run:
             user.groups.remove(smart_group.group)
-            # remove user
             if smart_group.notify_on_remove:
-                message = f'{user.username} - Removed from "{smart_group.group.name}" No Main'
                 notify(
                     user,
                     f'Auto Group Removal "{smart_group.group.name}"',

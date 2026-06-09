@@ -242,10 +242,15 @@ class UserInGroupFilter(FilterBase):
     reversed_logic = models.BooleanField(default=False)
 
     def process_filter(self, user: User):
-        return smart_filters.check_group_on_account(user, self.groups.all(),
-                                                    exempt_allis=self.exempt_alliances.all().values_list("alliance_id", flat=True),
-                                                    exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
-                                                    )
+        result = smart_filters.check_group_on_account(
+            user,
+            self.groups.all(),
+            exempt_allis=self.exempt_alliances.all().values_list("alliance_id", flat=True),
+            exempt_corps=self.exempt_corporations.all().values_list("corporation_id", flat=True)
+        )
+        if self.reversed_logic:
+            return not result
+        return result
 
     def audit_filter(self, users):
         cl = users.prefetch_related('groups').filter(
@@ -362,8 +367,8 @@ class SmartGroup(models.Model):
                     self.group.name, check, time.perf_counter() - t0
                 )
             except Exception as e:
+                logger.warning("audit_filter failed for '%s', falling back to process_filter: %s", check, e, exc_info=True)
                 try:
-                    print(e)
                     test_pass = {
                         user.id: {
                             "message": "",
@@ -371,14 +376,13 @@ class SmartGroup(models.Model):
                         }
                     }
                 except Exception as e2:
-                    print(e2)
+                    logger.error("process_filter also failed for '%s': %s", check, e2, exc_info=True)
                     test_pass = {
                         user.id: {
                             "message": "Filter Failed",
                             "check": False
                         }
                     }
-                    logger.error("TEST FAILED")  # TODO Make pretty
             _check = {
                 "name": check.filter_object.description,
             }
@@ -427,6 +431,7 @@ class GracePeriodRecord(models.Model):
                 pass
         else:
             pass
+
 
 from .service_filters import (  # noqa: E402, F401
     DiscordActiveFilter, DiscourseActiveFilter, Ips4ActiveFilter,
