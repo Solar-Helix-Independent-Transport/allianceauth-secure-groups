@@ -1,0 +1,239 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+# Translators:
+# mrCabez, 2026
+# 
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-20 16:56+0800\n"
+"PO-Revision-Date: 2023-10-13 09:06+0000\n"
+"Last-Translator: mrCabez, 2026\n"
+"Language-Team: Italian (Italy) (https://app.transifex.com/alliance-auth/teams/107430/it_IT/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: it_IT\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+
+#: auth_hooks.py:51 templates/smartgroups/groups_bs5.html:21
+#: templates/smartgroups/menu.html:14
+msgid "Secure Group Audit"
+msgstr "Audit Secure Groups"
+
+#: templates/smartgroups/audit.html:7
+msgid "Group Audit"
+msgstr "Audit del gruppo"
+
+#: templates/smartgroups/audit.html:94
+msgid "User"
+msgstr "Utente"
+
+#: templates/smartgroups/audit.html:95
+msgid "Organization"
+msgstr "Organizzazione"
+
+#: templates/smartgroups/audit.html:96
+#: templates/smartgroups/audit_list.html:28
+#: templates/smartgroups/groups.html:34
+msgid "Pending Removal"
+msgstr "Rimozione in sospeso"
+
+#: templates/smartgroups/audit.html:98
+msgid "Actions"
+msgstr "Azioni"
+
+#: templates/smartgroups/audit.html:118
+msgid "(unknown)"
+msgstr "(sconosciuto)"
+
+#: templates/smartgroups/audit.html:123
+msgid "Yes"
+msgstr "Sì"
+
+#: templates/smartgroups/audit.html:125
+msgid "No"
+msgstr "No"
+
+#: templates/smartgroups/audit.html:134
+msgid "Kick Member"
+msgstr "Espelli membro"
+
+#: templates/smartgroups/audit_list.html:5
+msgid "Smart Group Audit"
+msgstr "Audit Smart Group"
+
+#: templates/smartgroups/audit_list.html:15
+#: templates/smartgroups/groups_bs5.html:5
+#: templates/smartgroups/groups_bs5.html:6
+msgid "Secure Groups"
+msgstr "Secure Groups"
+
+#: templates/smartgroups/audit_list.html:24
+#: templates/smartgroups/groups.html:25
+#: templates/smartgroups/groups_bs5.html:34
+msgid "Name"
+msgstr "Nome"
+
+#: templates/smartgroups/audit_list.html:25
+#: templates/smartgroups/groups.html:26
+#: templates/smartgroups/groups_bs5.html:35
+msgid "Description"
+msgstr "Descrizione"
+
+#: templates/smartgroups/audit_list.html:26
+msgid "Status"
+msgstr "Stato"
+
+#: templates/smartgroups/audit_list.html:27
+msgid "Member Count"
+msgstr "Numero di membri"
+
+#: templates/smartgroups/audit_list.html:44
+msgid "Auto Group"
+msgstr "Gruppo automatico"
+
+#: templates/smartgroups/audit_list.html:46
+msgid "Open"
+msgstr "Aperto"
+
+#: templates/smartgroups/audit_list.html:48
+msgid "Requestable"
+msgstr "Richiedibile"
+
+#: templates/smartgroups/audit_list.html:59
+msgid "Audit Members"
+msgstr "Audit membri"
+
+#: templates/smartgroups/audit_list.html:62
+msgid "Request Update"
+msgstr "Richiedi aggiornamento"
+
+#: templates/smartgroups/audit_list.html:74
+msgid "No groups to list."
+msgstr "Nessun gruppo da mostrare."
+
+#: templates/smartgroups/filter_list.html:4
+#: templates/smartgroups/user_check.html:7
+#: templates/smartgroups/user_check_bs5.html:7
+msgid "Requirements"
+msgstr "Requisiti"
+
+#: templates/smartgroups/filter_list.html:5
+#: templates/smartgroups/user_check.html:8
+#: templates/smartgroups/user_check_bs5.html:8
+msgid "Note"
+msgstr "Nota"
+
+#: templates/smartgroups/filter_list.html:6
+#: templates/smartgroups/user_check.html:9
+#: templates/smartgroups/user_check_bs5.html:9
+msgid "Result"
+msgstr "Risultato"
+
+#: templates/smartgroups/groups.html:5 templates/smartgroups/groups.html:20
+msgid "Available Groups"
+msgstr "Gruppi disponibili"
+
+#: templates/smartgroups/groups.html:27
+#: templates/smartgroups/groups_bs5.html:36
+msgid "Leaders"
+msgstr "Leader"
+
+#: templates/smartgroups/groups.html:28
+#: templates/smartgroups/groups_bs5.html:37
+msgid "Action"
+msgstr "Azione"
+
+#: templates/smartgroups/groups.html:45
+#: templates/smartgroups/groups_bs5.html:54
+msgid "Leave"
+msgstr "Abbandona"
+
+#: templates/smartgroups/groups.html:49 templates/smartgroups/groups.html:58
+#: templates/smartgroups/groups_bs5.html:58
+#: templates/smartgroups/groups_bs5.html:67 views.py:231 views.py:295
+msgid "Pending"
+msgstr "In attesa"
+
+#: templates/smartgroups/groups.html:54
+#: templates/smartgroups/groups_bs5.html:63
+msgid "Request"
+msgstr "Richiedi"
+
+#: templates/smartgroups/groups.html:68
+#: templates/smartgroups/groups_bs5.html:78
+msgid "No groups available."
+msgstr "Nessun gruppo disponibile."
+
+#: templates/smartgroups/groups.html:76
+#: templates/smartgroups/groups_bs5.html:85
+msgid "Account Checks"
+msgstr "Controlli dell'account"
+
+#: templates/smartgroups/groups_bs5.html:13
+msgid "Group Management"
+msgstr "Gestione gruppi"
+
+#: templates/smartgroups/menu.html:9
+msgid "Toggle navigation"
+msgstr "Mostra/nascondi navigazione"
+
+#: templates/smartgroups/user_check.html:3
+#: templates/smartgroups/user_check_bs5.html:3
+#, python-format
+msgid "Group Error: %(message)s "
+msgstr "Errore del gruppo: %(message)s "
+
+#: templates/smartgroups/user_check.html:21
+#: templates/smartgroups/user_check_bs5.html:21
+msgid "Join Group"
+msgstr "Unisciti al gruppo"
+
+#: templates/smartgroups/user_check.html:21
+#: templates/smartgroups/user_check_bs5.html:21
+msgid "Ineligible"
+msgstr "Non idoneo"
+
+#: views.py:176
+msgid "Running Group Check Failed, Please contact an Admin!"
+msgstr "Controllo del gruppo non riuscito, contatta un amministratore!"
+
+#: views.py:209
+msgid "You are already a member of that group."
+msgstr "Fai già parte del gruppo selezionato."
+
+#: views.py:227
+msgid "You already have a pending application for that group."
+msgstr "Hai già una richiesta in sospeso per quel gruppo."
+
+#: views.py:241
+#, python-format
+msgid "Applied to group %(group)s."
+msgstr "Hai fatto domanda per il gruppo %(group)s."
+
+#: views.py:258
+msgid "You cannot leave that group"
+msgstr "Non puoi lasciare questo gruppo"
+
+#: views.py:265
+msgid "You are not a member of that group"
+msgstr "Non sei un membro di questo gruppo"
+
+#: views.py:280
+msgid "You already have a pending leave request for that group."
+msgstr "Hai già una richiesta di abbandono in sospeso per quel gruppo."
+
+#: views.py:306
+#, python-format
+msgid "Applied to leave group %(group)s."
+msgstr "Hai chiesto di abbandonare il gruppo %(group)s."
+
+#: views.py:336 views.py:339
+msgid "Does not Exist"
+msgstr "Non esiste"
