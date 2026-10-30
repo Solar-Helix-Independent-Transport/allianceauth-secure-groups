@@ -33,6 +33,8 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
@@ -48,8 +50,13 @@ urls.Homepage = "https://github.com/Solar-Helix-Independent-Transport/allianceau
 urls.Source = "https://github.com/Solar-Helix-Independent-Transport/allianceauth-secure-groupss"
 urls.Tracker = "https://github.com/Solar-Helix-Independent-Transport/allianceauth-secure-groups/issues"
 
-[tool.flit.module]
-name = "securegroups"
+[tool.flit]
+module.name = "securegroups"
+
+[tool.djlint]
+max_attribute_length = 119
+max_blank_lines = 1
+max_line_length = 119
 
 [tool.isort]
 profile = "django"
@@ -62,17 +69,12 @@ sections = [
     "FIRSTPARTY",
     "LOCALFOLDER",
 ]
+skip_gitignore = true
 known_allianceauth = [ "allianceauth", "esi" ]
 known_django = [ "django" ]
-skip_gitignore = true
 
 [tool.flake8]
 exclude = [ ".git", "*migrations*", ".tox", "dist", "htmlcov" ]
 max-line-length = 119
 select = [ "C", "E", "F", "W", "B", "B950" ]
-ignore = [ 'E203', 'E231', 'E501', 'W503', 'W291', 'W293' ]
-
-[tool.djlint]
-max_attribute_length = 119
-max_line_length = 119
-max_blank_lines = 1
+ignore = [ "E203", "E231", "E501", "W503", "W291", "W293" ]
