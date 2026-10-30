@@ -11,13 +11,13 @@ repos:
   #     - id: pyupgrade
   #       args: [--py38-plus]
   - repo: https://github.com/adamchainz/django-upgrade
-    rev: 1.23.1
+    rev: 1.33.0
     hooks:
       - id: django-upgrade
         args: [--target-version=4.2]
   # Code Logic
   - repo: https://github.com/pycqa/isort
-    rev: 6.0.1
+    rev: 10.0.0b1
     hooks:
       - id: isort
         name: isort (python)
@@ -30,7 +30,7 @@ repos:
       - id: text-unicode-replacement-char
   # Formatting
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       # Identify invalid files
       - id: check-ast
@@ -48,8 +48,6 @@ repos:
       #      - id: check-docstring-first
       - id: debug-statements
       #      - id: requirements-txt-fixer
-      - id: fix-encoding-pragma
-        args: [--remove]
       - id: fix-byte-order-marker
       # General quality checks
       - id: mixed-line-ending
@@ -75,7 +73,7 @@ repos:
             swagger\.json
           )
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.2.0
+    rev: 3.11.1
     hooks:
       - id: editorconfig-checker
         exclude: |
@@ -98,7 +96,7 @@ repos:
 
   # Infrastructure
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.5.1
+    rev: v2.30.3
     hooks:
       - id: pyproject-fmt
         name: pyproject.toml formatter
@@ -109,7 +107,7 @@ repos:
           - tox==4.24.2 # https://github.com/tox-dev/tox/releases/latest
 
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.24.1
+    rev: v0.27
     hooks:
       - id: validate-pyproject
         name: Validate pyproject.toml
